@@ -1,0 +1,7 @@
+NEXT: ALEMBIC database migrations.
+
+1. Add city/location to hotels
+2. Make the homepage search form submit query parameters
+3. Filter hotels by city and guests
+4. Add bookings/date logic
+5. Add users/auth

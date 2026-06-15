@@ -1,0 +1,229 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <!-- Top hotel section -->
+  <section class="bg-white rounded-4 shadow-sm p-4 mb-4">
+    <div class="row g-4">
+
+      <!-- Hotel image -->
+      <div class="col-md-7">
+        <img
+          src="{{ url_for('static', path=hotel.image_path) }}"
+          alt="{{ hotel.name }}"
+          class="img-fluid rounded-4 w-100"
+          style="height: 420px; object-fit: cover;"
+        >
+      </div>
+
+      <!-- Booking/search card -->
+      <div class="col-md-5">
+        <div class="border rounded-4 p-4 h-100">
+          <h1 class="fw-bold mb-2">{{ hotel.name }}</h1>
+
+          <p class="text-muted mb-3">
+            {{ hotel.description }}
+          </p>
+
+          <p class="fs-3 fw-bold mb-4">
+            From {{ hotel.price }}/night
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Check-in</label>
+            <input type="text" class="form-control" placeholder="Sat, Jun 20">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Check-out</label>
+            <input type="text" class="form-control" placeholder="Mon, Jun 22">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Guests</label>
+            <input type="text" class="form-control" placeholder="2 travelers, 1 room">
+          </div>
+
+          <button class="btn btn-primary w-100 fw-bold py-3">
+            Reserve now
+          </button>
+
+          <p class="text-muted small mt-3 mb-0 text-center">
+            You will not be charged yet.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- Basic hotel info -->
+  <section class="bg-white rounded-4 shadow-sm p-4 mb-4">
+    <div class="row">
+      <div class="col-md-8">
+        <h2 class="fw-bold mb-3">About this hotel</h2>
+
+        <p class="text-muted">
+          {{ hotel.description }}
+        </p>
+
+        <p>
+          This hotel is a comfortable option for travelers looking for a simple,
+          convenient place to stay. More detailed room information, amenities,
+          reviews, and booking features will be added later.
+        </p>
+      </div>
+
+      <div class="col-md-4">
+        <div class="border rounded-4 p-3">
+          <h5 class="fw-bold mb-3">Property highlights</h5>
+
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2">✓ Free WiFi</li>
+            <li class="mb-2">✓ Good location</li>
+            <li class="mb-2">✓ Front desk service</li>
+            <li class="mb-2">✓ Comfortable rooms</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Room preview section -->
+   <!-- Room preview section -->
+<section class="bg-white rounded-4 shadow-sm p-4 mb-4">
+  <h2 class="fw-bold mb-4">Choose your room</h2>
+
+  {% if rooms %}
+
+    <div class="row g-4">
+
+      {% for room in rooms %}
+        <div class="col-md-6">
+          <div class="border rounded-4 p-3 h-100">
+
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="fw-bold mb-0">
+                {{ room.room_type }}
+              </h5>
+
+              {% if room.available %}
+                <span class="badge bg-success">Available</span>
+              {% else %}
+                <span class="badge bg-secondary">Unavailable</span>
+              {% endif %}
+            </div>
+
+            <p class="text-muted mb-2">
+              Sleeps up to {{ room.max_guests }} guests
+            </p>
+
+            <ul class="list-unstyled text-muted small mb-3">
+              <li>✓ Free WiFi</li>
+              <li>✓ Private bathroom</li>
+              <li>✓ Air conditioning</li>
+              <li>✓ No prepayment needed</li>
+            </ul>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <p class="text-muted small mb-1">Price per night</p>
+                <p class="fs-5 fw-bold mb-0">
+                  {{ room.price }}
+                </p>
+              </div>
+
+              {% if room.available %}
+                <button class="btn btn-primary">
+                  Reserve
+                </button>
+              {% else %}
+                <button class="btn btn-outline-secondary" disabled>
+                  Sold out
+                </button>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    <div class="border rounded-4 p-4 text-center">
+      <p class="text-muted mb-0">
+        No rooms have been added for this hotel yet.
+      </p>
+    </div>
+
+  {% endif %}
+</section>
+
+  <!-- <section class="bg-white rounded-4 shadow-sm p-4 mb-4">
+    <h2 class="fw-bold mb-4">Choose your room</h2>
+
+    <div class="row g-4">
+
+      <div class="col-md-6">
+        <div class="border rounded-4 p-3 h-100">
+          <h5 class="fw-bold">Standard Room</h5>
+
+          <p class="text-muted">
+            A simple room with basic amenities for short stays.
+          </p>
+
+          <p class="fw-bold">
+            From {{ hotel.price }}/night
+          </p>
+
+          <button class="btn btn-outline-primary w-100">
+            View room
+          </button>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="border rounded-4 p-3 h-100">
+          <h5 class="fw-bold">Deluxe Room</h5>
+
+          <p class="text-muted">
+            A larger room with more space and upgraded comfort.
+          </p>
+
+          <p class="fw-bold">
+            From {{ hotel.price }}/night
+          </p>
+
+          <button class="btn btn-outline-primary w-100">
+            View room
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section> -->
+
+
+  <!-- Reviews placeholder -->
+  <section class="bg-white rounded-4 shadow-sm p-4">
+    <h2 class="fw-bold mb-3">Guest reviews</h2>
+
+    <div class="d-flex align-items-center mb-3">
+      <span class="badge bg-success fs-6 me-2">8.7</span>
+      <span class="fw-bold">Excellent</span>
+    </div>
+
+    <p class="text-muted mb-0">
+      Review data will be added later when the project has users and bookings.
+    </p>
+  </section>
+
+</main>
+
+{% endblock content %}

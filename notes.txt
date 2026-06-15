@@ -1,0 +1,7 @@
+Add API routes later.
+/api/hotels
+    Returns only Tokyo hotels as JSON.
+    This would be useful if you later add JavaScript search/filtering.
+    Also for booking data
+    Also for login
+

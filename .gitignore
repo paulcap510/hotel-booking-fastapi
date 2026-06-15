@@ -1,0 +1,18 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# SQLite database files
+hotels.db
+hotels_backup_before_alembic.db
+*.db
+
+# Mac files
+.DS_Store
