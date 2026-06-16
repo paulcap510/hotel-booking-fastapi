@@ -33,17 +33,17 @@
 
           <div class="mb-3">
             <label class="form-label fw-bold">Check-in</label>
-            <input type="text" class="form-control" placeholder="Sat, Jun 20">
+            <input type="date" class="form-control" name="check_in" value="{{ check_in if check_in else '' }}">
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-bold">Check-out</label>
-            <input type="text" class="form-control" placeholder="Mon, Jun 22">
+            <input type="date" class="form-control" name="check_out" value="{{ check_out if check_out else '' }}">
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-bold">Guests</label>
-            <input type="text" class="form-control" placeholder="2 travelers, 1 room">
+            <input type="number" class="form-control" name="guests" min="1" value="{{ guests }}">
           </div>
 
           <button class="btn btn-primary w-100 fw-bold py-3">

@@ -9,6 +9,7 @@ from typing import Annotated
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from routers import hotels, rooms
+from datetime import date
 
 import models
 from database import engine, Base, get_db
@@ -42,7 +43,8 @@ def home(request:Request, db: Session = Depends(get_db)):
                                       })
 
 @app.get("/hotel_info/{hotel_id}", response_class=HTMLResponse, include_in_schema=False)
-def hotel_info(request: Request, hotel_id: int, db: Session = Depends(get_db)):
+def hotel_info(request: Request, hotel_id: int, guests: int=1,
+               check_in: date | None = None, check_out: date | None = None, db: Session = Depends(get_db)):
     hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
 
     if hotel is None:
@@ -57,6 +59,8 @@ def hotel_info(request: Request, hotel_id: int, db: Session = Depends(get_db)):
         request, 'hotel_info.html',
                 {
             "request": request,
+            "check_in": check_in,
+            "check_out": check_out,
             "hotel": hotel,
             "rooms": rooms,
         },
@@ -64,7 +68,10 @@ def hotel_info(request: Request, hotel_id: int, db: Session = Depends(get_db)):
 
 
 @app.get("/search", response_class=HTMLResponse)
-def search_hotels(request: Request, city: str = "", guests: int = 1, db: Session = Depends(get_db)):
+def search_hotels(request: Request, city: str = "", guests: int = 1,
+                        check_in: date | None = None,
+                        check_out: date | None = None,
+                        db: Session = Depends(get_db)):
     hotels = (
         db.query(models.Hotel)
         .join(models.Room)
@@ -81,6 +88,8 @@ def search_hotels(request: Request, city: str = "", guests: int = 1, db: Session
             "request": request,
             "hotels": hotels,
             "search_city": city,
+            "check_in": check_in,
+            "check_out": check_out,
             "guests": guests,
         },
     )

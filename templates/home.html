@@ -5,64 +5,73 @@
   <div class="container">
     <h1 class="hero-title">Your next stay starts here</h1>
 
+<div class="search-card">
+  <form action="/search" method="get">
 
-    <div class="search-card">
-      <form action="/search" method="get">
-
-        <div class="row g-3 align-items-end">
-          <div class="col-md-4">
-            <div class="search-input-box">
-              <label>Where</label>
-              <input
-                type="text"
-                class="form-control"
-                name="city"
-                placeholder="Where to?"
-              />
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <div class="search-input-box">
-              <label>Dates</label>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Sat, Jun 20 - Mon, Jun 22"
-              />
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <div class="search-input-box">
-              <label>Guests</label>
-              <input
-                type="number"
-                class="form-control"
-                name="guests"
-                min="1"
-                value="1"
-              />
-            </div>
-          </div>
-
-          <div class="col-md-2">
-            <button type="submit" class="btn btn-primary search-btn w-100">
-              Search
-            </button>
-          </div>
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <div class="search-input-box">
+          <label>Where</label>
+          <input
+            type="text"
+            class="form-control"
+            name="city"
+            placeholder="Where to?"
+          />
         </div>
+      </div>
 
-        <div class="form-check business-check">
-          <input class="form-check-input" type="checkbox" id="businessTrip" />
-          <label class="form-check-label" for="businessTrip">
-            I'm traveling for business
-          </label>
+      <div class="col-md-2">
+        <div class="search-input-box">
+          <label>Check-in</label>
+          <input
+            type="date"
+            class="form-control"
+            name="check_in"
+          />
         </div>
+      </div>
 
-      </form>
+      <div class="col-md-2">
+        <div class="search-input-box">
+          <label>Check-out</label>
+          <input
+            type="date"
+            class="form-control"
+            name="check_out"
+          />
+        </div>
+      </div>
+
+      <div class="col-md-2">
+        <div class="search-input-box">
+          <label>Guests</label>
+          <input
+            type="number"
+            class="form-control"
+            name="guests"
+            min="1"
+            value="1"
+          />
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary search-btn w-100">
+          Search
+        </button>
+      </div>
     </div>
 
+    <div class="form-check business-check">
+      <input class="form-check-input" type="checkbox" id="businessTrip" />
+      <label class="form-check-label" for="businessTrip">
+        I'm traveling for business
+      </label>
+    </div>
+
+  </form>
+</div>
 
   </div>
 </section>
