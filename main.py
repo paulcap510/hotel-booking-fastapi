@@ -64,10 +64,16 @@ def hotel_info(request: Request, hotel_id: int, db: Session = Depends(get_db)):
 
 
 @app.get("/search", response_class=HTMLResponse)
-def search_hotels(request: Request, city: str = "", db: Session = Depends(get_db)):
-    hotels = db.query(models.Hotel).filter(models.Hotel.city.ilike(f"%{city}%")).all()
+def search_hotels(request: Request, city: str = "", guests: int = 1, db: Session = Depends(get_db)):
+    hotels = (
+        db.query(models.Hotel)
+        .join(models.Room)
+        .filter(models.Hotel.city.ilike(f"%{city}%"))
+        .filter(models.Room.max_guests >= guests)
+        .distinct()
+        .all()
+    )
 
-###** need to create the search_results.html
     return templates.TemplateResponse(
         request,
         "search_results.html",
@@ -75,6 +81,7 @@ def search_hotels(request: Request, city: str = "", db: Session = Depends(get_db
             "request": request,
             "hotels": hotels,
             "search_city": city,
+            "guests": guests,
         },
     )
 

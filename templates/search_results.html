@@ -15,11 +15,11 @@
     </h1>
 
     <p class="text-muted mb-0">
-      {% if hotels %}
-        {{ hotels|length }} hotel{% if hotels|length != 1 %}s{% endif %} found.
-      {% else %}
+    {% if hotels %}
+        {{ hotels|length }} hotel{% if hotels|length != 1 %}s{% endif %} found{% if guests %} for {{ guests }} guest{% if guests != 1 %}s{% endif %}{% endif %}.
+    {% else %}
         No hotels found for your search.
-      {% endif %}
+    {% endif %}
     </p>
   </div>
 

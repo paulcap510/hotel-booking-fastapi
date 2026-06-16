@@ -30,3 +30,6 @@ class Room(Base):
     available: Mapped[bool] = mapped_column(Boolean, default=True)
 
     hotel = relationship("Hotel", back_populates="rooms")
+
+
+
