@@ -1,16 +1,24 @@
 {% extends "layout.html" %}
 
 {% block content %}
-  <section class="hero">
-    <div class="container">
-      <h1 class="hero-title">Your next stay starts here</h1>
+<section class="hero">
+  <div class="container">
+    <h1 class="hero-title">Your next stay starts here</h1>
 
-      <div class="search-card">
+
+    <div class="search-card">
+      <form action="/search" method="get">
+
         <div class="row g-3 align-items-end">
           <div class="col-md-4">
             <div class="search-input-box">
               <label>Where</label>
-              <input type="text" class="form-control" placeholder="Where to?" />
+              <input
+                type="text"
+                class="form-control"
+                name="city"
+                placeholder="Where to?"
+              />
             </div>
           </div>
 
@@ -37,7 +45,9 @@
           </div>
 
           <div class="col-md-2">
-            <button class="btn btn-primary search-btn w-100">Search</button>
+            <button type="submit" class="btn btn-primary search-btn w-100">
+              Search
+            </button>
           </div>
         </div>
 
@@ -47,9 +57,14 @@
             I'm traveling for business
           </label>
         </div>
-      </div>
+
+      </form>
     </div>
-  </section>
+
+
+  </div>
+</section>
+
 
   <main class="container py-5">
     <main class="container py-5">

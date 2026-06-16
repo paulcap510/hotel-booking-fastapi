@@ -1,0 +1,220 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <!-- Search summary/header -->
+
+  <section class="bg-white rounded-4 shadow-sm p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+
+  <div>
+    <h1 class="fw-bold mb-2">
+      Search results{% if search_city %} for {{ search_city }}{% endif %}
+    </h1>
+
+    <p class="text-muted mb-0">
+      {% if hotels %}
+        {{ hotels|length }} hotel{% if hotels|length != 1 %}s{% endif %} found.
+      {% else %}
+        No hotels found for your search.
+      {% endif %}
+    </p>
+  </div>
+
+  <a href="/" class="btn btn-outline-primary">
+    Change search
+  </a>
+
+</div>
+
+  </section>
+
+  <!-- Search layout -->
+
+  <div class="row g-4">
+
+<!-- Left filter/sidebar placeholder -->
+<aside class="col-lg-3">
+  <div class="bg-white rounded-4 shadow-sm p-4 sticky-top" style="top: 90px;">
+    <h5 class="fw-bold mb-3">Filter results</h5>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold">Destination</label>
+      <input
+        type="text"
+        class="form-control"
+        value="{{ search_city }}"
+        disabled
+      >
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold">Popular filters</label>
+
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" disabled>
+        <label class="form-check-label text-muted">
+          Free WiFi
+        </label>
+      </div>
+
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" disabled>
+        <label class="form-check-label text-muted">
+          Breakfast included
+        </label>
+      </div>
+
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" disabled>
+        <label class="form-check-label text-muted">
+          Pay at property
+        </label>
+      </div>
+    </div>
+
+    <p class="text-muted small mb-0">
+      More filters will be added later when amenities, ratings, and bookings are built.
+    </p>
+  </div>
+</aside>
+
+
+<!-- Results list -->
+<section class="col-lg-9">
+
+  {% if hotels %}
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold mb-0">Available stays</h2>
+
+      <span class="text-muted small">
+        Sorted by recommended
+      </span>
+    </div>
+
+    <div class="d-flex flex-column gap-4">
+
+      {% for hotel in hotels %}
+        <div class="bg-white rounded-4 shadow-sm overflow-hidden">
+          <div class="row g-0">
+
+            <!-- Hotel image -->
+            <div class="col-md-4">
+              <img
+                src="{{ url_for('static', path=hotel.image_path) }}"
+                alt="{{ hotel.name }}"
+                class="img-fluid w-100 h-100"
+                style="min-height: 240px; object-fit: cover;"
+              >
+            </div>
+
+            <!-- Hotel details -->
+            <div class="col-md-5">
+              <div class="p-4 h-100">
+
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-primary">
+                    Hotel
+                  </span>
+
+                  <span class="text-muted small">
+                    {{ hotel.city }}
+                  </span>
+                </div>
+
+                <h3 class="fw-bold mb-2">
+                  {{ hotel.name }}
+                </h3>
+
+                <p class="text-muted mb-3">
+                  {{ hotel.description }}
+                </p>
+
+                <ul class="list-unstyled text-muted small mb-0">
+                  <li class="mb-1">✓ Free WiFi</li>
+                  <li class="mb-1">✓ Good location</li>
+                  <li class="mb-1">✓ Comfortable rooms</li>
+                  <li class="mb-1">✓ No booking fees</li>
+                </ul>
+
+              </div>
+            </div>
+
+            <!-- Price/action card -->
+            <div class="col-md-3">
+              <div class="p-4 h-100 border-start d-flex flex-column justify-content-between">
+
+                <div class="text-md-end">
+                  <div class="d-flex justify-content-md-end align-items-center mb-2">
+                    <span class="badge bg-success fs-6">
+                      8.7
+                    </span>
+                  </div>
+
+                  <p class="fw-bold mb-1">
+                    Excellent
+                  </p>
+
+                  <p class="text-muted small mb-4">
+                    Guest rating placeholder
+                  </p>
+                </div>
+
+                <div class="text-md-end">
+                  <p class="text-muted small mb-1">
+                    From
+                  </p>
+
+                  <p class="fs-4 fw-bold mb-1">
+                    {{ hotel.price }}
+                  </p>
+
+                  <p class="text-muted small mb-3">
+                    per night
+                  </p>
+
+                  <a
+                    href="/hotel_info/{{ hotel.id }}"
+                    class="btn btn-primary w-100 fw-bold"
+                  >
+                    View rooms
+                  </a>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    <!-- No results -->
+    <div class="bg-white rounded-4 shadow-sm p-5 text-center">
+      <h2 class="fw-bold mb-3">No hotels found</h2>
+
+      <p class="text-muted mb-4">
+        We could not find any hotels matching your search.
+        Try searching for a different city.
+      </p>
+
+      <a href="/" class="btn btn-primary px-4">
+        Back to search
+      </a>
+    </div>
+
+  {% endif %}
+
+</section>
+
+  </div>
+
+</main>
+
+{% endblock content %}
