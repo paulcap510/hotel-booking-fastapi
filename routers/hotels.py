@@ -35,6 +35,7 @@ def get_hotel(hotel_id: int, db: Session = Depends(get_db)):
 def create_hotel(hotel: HotelCreate, db: Session = Depends(get_db)):
     new_hotel = models.Hotel(
         name=hotel.name,
+        city=hotel.city,
         description=hotel.description,
         price=hotel.price,
         image_path=hotel.image_path,
@@ -57,6 +58,7 @@ def update_hotel(hotel_id: int, updated_hotel: HotelCreate, db: Session = Depend
         )
 
     hotel.name = updated_hotel.name
+    hotel.city = updated_hotel.city
     hotel.description = updated_hotel.description
     hotel.price = updated_hotel.price
     hotel.image_path = updated_hotel.image_path

@@ -14,7 +14,7 @@ class Hotel(Base):
     image_path: Mapped[str] = mapped_column(String, nullable=False)
 
     #** Adding city
-    # city: Mapped[str] = mapped_column(String, nullable=False)
+    city: Mapped[str] = mapped_column(String, nullable=False)
 
     rooms = relationship("Room", back_populates="hotel")
 

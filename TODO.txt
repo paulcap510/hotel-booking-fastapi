@@ -1,7 +1,36 @@
-NEXT: ALEMBIC database migrations.
+NEXT: ALEMBIC database migrations. We have wrote the "city" field for the schema
+and the models. Now we need to implement them.
 
 1. Add city/location to hotels
 2. Make the homepage search form submit query parameters
 3. Filter hotels by city and guests
 4. Add bookings/date logic
 5. Add users/auth
+
+
+[
+  {
+    "name": "Tokyo Garden Hotel",
+    "description": "A quiet hotel near the station.",
+    "price": "$120",
+    "image_path": "images/hotel1.jpg",
+    "city": "Unknown",
+    "id": 1
+  },
+  {
+    "name": "Big Osaka",
+    "description": "Luxurious hotel in Osaka",
+    "price": "$300",
+    "image_path": "images/hotel3.jpg",
+    "city": "Unknown",
+    "id": 2
+  },
+  {
+    "name": "Okinawa Stay",
+    "description": "Amazing hotel in Naha",
+    "price": "$99",
+    "image_path": "images/hotel4.jpg",
+    "city": "Unknown",
+    "id": 5
+  }
+]

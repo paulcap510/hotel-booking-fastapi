@@ -7,7 +7,7 @@ class HotelBase(BaseModel):
     price: str = Field(min_length=1)
     image_path: str = Field(min_length=1)
     #** Adding city
-    # city: str = Field(min_length=1)
+    city: str = Field(min_length=1)
 
 class HotelCreate(HotelBase):
     pass
