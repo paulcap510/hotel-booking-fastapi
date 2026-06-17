@@ -1,3 +1,6 @@
+TO DO IMMEDIATELY. TEST BOOKING POST
+
+
 NEXT: ALEMBIC database migrations. We have wrote the "city" field for the schema
 and the models. Now we need to implement them.
 

@@ -29,7 +29,7 @@ class Room(Base):
     available: Mapped[bool] = mapped_column(Boolean, default=True)
 
     hotel = relationship("Hotel", back_populates="rooms")
-    bookings = relationship("Booking", back_populates="bookings")
+    bookings = relationship("Booking", back_populates="room")
 
 
 class Booking(Base):
