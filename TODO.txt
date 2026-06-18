@@ -1,8 +1,0 @@
-NEXT: ALEMBIC database migrations. We have wrote the "city" field for the schema
-and the models. Now we need to implement them.
-
-1. Add city/location to hotels
-2. Make the homepage search form submit query parameters
-3. Filter hotels by city and guests
-4. Add bookings/date logic
-5. Add users/auth
