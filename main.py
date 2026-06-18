@@ -8,7 +8,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Annotated
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from routers import hotels, rooms
+from routers import hotels, rooms, bookings
 from datetime import date
 
 import models
@@ -22,6 +22,7 @@ app = FastAPI()
 
 app.include_router(hotels.router)
 app.include_router(rooms.router)
+app.include_router(bookings.router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
