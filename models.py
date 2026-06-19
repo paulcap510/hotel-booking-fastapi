@@ -42,4 +42,9 @@ class Booking(Base):
     check_in_date: Mapped[date] = mapped_column(Date, nullable=False)
     check_out_date: Mapped[date] = mapped_column(Date, nullable=False)
     number_of_guests: Mapped[int] = mapped_column(Integer, nullable=False)
+    number_of_nights: Mapped[int] = mapped_column(Integer, nullable=False)
+    price_per_night: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_price: Mapped[int] = mapped_column(Integer, nullable=False)
+
     room = relationship("Room", back_populates="bookings")
+

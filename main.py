@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException, status, Depends
+from fastapi import FastAPI, Request, HTTPException, status, Depends, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -64,6 +64,7 @@ def hotel_info(request: Request, hotel_id: int, guests: int=1,
             "check_out": check_out,
             "hotel": hotel,
             "rooms": rooms,
+            "guests": guests,
         },
     )
 
@@ -95,147 +96,143 @@ def search_hotels(request: Request, city: str = "", guests: int = 1,
         },
     )
 
+@app.get("/booking/rooms/{room_id}", response_class=HTMLResponse, include_in_schema=False)
+def booking_page(request: Request, room_id: int, check_in: date | None = None, check_out: date | None = None, guests: int = 1, db: Session = Depends(get_db)):
+    room = db.query(models.Room).filter(models.Room.id == room_id).first()
+
+    if room is None:
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Room not found"
+    )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == room.hotel_id).first()
 
 
-# @app.put("/api/hotels/{hotel_id}", response_model=HotelResponse)
-# def update_hotel(hotel_id: int, updated_hotel: HotelCreate, db: Session = Depends(get_db)):
-#     hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
-
-#     if hotel is None:
-#         raise HTTPException(
-#             status_code = status.HTTP_404_NOT_FOUND,
-#             detail = "Hotel not found"
-#         )
-
-#     hotel.name = updated_hotel.name
-#     hotel.description = updated_hotel.description
-#     hotel.price = updated_hotel.price
-#     hotel.image_path = updated_hotel.image_path
-
-#     db.commit()
-#     db.refresh(hotel)
-#     return hotel
-
-# @app.put("/api/rooms/{room_id}", response_model=RoomResponse)
-# def update_room(room_id: int, updated_room: RoomCreate, db: Session=Depends(get_db)):
-#     room = db.query(models.Room).filter(models.Room.id == room_id).first()
-
-#     if room is None:
-#         raise HTTPException(
-#             status_code = status.HTTP_404_NOT_FOUND,
-#             detail = "Room not found"
-#         )
-
-#     room.room_type = updated_room.room_type
-#     room.price = updated_room.price
-#     room.max_guests = updated_room.max_guests
-#     room.available = updated_room.available
-
-#     db.commit()
-#     db.refresh(room)
-#     return room
+    if hotel is None:
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Hotel not found"
+    )
 
 
-# @app.get("/api/hotels/{hotel_id}", response_model=HotelResponse)
-# def get_hotel(hotel_id: int, db: Session = Depends(get_db)):
-#     hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
-
-#     if hotel is None:
-#         raise HTTPException(
-#             status_code = status.HTTP_404_NOT_FOUND,
-#             detail = "Hotel not found"
-#         )
-#     return hotel
-
-# @app.get("/api/hotels", response_model=list[HotelResponse])
-# def get_hotels(hotel_id: int, db: Session = Depends(get_db)):
-#     # Depends(get_db) tells FastAPI to run get_db() before this route runs.
-#     # get_db() creates a database session and gives it to this route as db.
-#     # Session is a type hint saying db should be a SQLAlchemy Session.
-#     hotels = db.query(models.Hotel).all()
-#     return hotels
-
-# @app.get("/api/{hotel_id}/rooms", response_model=list[RoomResponse])
-# def get_rooms_for_hotel(hotel_id: int, db: Session = Depends(get_db)):
-#     hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
-
-#     if hotel is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Hotel not found"
-#         )
-
-#     rooms = db.query(models.Room).filter(models.Room.hotel_id == hotel_id).all()
-
-#     return rooms
+    nights = calculate_nights(check_in, check_out)
+    total_price = calculate_total_price(room.price, nights) if nights > 0 else 0
 
 
+    return templates.TemplateResponse(
+    request,
+    "booking.html",
+    {
+        "request": request,
+        "hotel": hotel,
+        "room": room,
+        "check_in": check_in,
+        "check_out": check_out,
+        "guests": guests,
+        "nights": nights,
+        "total_price": total_price,
+    },
+        )
 
-# @app.post("/api/hotels", response_model=HotelResponse, status_code=status.HTTP_201_CREATED)
-# def create_hotel(hotel: HotelCreate, db: Session = Depends(get_db)):
-#     new_hotel = models.Hotel(name=hotel.name, description=hotel.description, price=hotel.price, image_path=hotel.image_path)
+@app.post("/booking/rooms/{room_id}", include_in_schema=False)
+def submit_booking_form(
+    room_id: int,
+    guest_name: str = Form(...),
+    guest_email: str = Form(...),
+    check_in_date: date = Form(...),
+    check_out_date: date = Form(...),
+    number_of_guests: int = Form(...),
+    db: Session = Depends(get_db),
+):
+    room = db.query(models.Room).filter(models.Room.id == room_id).first()
 
-#     db.add(new_hotel)
-#     db.commit()
-#     db.refresh(new_hotel)
+    if room is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Room not found"
+        )
 
-#     return new_hotel
+    if check_out_date <= check_in_date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Check-out date must be after check-in date"
+        )
 
-# @app.post("/api/hotels/{hotel_id}/rooms", response_model=RoomResponse, status_code=status.HTTP_201_CREATED)
-# def create_room(hotel_id: int, room: RoomCreate, db: Session = Depends(get_db)):
-#     hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+    if number_of_guests > room.max_guests:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Number of guests exceeds room capacity"
+        )
 
-#     if hotel is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Hotel not found"
-#             )
+    overlapping_booking = (
+        db.query(models.Booking)
+        .filter(models.Booking.room_id == room_id)
+        .filter(models.Booking.check_in_date < check_out_date)
+        .filter(models.Booking.check_out_date > check_in_date)
+        .first()
+    )
 
-#     new_room = models.Room(
-#         hotel_id=hotel_id,
-#         room_type=room.room_type,
-#         price=room.price,
-#         max_guests=room.max_guests,
-#         available=room.available,
-#     )
+    if overlapping_booking:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Room is already booked for these dates"
+        )
 
-#     db.add(new_room)
-#     db.commit()
-#     db.refresh(new_room)
+    new_booking = models.Booking(
+        room_id=room_id,
+        guest_name=guest_name,
+        guest_email=guest_email,
+        check_in_date=check_in_date,
+        check_out_date=check_out_date,
+        number_of_guests=number_of_guests,
+    )
 
-#     return new_room
+    db.add(new_booking)
+    db.commit()
+    db.refresh(new_booking)
 
+    return {"message": "Booking created successfully", "booking_id": new_booking.id}
 
-# @app.delete("/api/rooms/{room_id}")
-# def delete_room(room_id: int, db: Session = Depends(get_db)):
-#     room = db.query(models.Room).filter(models.Room.id == room_id).first()
-#     if room is None:
-#         raise HTTPException(
-#             status_code = status.HTTP_404_NOT_FOUND,
-#             detail = "Hotel not found"
-#         )
-#     db.delete(room)
-#     db.commit()
-#     return {"message": "ROOM deleted successfully"}
+@app.get("/booking/confirmation/{booking_id}", include_in_schema=False)
+def booking_confirmation_page(request: Request, booking_id: int, db: Session = Depends(get_db)):
 
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
 
-# @app.delete("/api/hotels/{hotel_id}")
-# def delete_hotel(hotel_id: int, db: Session = Depends(get_db)):
-#     hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+    if booking is None:
+        raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Booking not found"
+    )
 
-#     if hotel is None:
-#         raise HTTPException(
-#             status_code = status.HTTP_404_NOT_FOUND,
-#             detail = "Hotel not found"
-#         )
+    return templates.TemplateResponse(
+        request,
+        "booking_confirmation_page.html",
+        {
+            "request": request,
+            "hotels": booking.hotel,
+            "city": booking.city,
+            "check_in": booking.check_in,
+            "check_out": booking.check_out,
+            "guests": booking.guests,
+            "price": booking.total_price,
+        },
+    )
 
-#     db.delete(hotel)
-#     db.commit()
-#     return {"message": "Hotel deleted successfully"}
+#! Helper function to calculate nights
+def calculate_nights(check_in: date | None, check_out: date | None):
+    if check_in is None or check_out is None:
+        return 0
 
+    return (check_out - check_in).days
 
+#! Helper function to calculate price
+def calculate_total_price(price: str, nights: int):
+    clean_price = price.replace("$", "").replace(",", "").strip()
 
+    price_per_night = int(float(clean_price))
 
+    return price_per_night * nights
 
 #! Error handling the 404
 @app.exception_handler(StarletteHTTPException)

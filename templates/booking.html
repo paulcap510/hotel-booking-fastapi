@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="row g-4">
+
+    <!-- Main booking form -->
+    <div class="col-lg-8">
+      <section class="bg-white rounded-4 shadow-sm p-4 mb-4">
+
+        <h1 class="fw-bold mb-2">Complete your booking</h1>
+
+        <p class="text-muted mb-4">
+          Enter your guest details to reserve this room. You will not be charged yet.
+        </p>
+
+        <div class="border rounded-4 p-3 mb-4 bg-light">
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <p class="text-muted small mb-1">Check-in</p>
+              <p class="fw-bold mb-0">
+                {{ check_in if check_in else "Not selected" }}
+              </p>
+            </div>
+
+            <div class="col-md-4">
+              <p class="text-muted small mb-1">Check-out</p>
+              <p class="fw-bold mb-0">
+                {{ check_out if check_out else "Not selected" }}
+              </p>
+            </div>
+
+            <div class="col-md-4">
+              <p class="text-muted small mb-1">Guests</p>
+              <p class="fw-bold mb-0">
+                {{ guests }}
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <form method="post" action="/booking/rooms/{{ room.id }}">
+
+          <input
+            type="hidden"
+            name="check_in_date"
+            value="{{ check_in if check_in else '' }}"
+          >
+
+          <input
+            type="hidden"
+            name="check_out_date"
+            value="{{ check_out if check_out else '' }}"
+          >
+
+          <input
+            type="hidden"
+            name="number_of_guests"
+            value="{{ guests }}"
+          >
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Guest full name</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="guest_name"
+              placeholder="Enter full name"
+              required
+            >
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Guest email</label>
+            <input
+              type="email"
+              class="form-control form-control-lg"
+              name="guest_email"
+              placeholder="email@example.com"
+              required
+            >
+          </div>
+
+          <div class="border rounded-4 p-3 mb-4">
+            <h5 class="fw-bold mb-2">Important information</h5>
+
+            <ul class="text-muted mb-0">
+              <li>You will not be charged yet.</li>
+              <li>Your booking will be checked against room availability.</li>
+              <li>You will receive a confirmation after submitting.</li>
+            </ul>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3">
+            Confirm booking
+          </button>
+
+        </form>
+
+      </section>
+    </div>
+
+
+    <!-- Booking summary card -->
+    <div class="col-lg-4">
+      <aside class="bg-white rounded-4 shadow-sm p-4 sticky-top" style="top: 20px;">
+
+        <img
+          src="{{ url_for('static', path=hotel.image_path) }}"
+          alt="{{ hotel.name }}"
+          class="img-fluid rounded-4 w-100 mb-3"
+          style="height: 180px; object-fit: cover;"
+        >
+
+        <h4 class="fw-bold mb-1">
+          {{ hotel.name }}
+        </h4>
+
+        <p class="text-muted mb-3">
+          {{ hotel.city }}
+        </p>
+
+        <hr>
+
+        <h5 class="fw-bold mb-2">
+          {{ room.room_type }}
+        </h5>
+
+        <p class="text-muted mb-2">
+          Sleeps up to {{ room.max_guests }} guests
+        </p>
+
+        <ul class="list-unstyled text-muted small mb-3">
+          <li>✓ Free WiFi</li>
+          <li>✓ Private bathroom</li>
+          <li>✓ Air conditioning</li>
+          <li>✓ No prepayment needed</li>
+        </ul>
+
+        <hr>
+
+        <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Price per night</span>
+            <span class="fw-bold">{{ room.price }}</span>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Nights</span>
+            <span class="fw-bold">{{ nights }}</span>
+        </div>
+
+        <hr>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="fs-5 fw-bold">Total</span>
+            <span class="fs-4 fw-bold">${{ total_price }}</span>
+        </div>
+
+      </aside>
+    </div>
+
+  </div>
+
+</main>
+
+{% endblock content %}

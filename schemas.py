@@ -48,5 +48,8 @@ class BookingCreate(BookingBase):
 class BookingResponse(BookingBase):
     id: int
     room_id: int
+    number_of_nights: int
+    price_per_night: int
+    total_price: int
 
     model_config = ConfigDict(from_attributes=True)
