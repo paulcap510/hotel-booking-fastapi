@@ -12,11 +12,11 @@ class Hotel(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
-    price: Mapped[str] = mapped_column(String, nullable=False)
+    # price: Mapped[str] = mapped_column(String, nullable=False)
     image_path: Mapped[str] = mapped_column(String, nullable=False)
     city: Mapped[str] = mapped_column(String, nullable=False)
 
-    rooms = relationship("Room", back_populates="hotel")
+    rooms = relationship("Room", back_populates="hotel", cascade="all, delete-orphan")
 
 class Room(Base):
     __tablename__ = "rooms"
@@ -24,12 +24,12 @@ class Room(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotels.id"), nullable=False)
     room_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    price: Mapped[str] = mapped_column(String, nullable=False)
+    price_per_night:Mapped[int] = mapped_column(Integer, nullable=False)
     max_guests: Mapped[int] = mapped_column(Integer, nullable=False)
     available: Mapped[bool] = mapped_column(Boolean, default=True)
 
     hotel = relationship("Hotel", back_populates="rooms")
-    bookings = relationship("Booking", back_populates="room")
+    bookings = relationship("Booking", back_populates="room", cascade="all, delete-orphan")
 
 
 class Booking(Base):

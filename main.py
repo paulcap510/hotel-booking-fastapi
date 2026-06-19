@@ -83,6 +83,17 @@ def search_hotels(request: Request, city: str = "", guests: int = 1,
         .all()
     )
 
+
+    for hotel in hotels:
+        rooms = (
+            db.query(models.Room)
+            .filter(models.Room.hotel_id == hotel.id)
+            .filter(models.Room.max_guests >= guests)
+            .all()
+        )
+
+        hotel.starting_price = calculate_starting_price(rooms)
+
     return templates.TemplateResponse(
         request,
         "search_results.html",
@@ -93,6 +104,7 @@ def search_hotels(request: Request, city: str = "", guests: int = 1,
             "check_in": check_in,
             "check_out": check_out,
             "guests": guests,
+
         },
     )
 
@@ -218,6 +230,16 @@ def booking_confirmation_page(request: Request, booking_id: int, db: Session = D
             "price": booking.total_price,
         },
     )
+
+
+#! Helper function to calculate starting price
+#* TODO: Show available room start price
+def calculate_starting_price(rooms):
+    if not rooms:
+        return None
+
+    return min(room.price_per_night for room in rooms)
+
 
 #! Helper function to calculate nights
 def calculate_nights(check_in: date | None, check_out: date | None):

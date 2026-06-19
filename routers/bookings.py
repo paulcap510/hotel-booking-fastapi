@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from datetime import date
 
 import models
 from database import get_db
@@ -22,7 +23,6 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
             detail="Room not found"
     )
 
-
     if booking.number_of_guests > room.max_guests: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Number of guests exceeds room capacity" )
 
     if booking.check_out_date <= booking.check_in_date:
@@ -44,13 +44,23 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
             detail="Room is already booked for these dates"
         )
 
+
+    number_of_nights = calculate_nights(booking.check_in_date, booking.check_out_date)
+    total_price = calculate_total_price(room.price,  number_of_nights) if  number_of_nights > 0 else 0
+    # price_per_night = parse_price(room.price)
+
+
     new_booking = models.Booking(
-         room_id = room_id,
-         guest_name = booking.guest_name,
-         guest_email = booking.guest_email,
-         check_in_date = booking.check_in_date,
-         check_out_date = booking.check_out_date,
-         number_of_guests = booking.number_of_guests
+        room_id = room_id,
+        guest_name = booking.guest_name,
+        guest_email = booking.guest_email,
+        check_in_date = booking.check_in_date,
+        check_out_date = booking.check_out_date,
+        number_of_guests = booking.number_of_guests,
+        number_of_nights=number_of_nights,
+        # price_per_night=price_per_night,
+        total_price=total_price,
+
     )
 
 
@@ -162,3 +172,17 @@ def find_overlapping_booking(db: Session, room_id: int, check_in_date, check_out
 
     return query.first()
 
+#! Helper function to calculate nights
+def calculate_nights(check_in: date | None, check_out: date | None):
+    if check_in is None or check_out is None:
+        return 0
+
+    return (check_out - check_in).days
+
+#! Helper function to calculate price
+def calculate_total_price(price: str, nights: int):
+    clean_price = price.replace("$", "").replace(",", "").strip()
+
+    price_per_night = int(float(clean_price))
+
+    return price_per_night * nights

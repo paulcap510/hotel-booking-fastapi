@@ -6,7 +6,7 @@ from datetime import date
 class HotelBase(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     description: str = Field(min_length=1)
-    price: str = Field(min_length=1)
+    # price: str = Field(min_length=1)
     image_path: str = Field(min_length=1)
     city: str = Field(min_length=1)
 
@@ -21,7 +21,7 @@ class HotelResponse(HotelBase):
 
 class RoomBase(BaseModel):
     room_type: str = Field(min_length=1, max_length=100)
-    price: str = Field(min_length=1)
+    price_per_night: int = Field(gt=0)
     max_guests: int = Field(gt=0)
     available: bool
 
