@@ -39,7 +39,7 @@ def update_room(room_id: int, updated_room: RoomCreate, db: Session = Depends(ge
         )
 
     room.room_type = updated_room.room_type
-    room.price = updated_room.price
+    room.price_per_night = updated_room.price_per_night
     room.max_guests = updated_room.max_guests
     room.available = updated_room.available
 
@@ -62,7 +62,7 @@ def create_room(hotel_id: int, room: RoomCreate, db: Session = Depends(get_db)):
     new_room = models.Room(
         hotel_id=hotel_id,
         room_type=room.room_type,
-        price=room.price,
+        price_per_night=room.price_per_night,
         max_guests=room.max_guests,
         available=room.available,
     )

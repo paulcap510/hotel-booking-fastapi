@@ -57,7 +57,11 @@
           </div>
 
           <p class="fs-3 fw-bold mb-3">
-            From {{ hotel.price_per_night }}/night
+            {% if starting_price %}
+              From ${{ starting_price }}/night
+            {% else %}
+              Rooms unavailable
+            {% endif %}
           </p>
 
           <p class="text-muted small mb-0">
@@ -148,7 +152,7 @@
 
               {% if room.available %}
               <a
-                href="/booking/rooms/{{ room.id }}?check_in={{ check_in }}&check_out={{ check_out }}&guests={{ guests }}"
+                href="/booking/rooms/{{ room.id }}?guests={{ guests }}{% if check_in %}&check_in={{ check_in }}{% endif %}{% if check_out %}&check_out={{ check_out }}{% endif %}"
                 class="btn btn-primary"
               >
                 Reserve

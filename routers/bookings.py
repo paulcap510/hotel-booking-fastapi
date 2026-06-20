@@ -6,6 +6,7 @@ import models
 from database import get_db
 from schemas import BookingCreate, BookingResponse
 
+from utils.pricing import calculate_total_price
 
 router = APIRouter(
     # prefix="/api/bookings",
@@ -46,9 +47,7 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
 
 
     number_of_nights = calculate_nights(booking.check_in_date, booking.check_out_date)
-    total_price = calculate_total_price(room.price,  number_of_nights) if  number_of_nights > 0 else 0
-    # price_per_night = parse_price(room.price)
-
+    total_price = calculate_total_price(room.price_per_night, number_of_nights) if number_of_nights > 0 else 0
 
     new_booking = models.Booking(
         room_id = room_id,
@@ -180,9 +179,5 @@ def calculate_nights(check_in: date | None, check_out: date | None):
     return (check_out - check_in).days
 
 #! Helper function to calculate price
-def calculate_total_price(price: str, nights: int):
-    clean_price = price.replace("$", "").replace(",", "").strip()
-
-    price_per_night = int(float(clean_price))
-
+def calculate_total_price(price_per_night: int, nights: int):
     return price_per_night * nights

@@ -18,8 +18,6 @@ from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
 app = FastAPI()
 
-# Base.metadata.create_all(bind=engine)
-
 app.include_router(hotels.router)
 app.include_router(rooms.router)
 app.include_router(bookings.router)
@@ -37,11 +35,17 @@ def load_hotels():
 def home(request:Request, db: Session = Depends(get_db)):
     hotels = db.query(models.Hotel).all()
 
+    for hotel in hotels:
+        rooms = (db.query(models.Room).filter(models.Room.hotel_id == hotel.id).all())
+        hotel.starting_price = calculate_starting_price(rooms)
+
     return templates.TemplateResponse(request, "home.html",
                                       {
                                           "request": request,
                                           "hotels": hotels,
+
                                       })
+
 
 @app.get("/hotel_info/{hotel_id}", response_class=HTMLResponse, include_in_schema=False)
 def hotel_info(request: Request, hotel_id: int, guests: int=1,
@@ -129,7 +133,7 @@ def booking_page(request: Request, room_id: int, check_in: date | None = None, c
 
 
     nights = calculate_nights(check_in, check_out)
-    total_price = calculate_total_price(room.price, nights) if nights > 0 else 0
+    total_price = calculate_total_price(room.price_per_night, nights) if nights > 0 else 0
 
 
     return templates.TemplateResponse(
@@ -249,11 +253,7 @@ def calculate_nights(check_in: date | None, check_out: date | None):
     return (check_out - check_in).days
 
 #! Helper function to calculate price
-def calculate_total_price(price: str, nights: int):
-    clean_price = price.replace("$", "").replace(",", "").strip()
-
-    price_per_night = int(float(clean_price))
-
+def calculate_total_price(price_per_night: int, nights: int):
     return price_per_night * nights
 
 #! Error handling the 404
