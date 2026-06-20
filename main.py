@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException, status, Depends, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import json
@@ -13,6 +13,8 @@ from datetime import date
 
 import models
 from database import engine, Base, get_db
+
+from utils.pricing import calculate_nights, calculate_total_price
 
 from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
@@ -195,6 +197,10 @@ def submit_booking_form(
             detail="Room is already booked for these dates"
         )
 
+    number_of_nights = calculate_nights(check_in_date, check_out_date)
+    price_per_night = room.price_per_night
+    total_price = calculate_total_price(price_per_night, number_of_nights)
+
     new_booking = models.Booking(
         room_id=room_id,
         guest_name=guest_name,
@@ -202,6 +208,9 @@ def submit_booking_form(
         check_in_date=check_in_date,
         check_out_date=check_out_date,
         number_of_guests=number_of_guests,
+        number_of_nights=number_of_nights,
+        price_per_night=price_per_night,
+        total_price=total_price,
     )
 
     db.add(new_booking)
@@ -244,17 +253,6 @@ def calculate_starting_price(rooms):
 
     return min(room.price_per_night for room in rooms)
 
-
-#! Helper function to calculate nights
-def calculate_nights(check_in: date | None, check_out: date | None):
-    if check_in is None or check_out is None:
-        return 0
-
-    return (check_out - check_in).days
-
-#! Helper function to calculate price
-def calculate_total_price(price_per_night: int, nights: int):
-    return price_per_night * nights
 
 #! Error handling the 404
 @app.exception_handler(StarletteHTTPException)

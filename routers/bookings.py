@@ -6,7 +6,7 @@ import models
 from database import get_db
 from schemas import BookingCreate, BookingResponse
 
-from utils.pricing import calculate_total_price
+from utils.pricing import calculate_nights, calculate_total_price
 
 router = APIRouter(
     # prefix="/api/bookings",
@@ -47,7 +47,9 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
 
 
     number_of_nights = calculate_nights(booking.check_in_date, booking.check_out_date)
+    price_per_night = room.price_per_night
     total_price = calculate_total_price(room.price_per_night, number_of_nights) if number_of_nights > 0 else 0
+
 
     new_booking = models.Booking(
         room_id = room_id,
@@ -57,7 +59,7 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
         check_out_date = booking.check_out_date,
         number_of_guests = booking.number_of_guests,
         number_of_nights=number_of_nights,
-        # price_per_night=price_per_night,
+        price_per_night=price_per_night,
         total_price=total_price,
 
     )
@@ -134,16 +136,23 @@ def update_booking(booking_id: int, updated_booking: BookingCreate, db: Session 
             detail="Room is already booked for these dates"
         )
 
+    number_of_nights = calculate_nights(updated_booking.check_in_date, updated_booking.check_out_date)
+    price_per_night = booking.price_per_night
+    total_price = calculate_total_price(price_per_night, number_of_nights)
+
     booking.guest_name = updated_booking.guest_name
     booking.guest_email = updated_booking.guest_email
     booking.check_in_date = updated_booking.check_in_date
     booking.check_out_date = updated_booking.check_out_date
     booking.number_of_guests = updated_booking.number_of_guests
+    booking.number_of_nights = number_of_nights
+    booking.total_price = total_price
 
     db.commit()
     db.refresh(booking)
 
     return booking
+
 #! Delete Booking
 @router.delete("/api/bookings/{booking_id}")
 def delete_booking(booking_id: int, db: Session = Depends(get_db)):

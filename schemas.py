@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from datetime import date
 
 #* TODO: Add Bookings and User models
@@ -6,7 +6,6 @@ from datetime import date
 class HotelBase(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     description: str = Field(min_length=1)
-    # price: str = Field(min_length=1)
     image_path: str = Field(min_length=1)
     city: str = Field(min_length=1)
 
@@ -35,7 +34,7 @@ class RoomResponse(RoomBase):
 
 class BookingBase(BaseModel):
     guest_name: str = Field(min_length=1, max_length=100)
-    guest_email: str = Field(min_length=1, max_length=100)
+    guest_email: EmailStr
     check_in_date: date
     check_out_date: date
     number_of_guests: int = Field(gt=0)

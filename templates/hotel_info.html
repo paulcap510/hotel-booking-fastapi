@@ -32,41 +32,30 @@
           </p>
 
           <div class="border rounded-4 p-3 mb-4 bg-light">
-            <h5 class="fw-bold mb-3">Your stay</h5>
-
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Check-in</span>
-              <span class="fw-bold">
-                {{ check_in if check_in else "Not selected" }}
-              </span>
-            </div>
-
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Check-out</span>
-              <span class="fw-bold">
-                {{ check_out if check_out else "Not selected" }}
-              </span>
-            </div>
-
-            <div class="d-flex justify-content-between">
-              <span class="text-muted">Guests</span>
-              <span class="fw-bold">
-                {{ guests }}
-              </span>
-            </div>
+            <h5 class="fw-bold mb-3">Your Stay</h5>
+            {% if check_in and check_out %}
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Check-in</span>
+                <span class="fw-bold">{{ check_in }}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Check-out</span>
+                <span class="fw-bold">{{ check_out }}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Guests</span>
+                <span class="fw-bold">{{ guests }}</span>
+              </div>
+              {% else %}
+                <p class="text-muted mb-3">
+                  Select dates from the homepage search to check room availability.
+                </p>
+                <a href="/" class="btn btn-primary w-100">
+                      Search dates
+                </a>
+                {% endif %}
           </div>
 
-          <p class="fs-3 fw-bold mb-3">
-            {% if starting_price %}
-              From ${{ starting_price }}/night
-            {% else %}
-              Rooms unavailable
-            {% endif %}
-          </p>
-
-          <p class="text-muted small mb-0">
-            Choose an available room below to continue your booking.
-          </p>
         </div>
       </div>
 
@@ -124,11 +113,28 @@
                 {{ room.room_type }}
               </h5>
 
-              {% if room.available %}
+              {% if room.available and check_in and check_out %}
+  <a
+    href="/booking/rooms/{{ room.id }}?guests={{ guests }}&check_in={{ check_in }}&check_out={{ check_out }}"
+    class="btn btn-primary"
+  >
+    Reserve
+  </a>
+{% elif room.available %}
+  <a href="/" class="btn btn-outline-primary">
+    Select dates
+  </a>
+{% else %}
+  <button class="btn btn-outline-secondary" disabled>
+    Sold out
+  </button>
+{% endif %}
+
+              <!-- {% if room.available %}
                 <span class="badge bg-success">Available</span>
               {% else %}
                 <span class="badge bg-secondary">Unavailable</span>
-              {% endif %}
+              {% endif %} -->
             </div>
 
             <p class="text-muted mb-2">
