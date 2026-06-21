@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <section class="bg-white rounded-4 shadow-sm p-4">
+
+    <h1 class="fw-bold mb-3">Booking confirmed</h1>
+
+    <p class="text-muted mb-4">
+      Thank you, {{ booking.guest_name }}. Your reservation has been created successfully.
+    </p>
+
+    <div class="border rounded-4 p-4 mb-4 bg-light">
+      <h4 class="fw-bold mb-1">
+        {{ hotel.name }}
+      </h4>
+
+      <p class="text-muted mb-0">
+        {{ hotel.city }}
+      </p>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+      <div class="col-md-4">
+        <div class="border rounded-4 p-3 h-100">
+          <p class="text-muted small mb-1">Room</p>
+          <p class="fw-bold mb-0">{{ room.room_type }}</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="border rounded-4 p-3 h-100">
+          <p class="text-muted small mb-1">Check-in</p>
+          <p class="fw-bold mb-0">{{ booking.check_in_date }}</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="border rounded-4 p-3 h-100">
+          <p class="text-muted small mb-1">Check-out</p>
+          <p class="fw-bold mb-0">{{ booking.check_out_date }}</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="border rounded-4 p-4 mb-4">
+
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">Guest name</span>
+        <span class="fw-bold">{{ booking.guest_name }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">Guest email</span>
+        <span class="fw-bold">{{ booking.guest_email }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">Guests</span>
+        <span class="fw-bold">{{ booking.number_of_guests }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">Nights</span>
+        <span class="fw-bold">{{ booking.number_of_nights }}</span>
+      </div>
+
+      <div class="d-flex justify-content-between mb-2">
+        <span class="text-muted">Price per night</span>
+        <span class="fw-bold">${{ booking.price_per_night }}</span>
+      </div>
+
+      <hr>
+
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="fs-5 fw-bold">Total</span>
+        <span class="fs-4 fw-bold">${{ booking.total_price }}</span>
+      </div>
+
+    </div>
+
+    <a href="/" class="btn btn-primary">
+      Back to homepage
+    </a>
+
+  </section>
+
+</main>
+
+{% endblock content %}

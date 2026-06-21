@@ -114,12 +114,6 @@
               </h5>
 
               {% if room.available and check_in and check_out %}
-  <a
-    href="/booking/rooms/{{ room.id }}?guests={{ guests }}&check_in={{ check_in }}&check_out={{ check_out }}"
-    class="btn btn-primary"
-  >
-    Reserve
-  </a>
 {% elif room.available %}
   <a href="/" class="btn btn-outline-primary">
     Select dates

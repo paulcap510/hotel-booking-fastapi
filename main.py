@@ -217,7 +217,11 @@ def submit_booking_form(
     db.commit()
     db.refresh(new_booking)
 
-    return {"message": "Booking created successfully", "booking_id": new_booking.id}
+    return RedirectResponse(
+        url=f"/booking/confirmation/{new_booking.id}",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
 
 @app.get("/booking/confirmation/{booking_id}", include_in_schema=False)
 def booking_confirmation_page(request: Request, booking_id: int, db: Session = Depends(get_db)):
@@ -230,23 +234,20 @@ def booking_confirmation_page(request: Request, booking_id: int, db: Session = D
         detail="Booking not found"
     )
 
+
     return templates.TemplateResponse(
         request,
         "booking_confirmation_page.html",
         {
             "request": request,
-            "hotels": booking.hotel,
-            "city": booking.city,
-            "check_in": booking.check_in,
-            "check_out": booking.check_out,
-            "guests": booking.guests,
-            "price": booking.total_price,
+            "booking": booking,
+            "room": booking.room,
+            "hotel": booking.room.hotel,
         },
     )
 
 
 #! Helper function to calculate starting price
-#* TODO: Show available room start price
 def calculate_starting_price(rooms):
     if not rooms:
         return None
