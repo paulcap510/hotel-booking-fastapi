@@ -11,3 +11,10 @@ def calculate_nights(check_in: date | None, check_out: date | None):
         return 0
 
     return (check_out - check_in).days
+
+#! Helper function to calculate starting price
+def calculate_starting_price(rooms):
+    if not rooms:
+        return None
+
+    return min(room.price_per_night for room in rooms)

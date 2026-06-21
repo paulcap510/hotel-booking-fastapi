@@ -14,7 +14,7 @@ from datetime import date
 import models
 from database import engine, Base, get_db
 
-from utils.pricing import calculate_nights, calculate_total_price
+from utils.pricing import calculate_nights, calculate_total_price, calculate_starting_price
 
 from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
@@ -28,10 +28,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-def load_hotels():
-    with open("data/hotels.json", "r") as file:
-        hotels = json.load(file)
-    return hotels
 
 @app.get("/", response_class=HTMLResponse)
 def home(request:Request, db: Session = Depends(get_db)):
@@ -47,7 +43,6 @@ def home(request:Request, db: Session = Depends(get_db)):
                                           "hotels": hotels,
 
                                       })
-
 
 @app.get("/hotel_info/{hotel_id}", response_class=HTMLResponse, include_in_schema=False)
 def hotel_info(request: Request, hotel_id: int, guests: int=1,
@@ -73,7 +68,6 @@ def hotel_info(request: Request, hotel_id: int, guests: int=1,
             "guests": guests,
         },
     )
-
 
 @app.get("/search", response_class=HTMLResponse)
 def search_hotels(request: Request, city: str = "", guests: int = 1,
@@ -245,14 +239,6 @@ def booking_confirmation_page(request: Request, booking_id: int, db: Session = D
             "hotel": booking.room.hotel,
         },
     )
-
-
-#! Helper function to calculate starting price
-def calculate_starting_price(rooms):
-    if not rooms:
-        return None
-
-    return min(room.price_per_night for room in rooms)
 
 
 #! Error handling the 404
