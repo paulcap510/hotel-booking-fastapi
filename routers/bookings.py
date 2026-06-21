@@ -7,9 +7,9 @@ from database import get_db
 from schemas import BookingCreate, BookingResponse
 
 from utils.pricing import calculate_nights, calculate_total_price
+from utils.inventory import calculate_available_inventory
 
 router = APIRouter(
-    # prefix="/api/bookings",
     tags=['Bookings']
 )
 
@@ -22,9 +22,13 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Room not found"
-    )
+        )
 
-    if booking.number_of_guests > room.max_guests: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Number of guests exceeds room capacity" )
+    if booking.number_of_guests > room.max_guests:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Number of guests exceeds room capacity"
+        )
 
     if booking.check_out_date <= booking.check_in_date:
         raise HTTPException(
@@ -32,46 +36,48 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
             detail="Check-out date must be after check-in date"
         )
 
-    overlapping_booking = find_overlapping_booking(
+    available_inventory = calculate_available_inventory(
         db=db,
         room_id=room_id,
         check_in_date=booking.check_in_date,
         check_out_date=booking.check_out_date,
     )
 
-    if overlapping_booking:
+    if available_inventory <= 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Room is already booked for these dates"
+            detail="No rooms available for these dates"
         )
 
+    number_of_nights = calculate_nights(
+        booking.check_in_date,
+        booking.check_out_date
+    )
 
-    number_of_nights = calculate_nights(booking.check_in_date, booking.check_out_date)
     price_per_night = room.price_per_night
-    total_price = calculate_total_price(room.price_per_night, number_of_nights) if number_of_nights > 0 else 0
 
+    total_price = calculate_total_price(
+        price_per_night,
+        number_of_nights
+    )
 
     new_booking = models.Booking(
-        room_id = room_id,
-        guest_name = booking.guest_name,
-        guest_email = booking.guest_email,
-        check_in_date = booking.check_in_date,
-        check_out_date = booking.check_out_date,
-        number_of_guests = booking.number_of_guests,
+        room_id=room_id,
+        guest_name=booking.guest_name,
+        guest_email=booking.guest_email,
+        check_in_date=booking.check_in_date,
+        check_out_date=booking.check_out_date,
+        number_of_guests=booking.number_of_guests,
         number_of_nights=number_of_nights,
         price_per_night=price_per_night,
         total_price=total_price,
-
     )
-
-
 
     db.add(new_booking)
     db.commit()
     db.refresh(new_booking)
 
     return new_booking
-
 #! Get Bookings All
 @router.get("/api/bookings", response_model=list[BookingResponse])
 def get_bookings(db: Session = Depends(get_db)):
@@ -122,7 +128,7 @@ def update_booking(booking_id: int, updated_booking: BookingCreate, db: Session 
             detail="Number of guests exceeds room capacity"
         )
 
-    overlapping_booking = find_overlapping_booking(
+    available_inventory = calculate_available_inventory(
         db=db,
         room_id=booking.room_id,
         check_in_date=updated_booking.check_in_date,
@@ -130,10 +136,10 @@ def update_booking(booking_id: int, updated_booking: BookingCreate, db: Session 
         exclude_booking_id=booking_id,
     )
 
-    if overlapping_booking:
+    if available_inventory <= 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Room is already booked for these dates"
+            detail="No rooms available for these dates"
         )
 
     number_of_nights = calculate_nights(updated_booking.check_in_date, updated_booking.check_out_date)
@@ -169,24 +175,3 @@ def delete_booking(booking_id: int, db: Session = Depends(get_db)):
 
     return {"message": "Booking deleted successfully"}
 
-
-#! Helper Function to Check Duplicate Bookings
-def find_overlapping_booking(db: Session, room_id: int, check_in_date, check_out_date, exclude_booking_id: int | None = None,
-    ):
-    query = (db.query(models.Booking).filter(models.Booking.room_id == room_id).filter(models.Booking.check_in_date < check_out_date).filter(models.Booking.check_out_date > check_in_date))
-
-    if exclude_booking_id is not None:
-        query = query.filter(models.Booking.id != exclude_booking_id)
-
-    return query.first()
-
-#! Helper function to calculate nights
-def calculate_nights(check_in: date | None, check_out: date | None):
-    if check_in is None or check_out is None:
-        return 0
-
-    return (check_out - check_in).days
-
-#! Helper function to calculate price
-def calculate_total_price(price_per_night: int, nights: int):
-    return price_per_night * nights

@@ -15,6 +15,8 @@ import models
 from database import engine, Base, get_db
 
 from utils.pricing import calculate_nights, calculate_total_price, calculate_starting_price
+from utils.inventory import calculate_available_inventory
+
 
 from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
@@ -177,19 +179,18 @@ def submit_booking_form(
             detail="Number of guests exceeds room capacity"
         )
 
-    overlapping_booking = (
-        db.query(models.Booking)
-        .filter(models.Booking.room_id == room_id)
-        .filter(models.Booking.check_in_date < check_out_date)
-        .filter(models.Booking.check_out_date > check_in_date)
-        .first()
+    available_inventory = calculate_available_inventory(
+    db=db,
+    room_id=room_id,
+    check_in_date=check_in_date,
+    check_out_date=check_out_date,
     )
 
-    if overlapping_booking:
+    if available_inventory <= 0:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Room is already booked for these dates"
-        )
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="No rooms available for these dates"
+    )
 
     number_of_nights = calculate_nights(check_in_date, check_out_date)
     price_per_night = room.price_per_night
@@ -215,7 +216,6 @@ def submit_booking_form(
         url=f"/booking/confirmation/{new_booking.id}",
         status_code=status.HTTP_303_SEE_OTHER
     )
-
 
 @app.get("/booking/confirmation/{booking_id}", include_in_schema=False)
 def booking_confirmation_page(request: Request, booking_id: int, db: Session = Depends(get_db)):
