@@ -28,6 +28,10 @@ class Room(Base):
     max_guests: Mapped[int] = mapped_column(Integer, nullable=False)
     available: Mapped[bool] = mapped_column(Boolean, default=True)
 
+    #* Adding inventory [001]
+    total_inventory: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
     hotel = relationship("Hotel", back_populates="rooms")
     bookings = relationship("Booking", back_populates="room", cascade="all, delete-orphan")
 
