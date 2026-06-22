@@ -6,7 +6,7 @@ import json
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Annotated
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from routers import hotels, rooms, bookings
 from datetime import date
@@ -47,21 +47,79 @@ def home(request:Request, db: Session = Depends(get_db)):
                                       })
 
 @app.get("/hotel_info/{hotel_id}", response_class=HTMLResponse, include_in_schema=False)
-def hotel_info(request: Request, hotel_id: int, guests: int=1,
-               check_in: date | None = None, check_out: date | None = None, db: Session = Depends(get_db)):
+def hotel_info(
+    request: Request,
+    hotel_id: int,
+    guests: int = 1,
+    check_in: date | None = None,
+    check_out: date | None = None,
+    db: Session = Depends(get_db)
+):
     hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
 
     if hotel is None:
         raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail = "Hotel not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Hotel not found"
         )
 
-    rooms = db.query(models.Room).filter(models.Room.hotel_id == hotel_id).all()
+    if check_in and check_out:
+        bookings_for_dates_subquery = (
+            db.query(
+                models.Booking.room_id.label("room_id"), #? show the room ID from Bookings table
+                # we are going to models, getting the Booking model (and the table that goes with it), and then getting the room id for each item in that table
+                func.count(models.Booking.id).label("bookings_for_dates") #? count bookings for each room ID
+            )
+            .filter(models.Booking.check_in_date < check_out) #? filtering bookings based on the dates
+            .filter(models.Booking.check_out_date > check_in)
+            .group_by(models.Booking.room_id)
+            .subquery()
+        )
+
+        room_rows = (
+            db.query(
+                models.Room,
+                func.coalesce(
+                    bookings_for_dates_subquery.c.bookings_for_dates,
+                    0
+                ).label("bookings_for_dates")
+            )
+            .outerjoin(
+                bookings_for_dates_subquery,
+                models.Room.id == bookings_for_dates_subquery.c.room_id
+            )
+            .filter(models.Room.hotel_id == hotel_id)
+            .filter(models.Room.max_guests >= guests)
+            .all()
+        )
+
+        rooms = []
+
+        for room, bookings_for_dates in room_rows:
+            room.bookings_for_dates = bookings_for_dates
+            room.available_inventory = room.total_inventory - bookings_for_dates
+            room.available = room.available_inventory > 0
+
+            if room.available:
+                rooms.append(room)
+
+    else:
+        rooms = (
+            db.query(models.Room)
+            .filter(models.Room.hotel_id == hotel_id)
+            .filter(models.Room.max_guests >= guests)
+            .all()
+        )
+
+        for room in rooms:
+            room.bookings_for_dates = 0
+            room.available_inventory = room.total_inventory
+            room.available = True
 
     return templates.TemplateResponse(
-        request, 'hotel_info.html',
-                {
+        request,
+        "hotel_info.html",
+        {
             "request": request,
             "check_in": check_in,
             "check_out": check_out,
