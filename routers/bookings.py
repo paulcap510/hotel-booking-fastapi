@@ -112,6 +112,12 @@ def update_booking(booking_id: int, updated_booking: BookingCreate, db: Session 
             detail="Booking not found"
         )
 
+    if booking.booking_status == BookingStatus.completed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot update a completed booking"
+        )
+
     if booking.booking_status == BookingStatus.cancelled:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

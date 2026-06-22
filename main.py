@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException, status, Depends, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import json
@@ -307,6 +307,12 @@ def general_exception_handler(request: Request, exception: StarletteHTTPExceptio
         else "An error occured. Please check request again"
     )
 
+    if request.url.path.startswith("/api"):
+        return JSONResponse(
+            status_code=exception.status_code,
+            content={"detail": message},
+        )
+
     return templates.TemplateResponse(
         request,
         "error.html",
@@ -321,6 +327,12 @@ def general_exception_handler(request: Request, exception: StarletteHTTPExceptio
 #! Validation Error Handling
 @app.exception_handler(RequestValidationError)
 def validation_exception_handler(request: Request, exception: RequestValidationError):
+    if request.url.path.startswith("/api"):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={"detail": exception.errors()},
+        )
+
     return templates.TemplateResponse(
         request,
         "error.html",
