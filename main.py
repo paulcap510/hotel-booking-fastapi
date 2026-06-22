@@ -64,10 +64,9 @@ def hotel_info(
         )
 
     if check_in and check_out:
-        bookings_for_dates_subquery = (
+        booking_count_table = (
             db.query(
                 models.Booking.room_id.label("room_id"), #? show the room ID from Bookings table
-                # we are going to models, getting the Booking model (and the table that goes with it), and then getting the room id for each item in that table
                 func.count(models.Booking.id).label("bookings_for_dates") #? count bookings for each room ID
             )
             .filter(models.Booking.check_in_date < check_out) #? filtering bookings based on the dates
@@ -80,13 +79,13 @@ def hotel_info(
             db.query(
                 models.Room,
                 func.coalesce(
-                    bookings_for_dates_subquery.c.bookings_for_dates,
+                    booking_count_table.c.bookings_for_dates, #? get bookings_for_dates column from the temporary subquery table
                     0
                 ).label("bookings_for_dates")
             )
             .outerjoin(
-                bookings_for_dates_subquery,
-                models.Room.id == bookings_for_dates_subquery.c.room_id
+                booking_count_table,
+                models.Room.id == booking_count_table.c.room_id
             )
             .filter(models.Room.hotel_id == hotel_id)
             .filter(models.Room.max_guests >= guests)
