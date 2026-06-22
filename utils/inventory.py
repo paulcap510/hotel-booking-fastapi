@@ -1,5 +1,7 @@
 from datetime import date
 from sqlalchemy.orm import Session
+from utils.booking_status import BookingStatus
+
 
 import models
 
@@ -19,6 +21,7 @@ def calculate_available_inventory(
     query = (
         db.query(models.Booking)
         .filter(models.Booking.room_id == room_id)
+        .filter(models.Booking.booking_status == BookingStatus.confirmed)
         .filter(models.Booking.check_in_date < check_out_date)
         .filter(models.Booking.check_out_date > check_in_date)
     )

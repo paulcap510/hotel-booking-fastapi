@@ -4,6 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm import relationship
 from datetime import date
 from sqlalchemy import Integer, String, Boolean, ForeignKey, Date
+from enum import Enum
+from utils.booking_status import BookingStatus
 
 
 class Hotel(Base):
@@ -49,6 +51,9 @@ class Booking(Base):
     number_of_nights: Mapped[int] = mapped_column(Integer, nullable=False)
     price_per_night: Mapped[int] = mapped_column(Integer, nullable=False)
     total_price: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    #** Adding booking status to add cancellation functionality
+    booking_status: Mapped[str] = mapped_column(String(20), nullable=False, default=BookingStatus.confirmed)
 
     room = relationship("Room", back_populates="bookings")
 

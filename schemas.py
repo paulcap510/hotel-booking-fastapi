@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from datetime import date
+from utils.booking_status import BookingStatus
 
-#* TODO: Add Bookings and User models
 
 class HotelBase(BaseModel):
     name: str = Field(min_length=1, max_length=100)
@@ -50,5 +50,6 @@ class BookingResponse(BookingBase):
     number_of_nights: int
     price_per_night: int
     total_price: int
+    booking_status: BookingStatus
 
     model_config = ConfigDict(from_attributes=True)

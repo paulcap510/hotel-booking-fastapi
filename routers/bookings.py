@@ -8,6 +8,8 @@ from schemas import BookingCreate, BookingResponse
 
 from utils.pricing import calculate_nights, calculate_total_price
 from utils.inventory import calculate_available_inventory
+from utils.booking_status import BookingStatus
+
 
 router = APIRouter(
     tags=['Bookings']
@@ -70,6 +72,7 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
         number_of_guests=booking.number_of_guests,
         number_of_nights=number_of_nights,
         price_per_night=price_per_night,
+        booking_status=BookingStatus.confirmed,
         total_price=total_price,
     )
 
@@ -78,6 +81,7 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
     db.refresh(new_booking)
 
     return new_booking
+
 #! Get Bookings All
 @router.get("/api/bookings", response_model=list[BookingResponse])
 def get_bookings(db: Session = Depends(get_db)):
@@ -106,6 +110,12 @@ def update_booking(booking_id: int, updated_booking: BookingCreate, db: Session 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Booking not found"
+        )
+
+    if booking.booking_status == BookingStatus.cancelled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot update a cancelled booking"
         )
 
     room = db.query(models.Room).filter(models.Room.id == booking.room_id).first()
@@ -159,7 +169,69 @@ def update_booking(booking_id: int, updated_booking: BookingCreate, db: Session 
 
     return booking
 
-#! Delete Booking
+#! Complete A Booking
+@router.patch("/api/bookings/{booking_id}/complete", response_model=BookingResponse)
+def complete_booking(booking_id: int, db: Session = Depends(get_db)):
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+
+    if booking is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Booking not found"
+        )
+
+    if booking.booking_status == BookingStatus.cancelled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot complete a booking that has been cancelled"
+        )
+
+    if booking.booking_status == BookingStatus.completed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Booking is already completed"
+        )
+
+    booking.booking_status = BookingStatus.completed
+
+    db.commit()
+    db.refresh(booking)
+
+    return booking
+
+
+
+#! Cancel A Booking
+@router.patch("/api/bookings/{booking_id}/cancel", response_model=BookingResponse)
+def cancel_booking(booking_id: int, db: Session = Depends(get_db)):
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+
+    if booking is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Booking not found"
+        )
+
+    if booking.booking_status == BookingStatus.cancelled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot complete a booking that has been cancelled"
+        )
+
+    if booking.booking_status == BookingStatus.completed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Booking is already completed"
+        )
+
+    booking.booking_status = BookingStatus.cancelled
+
+    db.commit()
+    db.refresh(booking)
+
+    return booking
+
+#! Delete Booking - For Admin Use
 @router.delete("/api/bookings/{booking_id}")
 def delete_booking(booking_id: int, db: Session = Depends(get_db)):
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()

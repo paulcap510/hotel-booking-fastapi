@@ -16,7 +16,7 @@ from database import engine, Base, get_db
 
 from utils.pricing import calculate_nights, calculate_total_price, calculate_starting_price
 from utils.inventory import calculate_available_inventory
-
+from utils.booking_status import BookingStatus
 
 from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
@@ -69,6 +69,7 @@ def hotel_info(
                 models.Booking.room_id.label("room_id"), #? show the room ID from Bookings table
                 func.count(models.Booking.id).label("bookings_for_dates") #? count bookings for each room ID
             )
+            .filter(models.Booking.booking_status == models.BookingStatus.confirmed)
             .filter(models.Booking.check_in_date < check_out) #? filtering bookings based on the dates
             .filter(models.Booking.check_out_date > check_in)
             .group_by(models.Booking.room_id)
@@ -100,9 +101,6 @@ def hotel_info(
             room.available = room.available_inventory > 0
 
             rooms.append(room)
-
-            # if room.available:
-            #     rooms.append(room)
 
     else:
         rooms = (
