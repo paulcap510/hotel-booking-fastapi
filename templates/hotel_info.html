@@ -97,97 +97,100 @@
 
 
   <!-- Room preview section -->
-<section class="bg-white rounded-4 shadow-sm p-4 mb-4">
-  <h2 class="fw-bold mb-4">Choose your room</h2>
+  <section class="bg-white rounded-4 shadow-sm p-4 mb-4">
+    <h2 class="fw-bold mb-4">Choose your room</h2>
 
-  {% if rooms %}
+    {% if rooms %}
 
-    <div class="row g-4">
-      {% for room in rooms %}
-  <div class="col-md-6">
-    <div class="border rounded-4 p-3 h-100">
+      <div class="row g-4">
+        {% for room in rooms %}
+        <div class="col-md-6">
+          <div class="border rounded-4 p-3 h-100">
 
-      <div class="mb-2">
-        <h5 class="fw-bold mb-0">
-          {{ room.room_type }}
-        </h5>
-      </div>
+            <div class="mb-2">
+              <h5 class="fw-bold mb-0">
+                {{ room.room_type }}
+              </h5>
+            </div>
 
-      <p class="text-muted mb-2">
-        Sleeps up to {{ room.max_guests }} guests
-      </p>
+            <p class="text-muted mb-2">
+              Sleeps up to {{ room.max_guests }} guests
+            </p>
 
-      {% if check_in and check_out %}
-        <p class="text-success small fw-semibold mb-3">
-          {{ room.available_inventory }} room{% if room.available_inventory != 1 %}s{% endif %} left for your dates
-        </p>
-      {% endif %}
+            {% if check_in and check_out %}
+              <p class="text-success small fw-semibold mb-3">
+                {{ room.available_inventory }} room{% if room.available_inventory != 1 %}s{% endif %} left for your dates
+              </p>
+            {% endif %}
 
-      <ul class="list-unstyled text-muted small mb-3">
-        <li>✓ Free WiFi</li>
-        <li>✓ Private bathroom</li>
-        <li>✓ Air conditioning</li>
-        <li>✓ No prepayment needed</li>
-      </ul>
+            <ul class="list-unstyled text-muted small mb-3">
+              <li>✓ Free WiFi</li>
+              <li>✓ Private bathroom</li>
+              <li>✓ Air conditioning</li>
+              <li>✓ No prepayment needed</li>
+            </ul>
 
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <p class="text-muted small mb-1">Price per night</p>
-          <p class="fs-5 fw-bold mb-0">
-            ${{ room.price_per_night }}
-          </p>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <p class="text-muted small mb-1">Price per night</p>
+                <p class="fs-5 fw-bold mb-0">
+                  ${{ room.price_per_night }}
+                </p>
+              </div>
+
+              {% if room.available and check_in and check_out %}
+                <a
+                  href="/booking/rooms/{{ room.id }}?guests={{ guests }}&check_in={{ check_in }}&check_out={{ check_out }}"
+                  class="btn btn-primary"
+                >
+                  Reserve
+                </a>
+              {% elif check_in and check_out and not room.available %}
+                <button class="btn btn-outline-secondary" disabled>
+                  Sold out
+                </button>
+                <!-- <a href="/" class="btn btn-outline-primary">
+                  Select dates
+                </a> -->
+              {% else %}
+                <a href="/" class="btn btn-outline-primary">
+                  Select dates
+                </a>
+              {% endif %}
+            </div>
+
+          </div>
         </div>
+  {% endfor %}
 
-        {% if room.available and check_in and check_out %}
-          <a
-            href="/booking/rooms/{{ room.id }}?guests={{ guests }}&check_in={{ check_in }}&check_out={{ check_out }}"
-            class="btn btn-primary"
-          >
-            Reserve
-          </a>
-        {% elif room.available %}
-          <a href="/" class="btn btn-outline-primary">
-            Select dates
-          </a>
-        {% else %}
-          <button class="btn btn-outline-secondary" disabled>
-            Sold out
-          </button>
-        {% endif %}
+
       </div>
 
-    </div>
-  </div>
-{% endfor %}
+    {% else %}
 
+      <div class="border rounded-4 p-4 text-center">
+        <p class="text-muted mb-0">
+          No rooms have been added for this hotel yet.
+        </p>
+      </div>
 
-    </div>
-
-  {% else %}
-
-    <div class="border rounded-4 p-4 text-center">
-      <p class="text-muted mb-0">
-        No rooms have been added for this hotel yet.
-      </p>
-    </div>
-
-  {% endif %}
-</section>
-
-
-  <!-- Reviews placeholder -->
-  <section class="bg-white rounded-4 shadow-sm p-4">
-    <h2 class="fw-bold mb-3">Guest reviews</h2>
-
-    <div class="d-flex align-items-center mb-3">
-      <span class="badge bg-success fs-6 me-2">8.7</span>
-      <span class="fw-bold">Excellent</span>
-    </div>
-
-    <p class="text-muted mb-0">
-      Review data will be added later when the project has users and bookings.
-    </p>
+    {% endif %}
   </section>
+
+
+    <!-- Reviews placeholder -->
+    <section class="bg-white rounded-4 shadow-sm p-4">
+      <h2 class="fw-bold mb-3">Guest reviews</h2>
+
+      <div class="d-flex align-items-center mb-3">
+        <span class="badge bg-success fs-6 me-2">8.7</span>
+        <span class="fw-bold">Excellent</span>
+      </div>
+
+      <p class="text-muted mb-0">
+        Review data will be added later when the project has users and bookings.
+      </p>
+    </section>
 
 </main>
 

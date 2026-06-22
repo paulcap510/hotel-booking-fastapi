@@ -99,8 +99,10 @@ def hotel_info(
             room.available_inventory = room.total_inventory - bookings_for_dates
             room.available = room.available_inventory > 0
 
-            if room.available:
-                rooms.append(room)
+            rooms.append(room)
+
+            # if room.available:
+            #     rooms.append(room)
 
     else:
         rooms = (
