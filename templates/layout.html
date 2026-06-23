@@ -193,21 +193,60 @@
               <a class="nav-link" href="#">PHP 🇵🇭</a>
             </li> -->
           </ul>
-
-          <ul class="navbar-nav ms-auto">
+          <ul class="navbar-nav ms-auto align-items-lg-center">
             <li class="nav-item">
               <a class="nav-link" href="#">List your property</a>
             </li>
+
             <li class="nav-item">
               <a class="nav-link" href="#">Support</a>
             </li>
+
             <li class="nav-item">
               <a class="nav-link" href="#">Trips</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Sign in</a>
+
+            <!-- Shown when logged out -->
+            <li class="nav-item" id="nav-login-item">
+              <a class="nav-link" href="/login">Sign in</a>
+            </li>
+
+            <li class="nav-item" id="nav-signup-item">
+              <a class="btn btn-outline-light btn-sm ms-lg-2" href="/signup">
+                Create account
+              </a>
+            </li>
+
+            <!-- Shown when logged in -->
+            <li class="nav-item dropdown d-none" id="nav-user-item">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Hi, <span id="nav-username">User</span>
+              </a>
+
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="#">My account</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">My bookings</a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <button class="dropdown-item" type="button" id="logout-button">
+                    Sign out
+                  </button>
+                </li>
+              </ul>
             </li>
           </ul>
+
+
         </div>
       </div>
     </nav>

@@ -34,12 +34,13 @@ class Room(Base):
     hotel = relationship("Hotel", back_populates="rooms")
     bookings = relationship("Booking", back_populates="room", cascade="all, delete-orphan")
 
-
 class Booking(Base):
     __tablename__ = "bookings"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+
     guest_name: Mapped[str] = mapped_column(String(100), nullable=False)
     guest_email: Mapped[str] = mapped_column(String(100), nullable=False)
     check_in_date: Mapped[date] = mapped_column(Date, nullable=False)

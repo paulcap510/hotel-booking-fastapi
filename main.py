@@ -8,7 +8,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Annotated
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
-from routers import hotels, rooms, bookings
+from routers import hotels, rooms, bookings, users
 from datetime import date
 
 import models
@@ -25,6 +25,7 @@ app = FastAPI()
 app.include_router(hotels.router)
 app.include_router(rooms.router)
 app.include_router(bookings.router)
+app.include_router(users.router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -285,7 +286,6 @@ def booking_confirmation_page(request: Request, booking_id: int, db: Session = D
         detail="Booking not found"
     )
 
-
     return templates.TemplateResponse(
         request,
         "booking_confirmation_page.html",
@@ -296,6 +296,24 @@ def booking_confirmation_page(request: Request, booking_id: int, db: Session = D
             "hotel": booking.room.hotel,
         },
     )
+
+
+
+
+@app.get("/signup")
+def signup_page(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "signup.html",
+        {"request": request},
+    )
+
+@app.get("/login")
+def login_page(request: Request):
+    return templates.TemplateResponse(
+        request, "login.html", {"request": request}
+    )
+
 
 
 #! Error handling the 404

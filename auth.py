@@ -8,8 +8,10 @@ from config import settings
 
 password_hash = PasswordHash.recommended() # creates a password hasher using argon2 with the recommended settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token") # URL has to match login endpoint
-    # extracts token from authorization header
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+    # URL has to match login endpoint
+    # OAuth2PasswordBearer looks at the request header, finds Bearer, and extracts the token.
+
 
 def hash_password(password: str) -> str:
     return password_hash.hash(password)
@@ -19,10 +21,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 
-####! REVIEW THIS FUNCTIONALITY FOR THE TOKENS
+#** see where this `data` comes from
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str: # data comes from backend verifying FE
     """Create a JWT access token."""
-    to_encode = data.copy()  # we make a copy to avoid interfering with the original data
+    to_encode = data.copy()
 
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
@@ -42,7 +44,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     return encoded_jwt
 
 
-
 def verify_access_token(token: str) -> str | None:
     """Verify a JWT access token and return the subject (user id) if valid."""
     try:
@@ -50,9 +51,14 @@ def verify_access_token(token: str) -> str | None:
             token,
             settings.secret_key.get_secret_value(),
             algorithms=[settings.algorithm],
-            options={"require": ["exp", "sub"]},
+            options={"require": ["exp", "sub"]}, #Reject the token unless it contains both "exp" and "sub".
         )
     except jwt.InvalidTokenError:
         return None
     else:
-        return payload.get("sub")
+        return payload.get("sub") # returns a suser ID if the token is valid
+
+    #A JWT contains a payload. But when the JWT is sent back to your app, it is not sent as a visible Python dictionary.
+    #  It is sent as a long encoded string: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    # JWT header (algorithm and type), playload (data and exp), signature (created from secret key)

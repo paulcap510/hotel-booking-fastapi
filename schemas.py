@@ -78,6 +78,9 @@ class UserPublicResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class UserUpdate(BaseModel):
+    email: EmailStr | None = None
+    username: str | None = None
 
 class Token(BaseModel):
     access_token: str
