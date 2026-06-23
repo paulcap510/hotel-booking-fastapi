@@ -14,7 +14,6 @@ class Hotel(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
-    # price: Mapped[str] = mapped_column(String, nullable=False)
     image_path: Mapped[str] = mapped_column(String, nullable=False)
     city: Mapped[str] = mapped_column(String, nullable=False)
 
@@ -29,8 +28,6 @@ class Room(Base):
     price_per_night:Mapped[int] = mapped_column(Integer, nullable=False)
     max_guests: Mapped[int] = mapped_column(Integer, nullable=False)
     available: Mapped[bool] = mapped_column(Boolean, default=True)
-
-    #* Adding inventory [001]
     total_inventory: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
 
@@ -51,9 +48,17 @@ class Booking(Base):
     number_of_nights: Mapped[int] = mapped_column(Integer, nullable=False)
     price_per_night: Mapped[int] = mapped_column(Integer, nullable=False)
     total_price: Mapped[int] = mapped_column(Integer, nullable=False)
-
-    #** Adding booking status to add cancellation functionality
     booking_status: Mapped[str] = mapped_column(String(20), nullable=False, default=BookingStatus.confirmed)
 
     room = relationship("Room", back_populates="bookings")
 
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

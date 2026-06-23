@@ -53,3 +53,32 @@ class BookingResponse(BookingBase):
     booking_status: BookingStatus
 
     model_config = ConfigDict(from_attributes=True)
+
+
+
+class UserBase(BaseModel):
+    email: EmailStr
+    username: str
+
+class UserCreate(UserBase):
+    password: str
+    #* TODO: Implmenet min_length = 8
+    # password: str = Field(min_length=8)
+
+class UserPrivateResponse(UserBase):
+    id: int
+    is_active: bool
+    is_admin: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+class UserPublicResponse(BaseModel):
+    id: int
+    username: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
