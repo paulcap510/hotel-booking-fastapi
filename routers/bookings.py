@@ -10,6 +10,7 @@ from utils.pricing import calculate_nights, calculate_total_price
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
 
+from routers.users import get_current_user
 
 router = APIRouter(
     tags=['Bookings']
@@ -17,7 +18,8 @@ router = APIRouter(
 
 #! Create Booking
 @router.post("/api/rooms/{room_id}/bookings", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
-def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(get_db)):
+def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(get_db),
+                   current_user: models.User = Depends(get_current_user)):
     room = db.query(models.Room).filter(models.Room.id == room_id).first()
 
     if room is None:
@@ -65,6 +67,7 @@ def create_booking(room_id: int, booking: BookingCreate, db: Session = Depends(g
 
     new_booking = models.Booking(
         room_id=room_id,
+        user_id=current_user.id,
         guest_name=booking.guest_name,
         guest_email=booking.guest_email,
         check_in_date=booking.check_in_date,
