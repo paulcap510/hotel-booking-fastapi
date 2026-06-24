@@ -20,8 +20,18 @@ from utils.booking_status import BookingStatus
 
 from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
+
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(hotels.router)
 app.include_router(rooms.router)
 app.include_router(bookings.router)
