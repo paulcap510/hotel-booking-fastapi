@@ -1,0 +1,131 @@
+.hero-search {
+  background:
+    linear-gradient(rgba(30, 14, 5, 0.38), rgba(30, 14, 5, 0.5)),
+    linear-gradient(135deg, #2a1208, #6f3d1f);
+  color: white;
+  padding: 4.5rem 2rem 5rem;
+}
+
+.hero-search-inner {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.hero-search h1 {
+  margin: 0 0 3rem;
+  text-align: center;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+}
+
+.search-card {
+  background: white;
+  color: #070b3f;
+  border-radius: 28px;
+  padding: 2rem;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+}
+
+.search-fields {
+  display: grid;
+  grid-template-columns: 1.45fr 0.95fr 0.95fr 0.95fr 1.45fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.search-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 86px;
+  padding: 0.9rem 1rem;
+  border: 1.5px solid #c8cfdd;
+  border-radius: 14px;
+  background: white;
+}
+
+.search-field span {
+  margin-bottom: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #070b3f;
+}
+
+.search-field input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 1.15rem;
+  color: #111827;
+  background: transparent;
+}
+
+.search-field input::placeholder {
+  color: #6b7280;
+}
+
+.search-button {
+  min-height: 86px;
+  border: 0;
+  border-radius: 999px;
+  background: #070b3f;
+  color: white;
+  font: inherit;
+  font-size: 1.55rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-button:hover {
+  background: #10166a;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(7, 11, 63, 0.22);
+}
+
+.business-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  font-weight: 800;
+  color: #070b3f;
+}
+
+.business-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: #070b3f;
+}
+
+@media (max-width: 1000px) {
+  .search-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .search-button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-search {
+    padding: 3rem 1rem;
+  }
+
+  .search-card {
+    border-radius: 22px;
+    padding: 1rem;
+  }
+
+  .search-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-search h1 {
+    margin-bottom: 2rem;
+  }
+}
