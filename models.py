@@ -27,7 +27,7 @@ class Room(Base):
     room_type: Mapped[str] = mapped_column(String(100), nullable=False)
     price_per_night:Mapped[int] = mapped_column(Integer, nullable=False)
     max_guests: Mapped[int] = mapped_column(Integer, nullable=False)
-    available: Mapped[bool] = mapped_column(Boolean, default=True)
+    # available: Mapped[bool] = mapped_column(Boolean, default=True)
     total_inventory: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
 
@@ -52,14 +52,18 @@ class Booking(Base):
     booking_status: Mapped[str] = mapped_column(String(20), nullable=False, default=BookingStatus.confirmed)
 
     room = relationship("Room", back_populates="bookings")
+    user = relationship("User", back_populates="bookings")
 
 
 class User(Base):
     __tablename__ = "users"
 
+    #** TODO: later allow users to reserve rooms as guests
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    bookings = relationship("Booking", back_populates="user", cascade="all, delete-orphan")

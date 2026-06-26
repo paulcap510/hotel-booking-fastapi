@@ -85,3 +85,35 @@ class UserUpdate(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+#** ADDING CONTENT TO RESTRUCTURE SEARCH AFTER ADDING REACT FRONTEND AND AGODA DB SEARCH
+#** Purpose: React can access these
+class HotelSearchResult(HotelResponse):
+    starting_price: int
+    available_rooms_count: int
+
+
+class SearchMetadata(BaseModel):
+    city: str
+    check_in: date | None
+    check_out: date | None
+    guests: int
+
+
+class PaginationMetadata(BaseModel):
+    page: int
+    limit: int
+    total: int
+
+
+class SortOption(BaseModel):
+    value: str
+    label: str
+
+
+class HotelSearchResponse(BaseModel):
+    search: SearchMetadata
+    pagination: PaginationMetadata
+    sort_options: list[SortOption]
+    results: list[HotelSearchResult]

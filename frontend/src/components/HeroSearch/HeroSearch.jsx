@@ -1,24 +1,26 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./HeroSearch.css";
 
-
 function HeroSearch() {
+  const navigate = useNavigate();
+
   const [city, setCity] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
 
-  //! In a normal HTML form, clicking submit makes the browser do its default behavior
-  //! In React, we usually do not want the page to reload. We want React to handle the form submission itself
   function handleSearchSubmit(e) {
     e.preventDefault();
 
-    console.log({
-      city,
-      checkIn,
-      checkOut,
-      guests,
+    const params = new URLSearchParams({
+      city: city,
+      check_in: checkIn,
+      check_out: checkOut,
+      guests: guests,
     });
+
+    navigate(`/search-results?${params.toString()}`);
   }
 
   return (

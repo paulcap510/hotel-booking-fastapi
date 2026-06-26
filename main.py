@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request, HTTPException, status, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-import json
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Annotated
@@ -18,7 +17,7 @@ from utils.pricing import calculate_nights, calculate_total_price, calculate_sta
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
 
-from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
+from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse, HotelSearchResult
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,6 +55,95 @@ def home(request:Request, db: Session = Depends(get_db)):
                                           "hotels": hotels,
 
                                       })
+
+
+#! Get Hotel Details API Route
+@app.get("/api/hotels/{hotel_id}/details")
+def get_hotel_details_api(
+    hotel_id: int,
+    guests: int = 1,
+    check_in: date | None = None,
+    check_out: date | None = None,
+    db: Session = Depends(get_db),
+):
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Hotel not found"
+        )
+
+    if check_in and check_out:
+        bookings_for_dates = (
+            db.query(
+                models.Booking.room_id.label("room_id"),
+                func.count(models.Booking.id).label("booked_count"),
+            )
+            .filter(models.Booking.booking_status == "confirmed")
+            .filter(models.Booking.check_in_date < check_out)
+            .filter(models.Booking.check_out_date > check_in)
+            .group_by(models.Booking.room_id)
+            .subquery()
+        )
+
+        room_rows = (
+            db.query(
+                models.Room,
+                func.coalesce(
+                    bookings_for_dates.c.booked_count,
+                    0
+                ).label("booked_count")
+            )
+            .outerjoin(
+                bookings_for_dates,
+                models.Room.id == bookings_for_dates.c.room_id
+            )
+            .filter(models.Room.hotel_id == hotel_id)
+            .filter(models.Room.max_guests >= guests)
+            .all()
+        )
+
+    else:
+        room_rows = (
+            db.query(
+                models.Room,
+                func.coalesce(0, 0).label("booked_count")
+            )
+            .filter(models.Room.hotel_id == hotel_id)
+            .filter(models.Room.max_guests >= guests)
+            .all()
+        )
+
+    rooms = []
+
+    for room, booked_count in room_rows:
+        available_inventory = room.total_inventory - booked_count
+
+        rooms.append({
+            "id": room.id,
+            "room_type": room.room_type,
+            "price_per_night": room.price_per_night,
+            "max_guests": room.max_guests,
+            "total_inventory": room.total_inventory,
+            "booked_count": booked_count,
+            "available_inventory": available_inventory,
+            "available": available_inventory > 0,
+        })
+
+    return {
+        "id": hotel.id,
+        "name": hotel.name,
+        "description": hotel.description,
+        "image_path": hotel.image_path,
+        "city": hotel.city,
+        "rooms": rooms,
+        "check_in": check_in,
+        "check_out": check_out,
+        "guests": guests,
+    }
+
+
 
 @app.get("/hotel_info/{hotel_id}", response_class=HTMLResponse, include_in_schema=False)
 def hotel_info(
@@ -139,44 +227,76 @@ def hotel_info(
         },
     )
 
-@app.get("/search", response_class=HTMLResponse)
-def search_hotels(request: Request, city: str = "", guests: int = 1,
-                        check_in: date | None = None,
-                        check_out: date | None = None,
-                        db: Session = Depends(get_db)):
-    hotels = (
-        db.query(models.Hotel)
-        .join(models.Room)
+
+#? Updated Api Search Route
+@app.get("/api/search", response_model=list[HotelSearchResult])
+def search_hotels_api(
+    city: str,
+    check_in: date,
+    check_out: date,
+    guests: int = 1,
+    db: Session = Depends(get_db),
+):
+    # 1. Validate search inputs
+    if check_out <= check_in:
+        raise HTTPException(
+            status_code=400,
+            detail="Check-out date must be after check-in date."
+        )
+
+    if guests < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Guests must be at least 1."
+        )
+
+    # 2. Count bookings that overlap the requested date range
+    bookings_for_dates = (
+        db.query(
+            models.Booking.room_id.label("room_id"),
+            func.count(models.Booking.id).label("booked_count"),
+        )
+        .filter(models.Booking.check_in_date < check_out)
+        .filter(models.Booking.check_out_date > check_in)
+        .filter(models.Booking.booking_status == "confirmed")
+        .group_by(models.Booking.room_id)
+        .subquery()
+    )
+
+    # 3. Find hotels with rooms that still have inventory left
+    rows = (
+        db.query(
+            models.Hotel.id.label("id"),
+            models.Hotel.name.label("name"),
+            models.Hotel.description.label("description"),
+            models.Hotel.image_path.label("image_path"),
+            models.Hotel.city.label("city"),
+            func.min(models.Room.price_per_night).label("starting_price"),
+            func.count(models.Room.id).label("available_rooms_count"),
+        )
+        .join(models.Room, models.Room.hotel_id == models.Hotel.id)
+        .outerjoin(
+            bookings_for_dates,
+            bookings_for_dates.c.room_id == models.Room.id,
+        )
         .filter(models.Hotel.city.ilike(f"%{city}%"))
         .filter(models.Room.max_guests >= guests)
-        .distinct()
+        .filter(
+            models.Room.total_inventory
+            > func.coalesce(bookings_for_dates.c.booked_count, 0)
+        )
+        .group_by(
+            models.Hotel.id,
+            models.Hotel.name,
+            models.Hotel.description,
+            models.Hotel.image_path,
+            models.Hotel.city,
+        )
         .all()
     )
 
+    return [dict(row._mapping) for row in rows]
 
-    for hotel in hotels:
-        rooms = (
-            db.query(models.Room)
-            .filter(models.Room.hotel_id == hotel.id)
-            .filter(models.Room.max_guests >= guests)
-            .all()
-        )
-
-        hotel.starting_price = calculate_starting_price(rooms)
-
-    return templates.TemplateResponse(
-        request,
-        "search_results.html",
-        {
-            "request": request,
-            "hotels": hotels,
-            "search_city": city,
-            "check_in": check_in,
-            "check_out": check_out,
-            "guests": guests,
-
-        },
-    )
 
 @app.get("/booking/rooms/{room_id}", response_class=HTMLResponse, include_in_schema=False)
 def booking_page(request: Request, room_id: int, check_in: date | None = None, check_out: date | None = None, guests: int = 1, db: Session = Depends(get_db)):
