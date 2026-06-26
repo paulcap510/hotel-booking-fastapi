@@ -12,7 +12,7 @@ def calculate_available_inventory(
     check_in_date: date,
     check_out_date: date,
     exclude_booking_id: int | None = None,
-):
+) -> int:
     room = db.query(models.Room).filter(models.Room.id == room_id).first()
 
     if room is None:

@@ -1,16 +1,13 @@
+import secrets
 from datetime import UTC, datetime, timedelta
 
-import jwt
-from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 
 from config import settings
 
+
 password_hash = PasswordHash.recommended() # creates a password hasher using argon2 with the recommended settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
-    # URL has to match login endpoint
-    # OAuth2PasswordBearer looks at the request header, finds Bearer, and extracts the token.
 
 
 def hash_password(password: str) -> str:
@@ -19,46 +16,45 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
 
+# --- Session-based auth (replaces JWT) ---
+# In-memory store for now. Maps session_id -> {"user_id": ..., "expires_at": ...}
+# NOTE: this resets every time the server restarts. A DB table or Redis
+# would persist across restarts — worth upgrading later, fine for now.
 
+sessions: dict[str, dict] = {}  #? setting the sessions variable to a dictionary that consistes of a string and another dictionary. `dict[str, dict]` here is a type hint
 
-#** see where this `data` comes from
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str: # data comes from backend verifying FE
-    """Create a JWT access token."""
-    to_encode = data.copy()
-
-    if expires_delta:
-        expire = datetime.now(UTC) + expires_delta
-    else:
-        expire = datetime.now(UTC) + timedelta(
-            minutes=settings.access_token_expire_minutes,
-        )
-
-    to_encode.update({"exp": expire}) # 'exp' is a JWT field name
-
-    encoded_jwt = jwt.encode(
-        to_encode,
-        settings.secret_key.get_secret_value(),
-        algorithm=settings.algorithm,
+#? when we do -> str, it means the session ID that is returned is going to. be a str, correct?
+def create_session(user_id: int) -> str:
+    """Create a new session and return the session_id to put in a cookie."""
+    session_id = secrets.token_urlsafe(32)  # random, unguessable string
+    expires_at = datetime.now(UTC) + timedelta(
+        minutes=settings.access_token_expire_minutes
     )
+    sessions[session_id] = {"user_id": user_id, "expires_at": expires_at}
+    return session_id
 
-    return encoded_jwt
 
 
-def verify_access_token(token: str) -> str | None:
-    """Verify a JWT access token and return the subject (user id) if valid."""
-    try:
-        payload = jwt.decode(
-            token,
-            settings.secret_key.get_secret_value(),
-            algorithms=[settings.algorithm],
-            options={"require": ["exp", "sub"]}, #Reject the token unless it contains both "exp" and "sub".
-        )
-    except jwt.InvalidTokenError:
+
+def get_user_id_from_session(session_id: str | None) -> int | None:
+    """Look up a session_id and return the user_id if the session is valid."""
+
+    if session_id is None:
         return None
-    else:
-        return payload.get("sub") # returns a suser ID if the token is valid
 
-    #A JWT contains a payload. But when the JWT is sent back to your app, it is not sent as a visible Python dictionary.
-    #  It is sent as a long encoded string: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    session = sessions.get(session_id)
+    if session is None:
+        return None
 
-    # JWT header (algorithm and type), playload (data and exp), signature (created from secret key)
+    if datetime.now(UTC) > session["expires_at"]:
+        del sessions[session_id]  # clean up expired session
+        return None
+
+    return session["user_id"]
+
+
+def delete_session(session_id: str | None) -> None:
+    """Remove a session — used for logout."""
+    if session_id in sessions:
+        del sessions[session_id]
+

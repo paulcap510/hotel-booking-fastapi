@@ -27,12 +27,13 @@ class Room(Base):
     room_type: Mapped[str] = mapped_column(String(100), nullable=False)
     price_per_night:Mapped[int] = mapped_column(Integer, nullable=False)
     max_guests: Mapped[int] = mapped_column(Integer, nullable=False)
-    available: Mapped[bool] = mapped_column(Boolean, default=True)
     total_inventory: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-
 
     hotel = relationship("Hotel", back_populates="rooms")
     bookings = relationship("Booking", back_populates="room", cascade="all, delete-orphan")
+
+
+
 
 class Booking(Base):
     __tablename__ = "bookings"

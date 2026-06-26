@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request, HTTPException, status, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-import json
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Annotated
@@ -17,6 +16,7 @@ from database import engine, Base, get_db
 from utils.pricing import calculate_nights, calculate_total_price, calculate_starting_price
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
+from routers.users import get_current_user
 
 from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
@@ -216,6 +216,7 @@ def submit_booking_form(
     check_out_date: date = Form(...),
     number_of_guests: int = Form(...),
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     room = db.query(models.Room).filter(models.Room.id == room_id).first()
 
@@ -257,12 +258,14 @@ def submit_booking_form(
     new_booking = models.Booking(
         room_id=room_id,
         guest_name=guest_name,
+        user_id=current_user.id,
         guest_email=guest_email,
         check_in_date=check_in_date,
         check_out_date=check_out_date,
         number_of_guests=number_of_guests,
         number_of_nights=number_of_nights,
         price_per_night=price_per_night,
+        booking_status=BookingStatus.confirmed,
         total_price=total_price,
     )
 
