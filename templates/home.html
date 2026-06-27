@@ -1,78 +1,141 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<style>
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: var(--hotels-navy);
+  border-color: var(--hotels-navy);
+}
+
+.flatpickr-day.today {
+  border-color: var(--hotels-red);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+  color: var(--hotels-navy);
+}
+
+.flatpickr-weekday {
+  color: var(--hotels-blue);
+  font-weight: 700;
+}
+
+.flatpickr-day:hover {
+  background: rgba(6, 11, 63, 0.08);
+}
+
+.flatpickr-calendar {
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  border: none;
+}
+
+.date-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.date-input-wrapper input {
+  padding-right: 28px;
+}
+
+.date-input-wrapper::after {
+  content: "📅";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.6;
+  font-size: 0.95rem;
+}
+
+
+</style>
+
 <section class="hero">
   <div class="container">
     <h1 class="hero-title">Your next stay starts here</h1>
+      <div class="search-card">
+        <form action="/search" method="get">
 
-<div class="search-card">
-  <form action="/search" method="get">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <div class="search-input-box">
+                <label>Where</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="city"
+                  placeholder="Where to?"
+                />
+              </div>
+            </div>
 
-    <div class="row g-3 align-items-end">
-      <div class="col-md-3">
-        <div class="search-input-box">
-          <label>Where</label>
-          <input
-            type="text"
-            class="form-control"
-            name="city"
-            placeholder="Where to?"
-          />
-        </div>
+            <div class="col-md-2">
+              <div class="search-input-box">
+                <label>Check-in</label>
+                <div class="date-input-wrapper">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="check_in"
+                    id="check-in"
+                    placeholder="Select date"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div class="search-input-box">
+                <label>Check-out</label>
+                <div class="date-input-wrapper">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="check_out"
+                    id="check-out"
+                    placeholder="Select date"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div class="search-input-box">
+                <label>Guests</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  name="guests"
+                  min="1"
+                  value="1"
+                />
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-primary search-btn w-100">
+                Search
+              </button>
+            </div>
+          </div>
+
+          <div class="form-check business-check">
+            <input class="form-check-input" type="checkbox" id="businessTrip" />
+            <label class="form-check-label" for="businessTrip">
+              I'm traveling for business
+            </label>
+          </div>
+
+        </form>
       </div>
-
-      <div class="col-md-2">
-        <div class="search-input-box">
-          <label>Check-in</label>
-          <input
-            type="date"
-            class="form-control"
-            name="check_in"
-          />
-        </div>
-      </div>
-
-      <div class="col-md-2">
-        <div class="search-input-box">
-          <label>Check-out</label>
-          <input
-            type="date"
-            class="form-control"
-            name="check_out"
-          />
-        </div>
-      </div>
-
-      <div class="col-md-2">
-        <div class="search-input-box">
-          <label>Guests</label>
-          <input
-            type="number"
-            class="form-control"
-            name="guests"
-            min="1"
-            value="1"
-          />
-        </div>
-      </div>
-
-      <div class="col-md-3">
-        <button type="submit" class="btn btn-primary search-btn w-100">
-          Search
-        </button>
-      </div>
-    </div>
-
-    <div class="form-check business-check">
-      <input class="form-check-input" type="checkbox" id="businessTrip" />
-      <label class="form-check-label" for="businessTrip">
-        I'm traveling for business
-      </label>
-    </div>
-
-  </form>
-</div>
-
   </div>
 </section>
 
@@ -175,42 +238,20 @@
   </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  const checkInPicker = flatpickr("#check-in", {
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    onChange: function (selectedDates) {
+      // Once a check-in date is picked, don't let check-out be before it
+      checkOutPicker.set("minDate", selectedDates[0]);
+    },
+  });
 
-  <!-- <main class="container py-5">
-  <h2 class="fw-bold mb-4 text-center">Featured stays</h2>
-
-  <div class="row g-4">
-    {% for hotel in hotels %}
-      <div class="col-md-4">
-        <div class="card hotel-card">
-
-          <img
-            src="{{ url_for('static', path=hotel.image_path) }}"
-            class="card-img-top"
-            alt="{{ hotel.name }}"
-            style="height: 220px; object-fit: cover;"
-          >
-
-          <div class="card-body">
-            <h5 class="card-title fw-bold">{{ hotel.name }}</h5>
-
-            <p class="card-text text-muted">
-              {{ hotel.description }}
-            </p>
-
-            <p class="fw-bold mb-3">
-              From ${{ hotel.starting_price }}/night
-            </p>
-
-            <a href="{{ url_for('hotel_info', hotel_id=hotel.id )}}" class="btn btn-outline-primary w-100">
-              View hotel
-            </a>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-</main> -->
-
-  </main>
+  const checkOutPicker = flatpickr("#check-out", {
+    dateFormat: "Y-m-d",
+    minDate: "today",
+  });
+</script>
 {% endblock content %}
