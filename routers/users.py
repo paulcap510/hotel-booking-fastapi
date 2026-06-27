@@ -79,12 +79,11 @@ def login(
 
     session_id = create_session(user.id)
 
-    # Set secure=True once you're running on https
     response.set_cookie(
         key="session_id",
         value=session_id,
         httponly=True,
-        secure=False,
+        secure=False,     # Set secure=True once you're running on https
         samesite="lax",
         max_age=60 * 60 * 24 * 7,  # 1 week
     )

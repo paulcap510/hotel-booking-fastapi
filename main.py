@@ -11,16 +11,36 @@ from routers import hotels, rooms, bookings, users
 from datetime import date
 
 import models
-from database import engine, Base, get_db
+from database import Base, get_db, SessionLocal
 
 from utils.pricing import calculate_nights, calculate_total_price, calculate_starting_price
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
 from routers.users import get_current_user
+from auth import get_user_id_from_session
 
 from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
 app = FastAPI()
+
+
+@app.middleware("http")
+async def add_current_user_to_request(request: Request, call_next):
+    db = SessionLocal()
+    try:
+        session_id = request.cookies.get("session_id")
+        user_id = get_user_id_from_session(session_id)
+
+        if user_id:
+            request.state.user = db.query(models.User).filter(models.User.id == user_id).first()
+        else:
+            request.state.user = None
+    finally:
+        db.close()
+
+    response = await call_next(request)
+    return response
+
 
 app.include_router(hotels.router)
 app.include_router(rooms.router)
