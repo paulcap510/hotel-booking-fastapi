@@ -1,0 +1,215 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5 support-page">
+
+  <div class="text-center mb-5">
+    <h1 class="fw-bold mb-2">How can we help?</h1>
+    <p class="text-muted">Find answers to common questions, or reach out to our team.</p>
+  </div>
+
+  <!-- Category cards -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-4">
+      <div class="support-card bg-white rounded-4 shadow-sm p-4 d-flex align-items-center gap-3 h-100">
+        <span class="fs-3">🏨</span>
+        <div>
+          <h6 class="fw-bold mb-0">Bookings & Stays</h6>
+          <p class="text-muted small mb-0">Manage or change a reservation</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="support-card bg-white rounded-4 shadow-sm p-4 d-flex align-items-center gap-3 h-100">
+        <span class="fs-3">💳</span>
+        <div>
+          <h6 class="fw-bold mb-0">Payments & Refunds</h6>
+          <p class="text-muted small mb-0">Billing questions and refund status</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="support-card bg-white rounded-4 shadow-sm p-4 d-flex align-items-center gap-3 h-100">
+        <span class="fs-3">👤</span>
+        <div>
+          <h6 class="fw-bold mb-0">Account</h6>
+          <p class="text-muted small mb-0">Login, security, and account settings</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ section -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="fw-bold mb-0">Frequently asked questions</h4>
+    <input
+      type="text"
+      id="faq-search"
+      class="form-control"
+      style="max-width: 280px;"
+      placeholder="Search questions..."
+    >
+  </div>
+
+  <div id="faq-list" class="mb-5">
+
+    <div class="faq-item rounded-4 mb-2 border" data-question="How do I cancel a booking?">
+      <button class="faq-question" type="button">
+        <span>How do I cancel a booking?</span>
+        <span class="faq-chevron">⌄</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner text-muted">
+          Go to <a href="{{ url_for('my_bookings_page') }}">My Trips</a>, select the booking you'd like to cancel, and choose "Cancel booking." You will not be charged for cancelled reservations.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item rounded-4 mb-2 border" data-question="When will I be charged for my reservation?">
+      <button class="faq-question" type="button">
+        <span>When will I be charged for my reservation?</span>
+        <span class="faq-chevron">⌄</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner text-muted">
+          You are not charged at the time of booking. Payment is collected at the property at check-in, unless otherwise noted.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item rounded-4 mb-2 border" data-question="How do I change the dates of my stay?">
+      <button class="faq-question" type="button">
+        <span>How do I change the dates of my stay?</span>
+        <span class="faq-chevron">⌄</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner text-muted">
+          Dates can't be changed directly on an existing booking yet. Please cancel your current reservation and create a new booking with your updated dates, subject to availability.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item rounded-4 mb-2 border" data-question="I forgot my password. What do I do?">
+      <button class="faq-question" type="button">
+        <span>I forgot my password. What do I do?</span>
+        <span class="faq-chevron">⌄</span>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner text-muted">
+          Password reset isn't available yet. In the meantime, please contact us below and we'll help you regain access to your account.
+        </div>
+      </div>
+    </div>
+
+    <p id="faq-empty" class="text-muted text-center py-4 d-none">
+      No questions matched your search.
+    </p>
+
+  </div>
+
+  <!-- Contact CTA -->
+  <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 text-center">
+    <h5 class="fw-bold mb-2">Still need help?</h5>
+    <p class="text-muted mb-4">Our team is happy to help with anything not covered above.</p>
+    <a href="mailto:support@hothotels.example" class="btn btn-primary btn-lg px-5">
+      Contact us
+    </a>
+  </div>
+
+</main>
+
+<style>
+  .support-card {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .support-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .faq-item {
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .faq-question {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .faq-chevron {
+    transition: transform 0.25s ease;
+    font-size: 1.1rem;
+    color: #6c757d;
+  }
+
+  .faq-item.open .faq-chevron {
+    transform: rotate(180deg);
+  }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+
+  .faq-answer-inner {
+    padding: 0 1.25rem 1.1rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .support-card,
+    .faq-chevron,
+    .faq-answer {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  // Accordion: toggle one FAQ open/closed with a smooth height animation
+  document.querySelectorAll(".faq-question").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const item = button.closest(".faq-item");
+      const answer = item.querySelector(".faq-answer");
+      const isOpen = item.classList.contains("open");
+
+      if (isOpen) {
+        item.classList.remove("open");
+        answer.style.maxHeight = null;
+      } else {
+        item.classList.add("open");
+        answer.style.maxHeight = answer.scrollHeight + "px";
+      }
+    });
+  });
+
+  // Live search filter over the FAQ questions
+  const searchInput = document.getElementById("faq-search");
+  const faqItems = document.querySelectorAll(".faq-item");
+  const emptyState = document.getElementById("faq-empty");
+
+  searchInput.addEventListener("input", function () {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    faqItems.forEach(function (item) {
+      const matches = item.dataset.question.toLowerCase().includes(query);
+      item.classList.toggle("d-none", !matches);
+      if (matches) visibleCount++;
+    });
+
+    emptyState.classList.toggle("d-none", visibleCount > 0);
+  });
+</script>
+
+{% endblock content %}

@@ -387,6 +387,12 @@ def my_bookings_page(
         "past_bookings": past,
     })
 
+
+@app.get("/support", response_class=HTMLResponse, include_in_schema=False)
+def support_page(request: Request):
+    return templates.TemplateResponse(request, "support.html", {"request": request})
+
+
 #! Error handling the 404
 @app.exception_handler(StarletteHTTPException)
 def general_exception_handler(request: Request, exception: StarletteHTTPException):
