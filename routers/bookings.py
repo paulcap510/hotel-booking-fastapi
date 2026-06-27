@@ -4,12 +4,14 @@ from datetime import date
 
 import models
 from database import get_db
-from schemas import BookingCreate, BookingResponse
+from schemas import BookingCreate, BookingResponse, MyBookingsResponse
 
 from utils.pricing import calculate_nights, calculate_total_price
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
 from utils.booking_logic import create_booking_for_user
+from utils.booking_queries import get_bookings_for_user
+
 
 from routers.users import get_current_user
 
@@ -96,6 +98,40 @@ def create_booking(
 def get_bookings(db: Session = Depends(get_db)):
     bookings = db.query(models.Booking).all()
     return bookings
+
+#***
+#! Get Bookings for a Specific User
+@router.get("/api/bookings/me", response_model=MyBookingsResponse)
+def get_my_bookings(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    upcoming, current, past = get_bookings_for_user(db, current_user.id)
+    return MyBookingsResponse(
+        upcoming_bookings=upcoming,
+        current_bookings=current,
+        past_bookings=past,
+    )
+
+# @router.get("/api/bookings/me", response_model=MyBookingsResponse)
+# def get_my_bookings(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+#     today = date.today()
+#     all_bookings = (
+#             db.query(models.Booking)
+#         .filter(models.Booking.user_id == current_user.id)
+#         .order_by(models.Booking.check_in_date)
+#         .all()
+#     )
+
+#     upcoming_bookings = [b for b in all_bookings if b.check_in_date > today]
+#     current_bookings = [b for b in all_bookings if b.check_in_date <= today <= b.check_out_date]
+#     past_bookings = [b for b in all_bookings if b.check_out_date < today]
+
+#     return {
+#         "upcoming_bookings": upcoming_bookings,
+#         "current_bookings": current_bookings,
+#         "past_bookings": past_bookings,
+#     }
 
 #! Get Specific Booking
 @router.get("/api/bookings/{booking_id}", response_model=BookingResponse)

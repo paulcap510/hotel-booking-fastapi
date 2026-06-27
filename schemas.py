@@ -55,6 +55,12 @@ class BookingResponse(BookingBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class MyBookingsResponse(BaseModel):
+    upcoming_bookings: list[BookingResponse]
+    current_bookings: list[BookingResponse]
+    past_bookings: list[BookingResponse]
+
+
 
 class UserBase(BaseModel):
     email: EmailStr

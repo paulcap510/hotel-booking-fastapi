@@ -17,6 +17,7 @@ from utils.pricing import calculate_nights, calculate_total_price, calculate_sta
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
 from utils.booking_logic import create_booking_for_user
+from utils.booking_queries import get_bookings_for_user
 from routers.users import get_current_user
 from auth import get_user_id_from_session
 
@@ -371,6 +372,20 @@ def login_page(request: Request):
     )
 
 
+
+@app.get("/bookings", response_class=HTMLResponse, include_in_schema=False)
+def my_bookings_page(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    upcoming, current, past = get_bookings_for_user(db, current_user.id)
+    return templates.TemplateResponse(request, "my_bookings.html", {
+        "request": request,
+        "upcoming_bookings": upcoming,
+        "current_bookings": current,
+        "past_bookings": past,
+    })
 
 #! Error handling the 404
 @app.exception_handler(StarletteHTTPException)
