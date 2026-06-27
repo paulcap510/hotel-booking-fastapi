@@ -16,8 +16,10 @@ from database import Base, get_db, SessionLocal
 from utils.pricing import calculate_nights, calculate_total_price, calculate_starting_price
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
+from utils.booking_logic import create_booking_for_user
 from routers.users import get_current_user
 from auth import get_user_id_from_session
+
 
 from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
@@ -227,6 +229,8 @@ def booking_page(request: Request, room_id: int, check_in: date | None = None, c
     },
         )
 
+# main.py
+
 @app.post("/booking/rooms/{room_id}", include_in_schema=False)
 def submit_booking_form(
     room_id: int,
@@ -238,65 +242,94 @@ def submit_booking_form(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    room = db.query(models.Room).filter(models.Room.id == room_id).first()
-
-    if room is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Room not found"
-        )
-
-    if check_out_date <= check_in_date:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Check-out date must be after check-in date"
-        )
-
-    if number_of_guests > room.max_guests:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Number of guests exceeds room capacity"
-        )
-
-    available_inventory = calculate_available_inventory(
-    db=db,
-    room_id=room_id,
-    check_in_date=check_in_date,
-    check_out_date=check_out_date,
-    )
-
-    if available_inventory <= 0:
-        raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="No rooms available for these dates"
-    )
-
-    number_of_nights = calculate_nights(check_in_date, check_out_date)
-    price_per_night = room.price_per_night
-    total_price = calculate_total_price(price_per_night, number_of_nights)
-
-    new_booking = models.Booking(
+    new_booking = create_booking_for_user(
+        db=db,
         room_id=room_id,
-        guest_name=guest_name,
         user_id=current_user.id,
+        guest_name=guest_name,
         guest_email=guest_email,
         check_in_date=check_in_date,
         check_out_date=check_out_date,
         number_of_guests=number_of_guests,
-        number_of_nights=number_of_nights,
-        price_per_night=price_per_night,
-        booking_status=BookingStatus.confirmed,
-        total_price=total_price,
     )
-
-    db.add(new_booking)
-    db.commit()
-    db.refresh(new_booking)
 
     return RedirectResponse(
         url=f"/booking/confirmation/{new_booking.id}",
-        status_code=status.HTTP_303_SEE_OTHER
+        status_code=status.HTTP_303_SEE_OTHER,
     )
+
+
+# @app.post("/booking/rooms/{room_id}", include_in_schema=False)
+# def submit_booking_form(
+#     room_id: int,
+#     guest_name: str = Form(...),
+#     guest_email: str = Form(...),
+#     check_in_date: date = Form(...),
+#     check_out_date: date = Form(...),
+#     number_of_guests: int = Form(...),
+#     db: Session = Depends(get_db),
+#     current_user: models.User = Depends(get_current_user),
+# ):
+#     room = db.query(models.Room).filter(models.Room.id == room_id).first()
+
+#     if room is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Room not found"
+#         )
+
+#     if check_out_date <= check_in_date:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Check-out date must be after check-in date"
+#         )
+
+#     if number_of_guests > room.max_guests:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Number of guests exceeds room capacity"
+#         )
+
+#     available_inventory = calculate_available_inventory(
+#     db=db,
+#     room_id=room_id,
+#     check_in_date=check_in_date,
+#     check_out_date=check_out_date,
+#     )
+
+#     if available_inventory <= 0:
+#         raise HTTPException(
+#         status_code=status.HTTP_400_BAD_REQUEST,
+#         detail="No rooms available for these dates"
+#     )
+
+#     number_of_nights = calculate_nights(check_in_date, check_out_date)
+#     price_per_night = room.price_per_night
+#     total_price = calculate_total_price(price_per_night, number_of_nights)
+
+#     new_booking = models.Booking(
+#         room_id=room_id,
+#         guest_name=guest_name,
+#         user_id=current_user.id,
+#         guest_email=guest_email,
+#         check_in_date=check_in_date,
+#         check_out_date=check_out_date,
+#         number_of_guests=number_of_guests,
+#         number_of_nights=number_of_nights,
+#         price_per_night=price_per_night,
+#         booking_status=BookingStatus.confirmed,
+#         total_price=total_price,
+#     )
+
+#     db.add(new_booking)
+#     db.commit()
+#     db.refresh(new_booking)
+
+#     return RedirectResponse(
+#         url=f"/booking/confirmation/{new_booking.id}",
+#         status_code=status.HTTP_303_SEE_OTHER
+#     )
+
 
 @app.get("/booking/confirmation/{booking_id}", include_in_schema=False)
 def booking_confirmation_page(request: Request, booking_id: int, db: Session = Depends(get_db)):
