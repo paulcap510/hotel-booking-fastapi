@@ -113,26 +113,6 @@ def get_my_bookings(
         past_bookings=past,
     )
 
-# @router.get("/api/bookings/me", response_model=MyBookingsResponse)
-# def get_my_bookings(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-#     today = date.today()
-#     all_bookings = (
-#             db.query(models.Booking)
-#         .filter(models.Booking.user_id == current_user.id)
-#         .order_by(models.Booking.check_in_date)
-#         .all()
-#     )
-
-#     upcoming_bookings = [b for b in all_bookings if b.check_in_date > today]
-#     current_bookings = [b for b in all_bookings if b.check_in_date <= today <= b.check_out_date]
-#     past_bookings = [b for b in all_bookings if b.check_out_date < today]
-
-#     return {
-#         "upcoming_bookings": upcoming_bookings,
-#         "current_bookings": current_bookings,
-#         "past_bookings": past_bookings,
-#     }
-
 #! Get Specific Booking
 @router.get("/api/bookings/{booking_id}", response_model=BookingResponse)
 def get_booking(booking_id: int, db: Session = Depends(get_db)):
@@ -148,7 +128,13 @@ def get_booking(booking_id: int, db: Session = Depends(get_db)):
 
 #! Update Booking
 @router.put("/api/bookings/{booking_id}", response_model=BookingResponse)
-def update_booking(booking_id: int, updated_booking: BookingCreate, db: Session = Depends(get_db)):
+def update_booking(
+    booking_id: int,
+    updated_booking: BookingCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
 
     if booking is None:
@@ -162,6 +148,10 @@ def update_booking(booking_id: int, updated_booking: BookingCreate, db: Session 
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot update a completed booking"
         )
+
+
+    if booking.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to modify this booking")
 
     if booking.booking_status == BookingStatus.cancelled:
         raise HTTPException(
@@ -254,7 +244,7 @@ def complete_booking(booking_id: int, db: Session = Depends(get_db)):
 
 #! Cancel A Booking
 @router.patch("/api/bookings/{booking_id}/cancel", response_model=BookingResponse)
-def cancel_booking(booking_id: int, db: Session = Depends(get_db)):
+def cancel_booking(booking_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
 
     if booking is None:
@@ -268,6 +258,9 @@ def cancel_booking(booking_id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot complete a booking that has been cancelled"
         )
+
+    if booking.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to modify this booking")
 
     if booking.booking_status == BookingStatus.completed:
         raise HTTPException(
@@ -284,7 +277,11 @@ def cancel_booking(booking_id: int, db: Session = Depends(get_db)):
 
 #! Delete Booking - For Admin Use
 @router.delete("/api/bookings/{booking_id}")
-def delete_booking(booking_id: int, db: Session = Depends(get_db)):
+def delete_booking(booking_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+
+    if not current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
 
     if booking is None:
