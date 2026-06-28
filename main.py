@@ -230,7 +230,6 @@ def booking_page(request: Request, room_id: int, check_in: date | None = None, c
     },
         )
 
-# main.py
 
 @app.post("/booking/rooms/{room_id}", include_in_schema=False)
 def submit_booking_form(
@@ -258,79 +257,6 @@ def submit_booking_form(
         url=f"/booking/confirmation/{new_booking.id}",
         status_code=status.HTTP_303_SEE_OTHER,
     )
-
-
-# @app.post("/booking/rooms/{room_id}", include_in_schema=False)
-# def submit_booking_form(
-#     room_id: int,
-#     guest_name: str = Form(...),
-#     guest_email: str = Form(...),
-#     check_in_date: date = Form(...),
-#     check_out_date: date = Form(...),
-#     number_of_guests: int = Form(...),
-#     db: Session = Depends(get_db),
-#     current_user: models.User = Depends(get_current_user),
-# ):
-#     room = db.query(models.Room).filter(models.Room.id == room_id).first()
-
-#     if room is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail="Room not found"
-#         )
-
-#     if check_out_date <= check_in_date:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Check-out date must be after check-in date"
-#         )
-
-#     if number_of_guests > room.max_guests:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Number of guests exceeds room capacity"
-#         )
-
-#     available_inventory = calculate_available_inventory(
-#     db=db,
-#     room_id=room_id,
-#     check_in_date=check_in_date,
-#     check_out_date=check_out_date,
-#     )
-
-#     if available_inventory <= 0:
-#         raise HTTPException(
-#         status_code=status.HTTP_400_BAD_REQUEST,
-#         detail="No rooms available for these dates"
-#     )
-
-#     number_of_nights = calculate_nights(check_in_date, check_out_date)
-#     price_per_night = room.price_per_night
-#     total_price = calculate_total_price(price_per_night, number_of_nights)
-
-#     new_booking = models.Booking(
-#         room_id=room_id,
-#         guest_name=guest_name,
-#         user_id=current_user.id,
-#         guest_email=guest_email,
-#         check_in_date=check_in_date,
-#         check_out_date=check_out_date,
-#         number_of_guests=number_of_guests,
-#         number_of_nights=number_of_nights,
-#         price_per_night=price_per_night,
-#         booking_status=BookingStatus.confirmed,
-#         total_price=total_price,
-#     )
-
-#     db.add(new_booking)
-#     db.commit()
-#     db.refresh(new_booking)
-
-#     return RedirectResponse(
-#         url=f"/booking/confirmation/{new_booking.id}",
-#         status_code=status.HTTP_303_SEE_OTHER
-#     )
-
 
 @app.get("/booking/confirmation/{booking_id}", include_in_schema=False)
 def booking_confirmation_page(request: Request, booking_id: int, db: Session = Depends(get_db)):
@@ -391,6 +317,154 @@ def my_bookings_page(
 @app.get("/support", response_class=HTMLResponse, include_in_schema=False)
 def support_page(request: Request):
     return templates.TemplateResponse(request, "support.html", {"request": request})
+
+
+
+
+
+
+@app.get("/bookings/{booking_id}", response_class=HTMLResponse, include_in_schema=False)
+def booking_detail_page(
+    booking_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+
+    if booking is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+
+    if booking.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this booking")
+
+    return templates.TemplateResponse(request, "booking_detail.html", {
+        "request": request,
+        "booking": booking,
+        "room": booking.room,
+        "hotel": booking.room.hotel,
+    })
+
+
+@app.get("/bookings/{booking_id}/manage", response_class=HTMLResponse, include_in_schema=False)
+def manage_booking_page(
+    booking_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)):
+
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+
+    if booking is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+
+    if booking.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this booking")
+
+    return templates.TemplateResponse(request, "manage_booking.html", {
+        "request": request,
+        "booking": booking,
+        "room": booking.room,
+        "hotel": booking.room.hotel,
+    })
+
+
+
+
+@app.post("/bookings/{booking_id}/update-contact", include_in_schema=False)
+def update_booking_contact_form(
+    booking_id: int,
+    guest_name: str = Form(...),
+    guest_email: str = Form(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+
+    if booking is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+
+    if booking.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to modify this booking")
+
+    if booking.booking_status == BookingStatus.cancelled:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot update a cancelled booking")
+
+    booking.guest_name = guest_name
+    booking.guest_email = guest_email
+
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/bookings/{booking_id}/manage",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+@app.post("/bookings/{booking_id}/update-dates", include_in_schema=False)
+def update_booking_dates_form(
+    booking_id: int,
+    check_in_date: date = Form(...),
+    check_out_date: date = Form(...),
+    number_of_guests: int = Form(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+
+    if booking is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+
+    if booking.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to modify this booking")
+
+    if booking.booking_status == BookingStatus.completed:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot update a completed booking")
+
+    if booking.booking_status == BookingStatus.cancelled:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot update a cancelled booking")
+
+    room = booking.room
+
+    if check_out_date <= check_in_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Check-out date must be after check-in date")
+
+    if number_of_guests > room.max_guests:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Number of guests exceeds room capacity")
+
+    try:
+        available_inventory = calculate_available_inventory(
+            db=db,
+            room_id=booking.room_id,
+            check_in_date=check_in_date,
+            check_out_date=check_out_date,
+            exclude_booking_id=booking_id,
+        )
+
+        if available_inventory <= 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No rooms available for these dates")
+
+        number_of_nights = calculate_nights(check_in_date, check_out_date)
+        total_price = calculate_total_price(booking.price_per_night, number_of_nights)
+
+        booking.check_in_date = check_in_date
+        booking.check_out_date = check_out_date
+        booking.number_of_guests = number_of_guests
+        booking.number_of_nights = number_of_nights
+        booking.total_price = total_price
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return RedirectResponse(
+        url=f"/bookings/{booking_id}/manage",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+
 
 
 #! Error handling the 404

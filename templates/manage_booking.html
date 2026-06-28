@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <h1 class="fw-bold mb-2">Manage your booking</h1>
+      <p class="text-muted mb-4">{{ hotel.name }} &middot; {{ room.room_type }}</p>
+
+      <!-- Contact info section -->
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5 mb-4">
+        <h5 class="fw-bold mb-3">Guest details</h5>
+
+        <form method="post" action="/bookings/{{ booking.id }}/update-contact">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Guest full name</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="guest_name"
+              value="{{ booking.guest_name }}"
+              required
+            >
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Guest email</label>
+            <input
+              type="email"
+              class="form-control form-control-lg"
+              name="guest_email"
+              value="{{ booking.guest_email }}"
+              required
+            >
+          </div>
+
+          <button type="submit" class="btn btn-outline-primary">
+            Save contact info
+          </button>
+        </form>
+      </section>
+
+      <!-- Change dates section -->
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5 mb-4">
+        <h5 class="fw-bold mb-1">Change dates & guests</h5>
+        <p class="text-muted small mb-3">
+          Updating your dates will recheck availability and may change your total price.
+        </p>
+
+        <form method="post" action="/bookings/{{ booking.id }}/update-dates">
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Check-in</label>
+              <input
+                type="date"
+                class="form-control"
+                name="check_in_date"
+                value="{{ booking.check_in_date }}"
+                required
+              >
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Check-out</label>
+              <input
+                type="date"
+                class="form-control"
+                name="check_out_date"
+                value="{{ booking.check_out_date }}"
+                required
+              >
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Guests</label>
+              <input
+                type="number"
+                class="form-control"
+                name="number_of_guests"
+                min="1"
+                max="{{ room.max_guests }}"
+                value="{{ booking.number_of_guests }}"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="border rounded-4 p-3 mb-4 bg-light d-flex justify-content-between">
+            <span class="text-muted">Current total</span>
+            <span class="fw-bold">${{ booking.total_price }}</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Update dates
+          </button>
+        </form>
+      </section>
+
+      <div class="text-center">
+        <a href="{{ url_for('my_bookings_page') }}" class="text-decoration-none fw-bold">
+          &larr; Back to My Trips
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+{% endblock content %}

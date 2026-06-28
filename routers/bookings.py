@@ -4,7 +4,7 @@ from datetime import date
 
 import models
 from database import get_db
-from schemas import BookingCreate, BookingResponse, MyBookingsResponse
+from schemas import BookingCreate, BookingResponse, MyBookingsResponse, BookingContactUpdate
 
 from utils.pricing import calculate_nights, calculate_total_price
 from utils.inventory import calculate_available_inventory
@@ -39,67 +39,12 @@ def create_booking(
     )
 
 
-# @router.post("/api/rooms/{room_id}/bookings", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
-# def create_booking(
-#     room_id: int,
-#     booking: BookingCreate,
-#     db: Session = Depends(get_db),
-#     current_user: models.User = Depends(get_current_user),
-# ):
-#     print(f"DEBUG: current_user = {current_user}, current_user.id = {current_user.id}")
-#     room = db.query(models.Room).filter(models.Room.id == room_id).first()
-#     if room is None:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
-
-#     if booking.number_of_guests > room.max_guests:
-#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Number of guests exceeds room capacity")
-
-#     if booking.check_out_date <= booking.check_in_date:
-#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Check-out date must be after check-in date")
-
-#     number_of_nights = calculate_nights(booking.check_in_date, booking.check_out_date)
-#     price_per_night = room.price_per_night
-#     total_price = calculate_total_price(price_per_night, number_of_nights)
-
-#     # wrap avaiability check and insert into one so SLQLite holds write-lock to avoid simultaneous bookings
-#     # the check and the write can't be split apart by a concurrent request. Temporary solution to stop
-#     # double bookings when only 1 inventory remains
-#     with db.begin():
-#         available_inventory = calculate_available_inventory(
-#             db=db,
-#             room_id=room_id,
-#             check_in_date=booking.check_in_date,
-#             check_out_date=booking.check_out_date,
-#         )
-
-#         if available_inventory <= 0:
-#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No rooms available for these dates")
-
-#         new_booking = models.Booking(
-#             room_id=room_id,
-#             user_id=current_user.id,
-#             guest_name=booking.guest_name,
-#             guest_email=booking.guest_email,
-#             check_in_date=booking.check_in_date,
-#             check_out_date=booking.check_out_date,
-#             number_of_guests=booking.number_of_guests,
-#             number_of_nights=number_of_nights,
-#             price_per_night=price_per_night,
-#             booking_status=BookingStatus.confirmed,
-#             total_price=total_price,
-#         )
-#         db.add(new_booking)
-
-#     db.refresh(new_booking)
-#     return new_booking
-
 #! Get Bookings All
 @router.get("/api/bookings", response_model=list[BookingResponse])
 def get_bookings(db: Session = Depends(get_db)):
     bookings = db.query(models.Booking).all()
     return bookings
 
-#***
 #! Get Bookings for a Specific User
 @router.get("/api/bookings/me", response_model=MyBookingsResponse)
 def get_my_bookings(
@@ -134,7 +79,6 @@ def update_booking(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
 
     if booking is None:
@@ -143,15 +87,17 @@ def update_booking(
             detail="Booking not found"
         )
 
+    if booking.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to modify this booking"
+        )
+
     if booking.booking_status == BookingStatus.completed:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot update a completed booking"
         )
-
-
-    if booking.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to modify this booking")
 
     if booking.booking_status == BookingStatus.cancelled:
         raise HTTPException(
@@ -179,37 +125,39 @@ def update_booking(
             detail="Number of guests exceeds room capacity"
         )
 
-    available_inventory = calculate_available_inventory(
-        db=db,
-        room_id=booking.room_id,
-        check_in_date=updated_booking.check_in_date,
-        check_out_date=updated_booking.check_out_date,
-        exclude_booking_id=booking_id,
-    )
-
-    if available_inventory <= 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No rooms available for these dates"
+    try:
+        available_inventory = calculate_available_inventory(
+            db=db,
+            room_id=booking.room_id,
+            check_in_date=updated_booking.check_in_date,
+            check_out_date=updated_booking.check_out_date,
+            exclude_booking_id=booking_id,
         )
 
-    #! Dealing with race conditions here
+        if available_inventory <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No rooms available for these dates"
+            )
 
-    number_of_nights = calculate_nights(updated_booking.check_in_date, updated_booking.check_out_date)
-    price_per_night = booking.price_per_night
-    total_price = calculate_total_price(price_per_night, number_of_nights)
+        number_of_nights = calculate_nights(updated_booking.check_in_date, updated_booking.check_out_date)
+        price_per_night = booking.price_per_night
+        total_price = calculate_total_price(price_per_night, number_of_nights)
 
-    booking.guest_name = updated_booking.guest_name
-    booking.guest_email = updated_booking.guest_email
-    booking.check_in_date = updated_booking.check_in_date
-    booking.check_out_date = updated_booking.check_out_date
-    booking.number_of_guests = updated_booking.number_of_guests
-    booking.number_of_nights = number_of_nights
-    booking.total_price = total_price
+        booking.guest_name = updated_booking.guest_name
+        booking.guest_email = updated_booking.guest_email
+        booking.check_in_date = updated_booking.check_in_date
+        booking.check_out_date = updated_booking.check_out_date
+        booking.number_of_guests = updated_booking.number_of_guests
+        booking.number_of_nights = number_of_nights
+        booking.total_price = total_price
 
-    db.commit()
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
     db.refresh(booking)
-
     return booking
 
 #! Complete A Booking
@@ -294,4 +242,37 @@ def delete_booking(booking_id: int, db: Session = Depends(get_db), current_user:
     db.commit()
 
     return {"message": "Booking deleted successfully"}
+
+
+
+
+
+#! Update Booking Contact Info (name/email only — no date/availability logic)
+@router.patch("/api/bookings/{booking_id}/details", response_model=BookingResponse)
+def update_booking_details(
+    booking_id: int,
+    contact_update: BookingContactUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+
+    if booking is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+
+    if booking.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to modify this booking")
+
+    if booking.booking_status == BookingStatus.cancelled:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot update a cancelled booking")
+
+    booking.guest_name = contact_update.guest_name
+    booking.guest_email = contact_update.guest_email
+
+    db.commit()
+    db.refresh(booking)
+
+    return booking
+
+
 

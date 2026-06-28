@@ -54,6 +54,10 @@ class BookingResponse(BookingBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+class BookingContactUpdate(BaseModel):
+    guest_name: str = Field(min_length=1, max_length=100)
+    guest_email: EmailStr
+
 
 class MyBookingsResponse(BaseModel):
     upcoming_bookings: list[BookingResponse]
@@ -91,3 +95,4 @@ class UserUpdate(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
