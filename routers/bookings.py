@@ -51,11 +51,12 @@ def get_my_bookings(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    upcoming, current, past = get_bookings_for_user(db, current_user.id)
+    upcoming, current, past, cancelled = get_bookings_for_user(db, current_user.id)
     return MyBookingsResponse(
         upcoming_bookings=upcoming,
         current_bookings=current,
         past_bookings=past,
+        cancelled_bookings=cancelled,
     )
 
 #! Get Specific Booking

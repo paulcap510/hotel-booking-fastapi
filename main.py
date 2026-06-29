@@ -305,12 +305,13 @@ def my_bookings_page(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    upcoming, current, past = get_bookings_for_user(db, current_user.id)
+    upcoming, current, past, cancelled = get_bookings_for_user(db, current_user.id)
     return templates.TemplateResponse(request, "my_bookings.html", {
         "request": request,
         "upcoming_bookings": upcoming,
         "current_bookings": current,
         "past_bookings": past,
+        "cancelled_bookings": cancelled,
     })
 
 
@@ -367,6 +368,32 @@ def manage_booking_page(
         "room": booking.room,
         "hotel": booking.room.hotel,
     })
+
+
+@app.post("/bookings/{booking_id}/cancel", include_in_schema=False)
+def cancel_booking_action(
+    booking_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+
+    if booking is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+
+    if booking.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to modify this booking")
+
+    if booking.booking_status == BookingStatus.cancelled:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot update a cancelled booking")
+
+    booking.booking_status = BookingStatus.cancelled
+
+    db.commit()
+    return RedirectResponse(
+        url=f"/bookings/{booking_id}/manage",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
 
 
 
