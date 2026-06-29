@@ -3,12 +3,25 @@
 This is a hotel booking platform similar to Hotels.com or Agoda. Users can create accounts, search for hotels, view and manage their bookings, and get help through a dedicated support page.
 
 ## Features
-- User signup/login (session-based auth)
-- Browse/search hotels, with a styled date-picker for check-in/check-out
-- Book a room, with real-time inventory checking
-- My Trips page — view upcoming, current, and past bookings
-- Navbar reflects real login state (signed in / signed out)
-- Support/FAQ page with live search and an expandable accordion
+
+### Implemented
+- User signup/login (session-based auth), logout
+- Hotel search by city, dates, and guest count, with real-time availability checking
+- Hotel and room browsing with detail pages
+- Book a room, with availability and capacity validation
+- Booking confirmation page
+- My Trips: view bookings split into upcoming, current, past, and cancelled
+- Booking detail page (read-only summary)
+- Manage booking page: edit guest contact info, change dates/guests (with availability re-check), and cancel (with confirmation modal)
+- Role-based authorization: admin-only booking deletion (is_admin flag; no admin UI yet)
+- Navbar reflects real login state across the whole site
+- Support/FAQ page with live search
+-
+### Planned / Not yet built
+- [ ] User profile editing (name, email)
+- [ ] Password reset
+- [ ] Host/property-owner accounts
+- [ ] Reviews and ratings (currently hardcoded placeholder data)
 
 ## Tech Stack
 - Backend: FastAPI

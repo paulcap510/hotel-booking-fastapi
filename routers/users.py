@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 import models
 from database import get_db
-from schemas import UserCreate, UserPrivateResponse, UserPublicResponse, UserUpdate
+from schemas import UserCreate, UserPrivateResponse, UserPublicResponse, EmailUpdate
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func
 from auth import (
@@ -119,14 +119,38 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
 
     return user
 
+@router.patch("/api/users/me/email", response_model=UserPrivateResponse)
+def update_email(
+    email_update: EmailUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    existing_email = (
+        db.query(models.User)
+        .filter(func.lower(models.User.email) == email_update.email.lower())
+        .filter(models.User.id != current_user.id)
+        .first()
+    )
+
+    if existing_email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already in use")
+
+    current_user.email = email_update.email.lower()
+    db.commit()
+    db.refresh(current_user)
+
+    return current_user
+
+
+
+
 
 @router.get("/me", response_model=UserPrivateResponse)
 def get_me(current_user: models.User = Depends(get_current_user)):
     return current_user
 
 
-# Public User response for when users do things like comment or leave reviews,
-# doesn't contain sensitive info (email, etc.)
+# Public User response for when users do things like comment or leave reviews, doesn't contain sensitive info (email, etc.)
 @router.get("/{user_id}", response_model=UserPublicResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
