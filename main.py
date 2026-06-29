@@ -492,6 +492,40 @@ def update_booking_dates_form(
 
 
 
+@app.get("/account/email", response_class=HTMLResponse, include_in_schema=False)
+def update_email_page(
+    request: Request,
+    current_user: models.User = Depends(get_current_user),
+):
+    return templates.TemplateResponse(request, "update_email.html", {
+        "request": request,
+        "current_user": current_user,
+    })
+
+@app.post("/account/email", include_in_schema=False)
+def update_email_form(
+    email: str = Form(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    existing_email = (
+        db.query(models.User)
+        .filter(func.lower(models.User.email) == email.lower())
+        .filter(models.User.id != current_user.id)
+        .first()
+    )
+
+    if existing_email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already in use")
+
+    current_user.email = email.lower()
+    db.commit()
+
+    return RedirectResponse(
+        url="/?email_updated=true",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
 
 
 #! Error handling the 404

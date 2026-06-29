@@ -269,5 +269,35 @@
         });
       }
     </script>
+    <!-- Email updated confirmation modal -->
+<div class="modal fade" id="emailUpdatedModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Email updated</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-0">
+          Your email address has been updated successfully.
+        </p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // If the URL says the email was just updated, show the confirmation modal
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("email_updated") === "true") {
+    const emailUpdatedModal = new bootstrap.Modal(document.getElementById("emailUpdatedModal"));
+    emailUpdatedModal.show();
+  }
+</script>
   </body>
 </html>

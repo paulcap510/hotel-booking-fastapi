@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-xl-5">
+
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+
+        <h1 class="fw-bold mb-2">Update your email</h1>
+        <p class="text-muted mb-4">
+          This is the email address you use to sign in.
+        </p>
+
+        <form method="post" action="/account/email">
+          <div class="mb-4">
+            <label class="form-label fw-bold">Email address</label>
+            <input
+              type="email"
+              class="form-control form-control-lg"
+              name="email"
+              value="{{ current_user.email }}"
+              required
+            >
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-100">
+            Save email
+          </button>
+        </form>
+
+      </section>
+
+      <div class="text-center mt-4">
+        <a href="/" class="text-decoration-none fw-bold">
+          &larr; Back to home
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+{% endblock content %}
