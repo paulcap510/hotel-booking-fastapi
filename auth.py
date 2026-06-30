@@ -1,12 +1,11 @@
 import secrets
 from datetime import UTC, datetime, timedelta
-
 from pwdlib import PasswordHash
-
 from config import settings
 
 
-password_hash = PasswordHash.recommended() # creates a password hasher using argon2 with the recommended settings
+password_hash = PasswordHash.recommended()
+# creates a password hasher using argon2 with the recommended settings
 
 
 
@@ -21,9 +20,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # NOTE: this resets every time the server restarts. A DB table or Redis
 # would persist across restarts — worth upgrading later, fine for now.
 
-sessions: dict[str, dict] = {}  #? setting the sessions variable to a dictionary that consistes of a string and another dictionary. `dict[str, dict]` here is a type hint
 
-#? when we do -> str, it means the session ID that is returned is going to. be a str, correct?
+sessions: dict[str, dict] = {}
+
+
 def create_session(user_id: int) -> str:
     """Create a new session and return the session_id to put in a cookie."""
     session_id = secrets.token_urlsafe(32)  # random, unguessable string
@@ -32,7 +32,6 @@ def create_session(user_id: int) -> str:
     )
     sessions[session_id] = {"user_id": user_id, "expires_at": expires_at}
     return session_id
-
 
 
 

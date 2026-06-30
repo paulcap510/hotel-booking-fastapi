@@ -492,6 +492,7 @@ def update_booking_dates_form(
 
 
 
+
 @app.get("/account/email", response_class=HTMLResponse, include_in_schema=False)
 def update_email_page(
     request: Request,
@@ -527,6 +528,15 @@ def update_email_form(
     )
 
 
+@app.get("/account", response_class=HTMLResponse, include_in_schema=False)
+def account_page(
+    request: Request,
+    current_user: models.User = Depends(get_current_user),
+):
+    return templates.TemplateResponse(request, "account.html", {
+        "request": request,
+        "current_user": current_user,
+    })
 
 #! Error handling the 404
 @app.exception_handler(StarletteHTTPException)

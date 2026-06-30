@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <h1 class="fw-bold mb-2">My account</h1>
+      <p class="text-muted mb-5">Manage your profile, bookings, and preferences.</p>
+
+      <!-- Profile summary -->
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5 mb-4">
+        <h5 class="fw-bold mb-3">Profile</h5>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Username</p>
+            <p class="fw-bold mb-0">{{ current_user.username }}</p>
+          </div>
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Email address</p>
+            <p class="fw-bold mb-0">{{ current_user.email }}</p>
+          </div>
+        </div>
+
+        <a href="/account/email" class="btn btn-outline-primary me-2">
+          Update email
+        </a>
+        <a href="/account/password" class="btn btn-outline-secondary">
+          Change password
+        </a>
+      </section>
+
+      <!-- Bookings -->
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5 mb-4">
+        <h5 class="fw-bold mb-1">Bookings</h5>
+        <p class="text-muted small mb-3">View, edit, or cancel your reservations.</p>
+
+        <a href="{{ url_for('my_bookings_page') }}" class="btn btn-outline-primary">
+          My Trips
+        </a>
+      </section>
+
+      <!-- Payment (placeholder) -->
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5 mb-4">
+        <h5 class="fw-bold mb-1">Payment</h5>
+        <p class="text-muted small mb-3">Manage your saved payment methods.</p>
+
+        <div class="border rounded-4 p-3 d-flex align-items-center gap-3 mb-3">
+          <span class="fs-4">💳</span>
+          <div>
+            <p class="fw-bold mb-0 small">Visa ending in 4242</p>
+            <p class="text-muted mb-0 small">Expires 12/28</p>
+          </div>
+        </div>
+
+        <a href="#" class="btn btn-outline-secondary disabled" aria-disabled="true">
+          Manage payment methods
+        </a>
+        <p class="text-muted small mt-2 mb-0">Payment management coming soon.</p>
+      </section>
+
+      <!-- Danger zone -->
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5 border border-danger-subtle">
+        <h5 class="fw-bold mb-1 text-danger">Account settings</h5>
+        <p class="text-muted small mb-3">
+          Account deactivation and other sensitive settings.
+        </p>
+
+        <a href="#" class="btn btn-outline-danger disabled" aria-disabled="true">
+          Deactivate account
+        </a>
+        <p class="text-muted small mt-2 mb-0">Coming soon.</p>
+      </section>
+
+    </div>
+  </div>
+
+</main>
+
+{% endblock content %}
