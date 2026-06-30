@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 import models
 from database import get_db
-from schemas import UserCreate, UserPrivateResponse, UserPublicResponse, EmailUpdate
+from schemas import UserCreate, UserPrivateResponse, UserPublicResponse, EmailUpdate, PasswordResetRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func
 from auth import (
@@ -97,6 +97,7 @@ def logout(request: Request, response: Response):
     delete_session(session_id)
     response.delete_cookie("session_id")
     return {"message": "Logged out successfully"}
+
 
 
 # "Given the session cookie you sent me, tell me which user is currently logged in."

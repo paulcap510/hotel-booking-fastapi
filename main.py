@@ -4,14 +4,13 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from typing import Annotated
-from sqlalchemy import select, func
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from routers import hotels, rooms, bookings, users
 from datetime import date
 
 import models
-from database import Base, get_db, SessionLocal
+from database import get_db, SessionLocal
 
 from utils.pricing import calculate_nights, calculate_total_price, calculate_starting_price
 from utils.inventory import calculate_available_inventory
@@ -19,10 +18,9 @@ from utils.booking_status import BookingStatus
 from utils.booking_logic import create_booking_for_user
 from utils.booking_queries import get_bookings_for_user
 from routers.users import get_current_user
-from auth import get_user_id_from_session
+from auth import get_user_id_from_session, create_reset_token, get_user_id_from_reset_token, delete_reset_token, hash_password
 
 
-from schemas import HotelCreate, HotelResponse, RoomCreate, RoomResponse
 
 app = FastAPI()
 
@@ -537,6 +535,101 @@ def account_page(
         "request": request,
         "current_user": current_user,
     })
+
+
+
+@app.get("/account/forgot-password", response_class=HTMLResponse, include_in_schema=False)
+def forgot_password_page(request: Request):
+    return templates.TemplateResponse(request, "forgot_password.html", {
+        "request": request,
+    })
+
+
+#* Form that processes the user input
+@app.post("/account/forgot-password", include_in_schema=False)
+def forgot_password_form(
+    request: Request,
+    email: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = db.query(models.User).filter(func.lower(models.User.email) == email.lower()).first()
+
+    if user:
+        token = create_reset_token(user.id)
+        reset_link = f"http://127.0.0.1:8000/account/reset-password?token={token}"
+        print(f"\n[DEV MODE] Password reset link for {user.email}:\n{reset_link}\n")
+
+    return templates.TemplateResponse(request, "forgot_password.html", {
+        "request": request,
+        "message": "If that email is registered, a reset link has been sent.",
+    })
+
+
+
+@app.get("/account/reset-password", response_class=HTMLResponse, include_in_schema=False)
+def reset_password_page(
+    request: Request,
+    token: str,
+):
+    user_id = get_user_id_from_reset_token(token)
+
+    if user_id is None:
+        return templates.TemplateResponse(request, "reset_password.html", {
+            "request": request,
+            "error": "This reset link is invalid or has expired.",
+            "token": None,
+        })
+
+    return templates.TemplateResponse(request, "reset_password.html", {
+        "request": request,
+        "error": None,
+        "token": token,
+    })
+
+
+#* backend for handling form submission
+@app.post("/account/reset-password", include_in_schema=False)
+def reset_password_form(
+    request: Request,
+    token: str = Form(...),
+    new_password: str = Form(...),
+    confirm_password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    if new_password != confirm_password:
+        return templates.TemplateResponse(request, "reset_password.html", {
+            "request": request,
+            "error": None,
+            "token": token,
+            "password_error": "Passwords do not match.",
+        })
+
+    user_id = get_user_id_from_reset_token(token)
+
+    if user_id is None:
+        return templates.TemplateResponse(request, "reset_password.html", {
+            "request": request,
+            "error": "This reset link is invalid or has expired.",
+            "token": None,
+                        "password_error": None,
+        })
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if user is None:
+        return templates.TemplateResponse(request, "reset_password.html", {
+            "request": request,
+            "error": "User not found.",
+            "token": None,
+            "password_error": None,
+        })
+
+    user.hashed_password = hash_password(new_password)
+    db.commit()
+
+    delete_reset_token(token)
+
+    return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
 #! Error handling the 404
 @app.exception_handler(StarletteHTTPException)

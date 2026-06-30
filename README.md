@@ -18,6 +18,7 @@ This is a hotel booking platform similar to Hotels.com or Agoda. Users can creat
 - Support/FAQ page with live search
 -
 ### Planned / Not yet built
+- [ ] Password reset emails are mocked — reset links are printed to the server console rather than sent via a real email provider. Production would integrate a transactional email service (e.g. SendGrid, SES).
 - [ ] User profile editing (name, email)
 - [ ] Password reset
 - [ ] Host/property-owner accounts
@@ -55,6 +56,7 @@ uvicorn main:app --reload
 
 ## Next Steps / Limitations
 - [ ] Sessions are currently stored in memory; they reset on server restart and won't work across multiple server instances. Should move to a database table or Redis before any real deployment.
+- [ ] Expired session and password-reset tokens aren't proactively cleaned up: they're only removed when someone attempts to use them. A production system would run a periodic background job to purge expired entries regardless of use.
 - [ ] Booking creation re-validates availability right before commit to reduce race conditions on concurrent bookings; full prevention would require row-level locking (e.g. via Postgres), which SQLite doesn't support.
 - [ ] The login-state middleware queries the database on every request. Fine at this scale; at higher traffic this should be backed by a cache (e.g. Redis) so most requests don't hit the database just to check who's logged in.
 - [ ] No CSRF token yet on form-based routes; `SameSite=Lax` mitigates the most common attack vectors but a dedicated token would be a stronger production-grade defense.

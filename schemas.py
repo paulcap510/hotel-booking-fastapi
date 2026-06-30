@@ -3,6 +3,7 @@ from datetime import date
 from utils.booking_status import BookingStatus
 
 
+#! Hotels
 class HotelBase(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     description: str = Field(min_length=1)
@@ -18,6 +19,7 @@ class HotelResponse(HotelBase):
     model_config = ConfigDict(from_attributes=True) #Allow Pydantic/FastAPI to turn SQLAlchemy objects into API responses
 
 
+#! ROOMS
 class RoomBase(BaseModel):
     room_type: str = Field(min_length=1, max_length=100)
     price_per_night: int = Field(gt=0)
@@ -32,6 +34,8 @@ class RoomResponse(RoomBase):
     hotel_id: int
     model_config = ConfigDict(from_attributes=True)
 
+
+#! BOOKINGS
 class BookingBase(BaseModel):
     guest_name: str = Field(min_length=1, max_length=100)
     guest_email: EmailStr
@@ -39,10 +43,8 @@ class BookingBase(BaseModel):
     check_out_date: date
     number_of_guests: int = Field(gt=0)
 
-
 class BookingCreate(BookingBase):
     pass
-
 
 class BookingResponse(BookingBase):
     id: int
@@ -58,14 +60,13 @@ class BookingContactUpdate(BaseModel):
     guest_name: str = Field(min_length=1, max_length=100)
     guest_email: EmailStr
 
-
 class MyBookingsResponse(BaseModel):
     upcoming_bookings: list[BookingResponse]
     current_bookings: list[BookingResponse]
     past_bookings: list[BookingResponse]
 
 
-
+#! USER
 class UserBase(BaseModel):
     email: EmailStr
     username: str
@@ -92,10 +93,22 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     username: str | None = None
 
+
+#! TOKEN
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 
+#! EMAIL UPDATE
 class EmailUpdate(BaseModel):
     email: EmailStr
+
+
+#! PASSWORD RESET
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str = Field(min_length=8)

@@ -22,6 +22,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 sessions: dict[str, dict] = {}
+reset_tokens: dict[str, dict] = {}
 
 
 def create_session(user_id: int) -> str:
@@ -32,7 +33,6 @@ def create_session(user_id: int) -> str:
     )
     sessions[session_id] = {"user_id": user_id, "expires_at": expires_at}
     return session_id
-
 
 
 def get_user_id_from_session(session_id: str | None) -> int | None:
@@ -51,9 +51,36 @@ def get_user_id_from_session(session_id: str | None) -> int | None:
 
     return session["user_id"]
 
-
 def delete_session(session_id: str | None) -> None:
     """Remove a session — used for logout."""
     if session_id in sessions:
         del sessions[session_id]
 
+
+def create_reset_token(user_id: int) -> str:
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(UTC) + timedelta(minutes=30)
+    reset_tokens[token] = {"user_id": user_id, "expires_at": expires_at}
+    return token
+
+def get_user_id_from_reset_token(token: str) -> int | None:
+    entry = reset_tokens.get(token)
+
+    if entry is None:
+        return None
+
+    if datetime.now(UTC) > entry["expires_at"]:
+        del reset_tokens[token]
+        return None
+
+    return entry["user_id"]
+
+
+
+
+
+
+
+def delete_reset_token(token: str) -> None:
+    if token in reset_tokens:
+        del reset_tokens[token]
