@@ -88,9 +88,11 @@
             </div>
           </div>
 
-          <div class="border rounded-4 p-3 mb-4 bg-light d-flex justify-content-between">
+          <div class="border rounded-4 p-3 mb-4 bg-light d-flex justify-content-between"
+                id="price-summary"
+                data-price-per-night="{{ room.price_per_night }}">
             <span class="text-muted">Current total</span>
-            <span class="fw-bold">${{ booking.total_price }}</span>
+            <span class="fw-bold" id="total-price-display">${{ booking.total_price }}</span>
           </div>
 
           <button type="submit" class="btn btn-primary">
@@ -155,5 +157,27 @@
   </div>
 
 </main>
+
+<script>
+  const checkInInput = document.querySelector("[name='check_in_date']");
+  const checkOutInput = document.querySelector("[name='check_out_date']");
+  const totalDisplay = document.getElementById("total-price-display");
+  const pricePerNight = parseInt(
+    document.getElementById("price-summary").dataset.pricePerNight, 10
+  );
+
+  function updateTotal() {
+    const checkIn = new Date(checkInInput.value);
+    const checkOut = new Date(checkOutInput.value);
+
+    if (checkIn && checkOut && checkOut > checkIn) {
+      const nights = (checkOut - checkIn) / (1000 * 60 * 60 * 24);
+      totalDisplay.textContent = "$" + (nights * pricePerNight);
+    }
+  }
+
+  checkInInput.addEventListener("change", updateTotal);
+  checkOutInput.addEventListener("change", updateTotal);
+</script>
 
 {% endblock content %}

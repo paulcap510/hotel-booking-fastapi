@@ -360,12 +360,14 @@ def manage_booking_page(
     if booking.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this booking")
 
-    return templates.TemplateResponse(request, "manage_booking.html", {
+    response = templates.TemplateResponse(request, "manage_booking.html", {
         "request": request,
         "booking": booking,
         "room": booking.room,
         "hotel": booking.room.hotel,
     })
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @app.post("/bookings/{booking_id}/cancel", include_in_schema=False)
