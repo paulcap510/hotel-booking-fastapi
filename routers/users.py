@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 import models
 from database import get_db
-from schemas import UserCreate, UserPrivateResponse, UserPublicResponse, EmailUpdate, PasswordResetRequest
+from schemas import UserCreate, UserPrivateResponse, UserPublicResponse, EmailUpdate
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func
 from auth import (

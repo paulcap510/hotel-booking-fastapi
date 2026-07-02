@@ -13,10 +13,17 @@ class HotelBase(BaseModel):
 class HotelCreate(HotelBase):
     pass
 
+class HostHotelUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    image_path: str | None = None
+    city: str | None = None
+
 class HotelResponse(HotelBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True) #Allow Pydantic/FastAPI to turn SQLAlchemy objects into API responses
+
 
 
 #! ROOMS

@@ -18,6 +18,7 @@ class Hotel(Base):
     city: Mapped[str] = mapped_column(String, nullable=False)
 
     rooms = relationship("Room", back_populates="hotel", cascade="all, delete-orphan")
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
 
 class Room(Base):
     __tablename__ = "rooms"
@@ -64,5 +65,4 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-
-# bookings and users need to be associated ?
+    is_host: Mapped[bool] = mapped_column(Boolean, default=False)
