@@ -15,6 +15,11 @@
     {{ request.query_params.get("message") }}
   </div>
   {% endif %}
+  {% if request.query_params.get("error") %}
+  <div class="alert alert-danger rounded-3 mb-4">
+    {{ request.query_params.get("error") }}
+  </div>
+  {% endif %}
 
   <!-- Property header -->
   <div class="d-flex justify-content-between align-items-start mb-5">
@@ -74,13 +79,57 @@
             <td>{{ room.total_inventory }}</td>
             <td>
             <td>
-              <a href="/host/properties/{{ hotel.id }}/rooms/{{ room.id }}/edit"
-                class="btn btn-sm rounded-3 px-3"
-                style="background-color: #f0f4ff; color: #3d6bce; border: 1px solid #c5d3f5;">
-                Edit
-              </a>
+              <div class="d-flex gap-2 justify-content-end">
+                <a href="/host/properties/{{ hotel.id }}/rooms/{{ room.id }}/edit"
+                  class="btn btn-sm rounded-3 px-3"
+                  style="background-color: #f0f4ff; color: #3d6bce; border: 1px solid #c5d3f5;">
+                  Edit
+                </a>
+
+
+
+                  <!-- Delete trigger button (no form here) -->
+                  <button type="button"
+                          class="btn btn-sm rounded-3 px-3"
+                          style="background-color: #fff0f0; color: #b91c1c; border: 1px solid #fca5a5;"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteModal{{ room.id }}">
+                    Delete
+                  </button>
+
+                  <!-- Modal (one per room, outside the table) -->
+                  <div class="modal fade" id="deleteModal{{ room.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content rounded-4 border-0 shadow">
+                        <div class="modal-header border-0 pb-0">
+                          <h5 class="modal-title fw-bold">Delete room?</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-muted">
+                          Are you sure you want to delete <strong>{{ room.room_type }}</strong>?
+                          This cannot be undone.
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                          <button type="button" class="btn btn-outline-secondary btn-sm rounded-3"
+                                  data-bs-dismiss="modal">
+                            Cancel
+                          </button>
+                          <form method="post" action="/host/properties/{{ hotel.id }}/rooms/{{ room.id }}/delete">
+                            <button type="submit"
+                                    class="btn btn-sm rounded-3 px-3"
+                                    style="background-color: #fff0f0; color: #b91c1c; border: 1px solid #fca5a5;">
+                              Yes, delete
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+              </div>
             </td>
-              </a>
             </td>
           </tr>
           {% endfor %}

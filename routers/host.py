@@ -17,6 +17,7 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory="templates")
 
+
 @router.get("/properties/{hotel_id}/bookings")
 def host_manage_bookings_page(request: Request, hotel_id: int, db: Session = Depends(get_db)):
 
@@ -50,6 +51,52 @@ def host_manage_bookings_page(request: Request, hotel_id: int, db: Session = Dep
                 "hotel": hotel,
                 "bookings": bookings,
             })
+
+
+
+@router.post("/properties/{hotel_id}/rooms/{room_id}/delete")
+def host_page_delete_room(request: Request, hotel_id: int, room_id: int, db: Session = Depends(get_db)):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    room = db.query(models.Room).filter(models.Room.id == room_id).first()
+
+    if room is None:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    active_bookings = db.query(models.Booking).filter(
+        models.Booking.room_id == room_id,
+        models.Booking.booking_status != "cancelled"
+    ).first()
+
+    if active_bookings:
+        return RedirectResponse(
+            url=f"/host/properties/{hotel_id}/manage?error=Cannot+delete+a+room+with+active+bookings",
+            status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+    db.delete(room)
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/host/properties/{hotel_id}/manage?message=Room+deleted+successfully",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
 
 
 
