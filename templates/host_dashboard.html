@@ -9,49 +9,84 @@
       <h1 class="fw-bold mb-1">Host dashboard</h1>
       <p class="text-muted mb-0">Manage your properties and track bookings.</p>
     </div>
+
     <a href="/host/properties/new" class="btn btn-primary">
       + Add property
     </a>
   </div>
 
   {% if properties %}
+
   <div class="row g-4">
     {% for hotel in properties %}
+
     <div class="col-md-6 col-lg-4">
-      <div class="bg-white rounded-4 shadow-sm p-4 h-100">
+      <div class="bg-white rounded-4 shadow-sm h-100 overflow-hidden">
 
-        <h5 class="fw-bold mb-1">{{ hotel.name }}</h5>
-        <p class="text-muted small mb-3">{{ hotel.city }}</p>
+        {% if hotel.image_path %}
+        <img
+          src="{{ url_for('static', path=hotel.image_path) }}"
+          alt="{{ hotel.name }}"
+          class="w-100 property-card-img"
+        >
+        {% endif %}
+        <div class="p-4">
+          <h5 class="fw-bold mb-1">{{ hotel.name }}</h5>
+          <p class="text-muted small mb-3">{{ hotel.city }}</p>
 
-        <p class="text-muted small mb-4">{{ hotel.description[:100] }}{% if hotel.description|length > 100 %}...{% endif %}</p>
+          <p class="text-muted small mb-4">
+            {{ hotel.description[:100] }}{% if hotel.description|length > 100 %}...{% endif %}
+          </p>
 
-        <div class="d-flex gap-2 flex-wrap">
-          <a href="/host/properties/{{ hotel.id }}/edit" class="btn btn-outline-primary btn-sm">
-            Edit property
-          </a>
-          <a href="/host/properties/{{ hotel.id }}/rooms/new" class="btn btn-outline-secondary btn-sm">
-            Add room
-          </a>
-          <a href="/host/properties/{{ hotel.id }}/bookings" class="btn btn-outline-secondary btn-sm">
-            View bookings
-          </a>
+          <div class="mb-3">
+            <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-primary btn-sm">
+              Manage property
+            </a>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap">
+            <a href="/host/properties/{{ hotel.id }}/edit" class="btn btn-outline-primary btn-sm">
+              Edit property
+            </a>
+
+            <a href="/host/properties/{{ hotel.id }}/rooms/new" class="btn btn-outline-secondary btn-sm">
+              Add room
+            </a>
+
+            <a href="/host/properties/{{ hotel.id }}/bookings" class="btn btn-outline-secondary btn-sm">
+              View bookings
+            </a>
+          </div>
         </div>
 
       </div>
     </div>
+
     {% endfor %}
   </div>
 
   {% else %}
+
   <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 text-center">
     <p class="fs-5 fw-bold mb-2">No properties yet</p>
     <p class="text-muted mb-4">Add your first property to start accepting bookings.</p>
+
     <a href="/host/properties/new" class="btn btn-primary">
       Add your first property
     </a>
   </div>
+
   {% endif %}
 
 </main>
+
+<style>
+  .property-card-img {
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    background: #e9ecef;
+  }
+</style>
 
 {% endblock content %}

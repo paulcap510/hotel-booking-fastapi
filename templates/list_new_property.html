@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+
+      <div class="mb-4">
+        <a href="{{ url_for('host_dashboard') }}" class="text-decoration-none text-muted small">
+          &larr; Back to dashboard
+        </a>
+      </div>
+
+      <h1 class="fw-bold mb-2">List a new property</h1>
+      <p class="text-muted mb-5">Fill in the details below to create your listing.</p>
+
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+
+        <form method="post" action="/host/properties/new" enctype="multipart/form-data">
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Property name</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="name"
+              placeholder="e.g. Sakura Grand Hotel"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">City</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="city"
+              placeholder="e.g. Tokyo"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Description</label>
+            <textarea
+              class="form-control"
+              name="description"
+              rows="4"
+              placeholder="Describe your property — location, atmosphere, nearby attractions..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Image URL</label>
+            <input
+              type="file"
+              class="form-control"
+              name="image"
+              accept="image/*"
+              required
+            >
+            <div class="form-text">
+                Upload a photo of your property.
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-100">
+            Create listing
+          </button>
+
+        </form>
+
+      </section>
+
+    </div>
+  </div>
+
+</main>
+
+{% endblock content %}

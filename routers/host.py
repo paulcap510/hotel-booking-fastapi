@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Request, Depends, status
+from fastapi import APIRouter, Request, Depends, status, Form, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from database import get_db
 from auth import get_user_id_from_session
 from fastapi.templating import Jinja2Templates
+import shutil
 import models
+from pathlib import Path
 
 
 
@@ -14,6 +16,177 @@ router = APIRouter(
 )
 
 templates = Jinja2Templates(directory="templates")
+
+@router.get("/properties/{hotel_id}/rooms/new")
+def new_room_form(request: Request, hotel_id: int, db: Session = Depends(get_db)):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    return templates.TemplateResponse(
+        request, "add_room.html", {"hotel": hotel}
+    )
+
+
+@router.post("/properties/{hotel_id}/rooms/new")
+def create_room(
+    request: Request,
+    hotel_id: int,
+    room_type: str = Form(...),
+    price_per_night: int = Form(...),
+    max_guests: int = Form(...),
+    total_inventory: int = Form(1),
+    db: Session = Depends(get_db),
+):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    new_room = models.Room(
+        hotel_id=hotel.id,
+        room_type=room_type,
+        price_per_night=price_per_night,
+        max_guests=max_guests,
+        total_inventory=total_inventory,
+    )
+    db.add(new_room)
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/host/dashboard/",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+@router.post("/properties/new", include_in_schema=False)
+def add_new_property(
+    request: Request,
+    name: str = Form(...),
+    description: str = Form(...),
+    image: UploadFile = File(...),
+    city: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+list+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if not user.is_host:
+        return RedirectResponse(
+            url="/host/become",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    upload_dir = Path("static/uploads/hotels")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    file_path = upload_dir / image.filename
+
+    with file_path.open("wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    image_path = f"uploads/hotels/{image.filename}"
+
+    new_hotel = models.Hotel(
+        name=name,
+        description=description,
+        image_path=image_path,
+        city=city,
+        owner_id=user_id,
+    )
+
+    db.add(new_hotel)
+    db.commit()
+    db.refresh(new_hotel)
+
+    return RedirectResponse(
+        url="/host/dashboard/",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+@router.get("/properties/manage", response_class=HTMLResponse, include_in_schema=False)
+def manage_properties_page(request: Request, db: Session = Depends(get_db)):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+list+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if not user.is_host:
+        return RedirectResponse(
+            url="/host/become",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    return templates.TemplateResponse(request, "manage_properties.html", {
+        "request": request,
+        "user": user,
+    })
+
+@router.get("/properties/new", response_class=HTMLResponse, include_in_schema=False)
+def list_new_property_page(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+list+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if not user.is_host:
+        return RedirectResponse(
+            url="/host/become",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    return templates.TemplateResponse(request, "list_new_property.html", {
+        "request": request,
+        "user": user,
+    })
+
 
 
 @router.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
@@ -40,7 +213,6 @@ def host_dashboard(request: Request, db: Session = Depends(get_db)):
                 "user": user,
                 "properties": properties,
             })
-
 
 
 @router.post("/become", include_in_schema=False)

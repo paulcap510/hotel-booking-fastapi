@@ -31,7 +31,7 @@ class RoomBase(BaseModel):
     room_type: str = Field(min_length=1, max_length=100)
     price_per_night: int = Field(gt=0)
     max_guests: int = Field(gt=0)
-    available: bool
+    # available: bool
 
 class RoomCreate(RoomBase):
     pass
