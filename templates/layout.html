@@ -223,10 +223,12 @@
 
             {% if not request.state.user %}
             <li class="nav-item">
-              <a class="nav-link" href="/login">Sign in</a>
+              <a class="nav-link" href="{{ url_for('login_page') }}">Sign in</a>
+
+              <!-- <a class="nav-link" href="/login">Sign in</a> -->
             </li>
             <li class="nav-item">
-              <a class="nav-pill ms-lg-2" href="/signup">
+              <a class="nav-pill ms-lg-2" href="{{ url_for('signup_page') }}">
                 Create account
               </a>
             </li>

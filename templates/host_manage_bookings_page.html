@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="mb-4">
+    <a href="/host/properties/{{ hotel.id }}/manage" class="text-muted small text-decoration-none">
+      ← Back to manage property
+    </a>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-start mb-5">
+    <div>
+      <h1 class="fw-bold mb-1">Bookings — {{ hotel.name }}</h1>
+      <p class="text-muted mb-0">{{ hotel.city }}</p>
+    </div>
+  </div>
+
+  {% if request.query_params.get("message") %}
+  <div class="alert alert-success rounded-3 mb-4">
+    {{ request.query_params.get("message") }}
+  </div>
+  {% endif %}
+
+  {% if bookings %}
+  <div class="bg-white rounded-4 shadow-sm p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Guest</th>
+            <th>Email</th>
+            <th>Room type</th>
+            <th>Check-in</th>
+            <th>Check-out</th>
+            <th>Nights</th>
+            <th>Guests</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for booking in bookings %}
+          <tr>
+            <td>{{ booking.guest_name }}</td>
+            <td class="text-muted small">{{ booking.guest_email }}</td>
+            <td>{{ booking.room.room_type }}</td>
+            <td>{{ booking.check_in_date }}</td>
+            <td>{{ booking.check_out_date }}</td>
+            <td>{{ booking.number_of_nights }}</td>
+            <td>{{ booking.number_of_guests }}</td>
+            <td>${{ booking.total_price }}</td>
+            <td>
+              {% if booking.booking_status == "confirmed" %}
+              <span class="badge rounded-pill" style="background-color: #d1fae5; color: #065f46;">
+                Confirmed
+              </span>
+              {% elif booking.booking_status == "cancelled" %}
+              <span class="badge rounded-pill" style="background-color: #fee2e2; color: #991b1b;">
+                Cancelled
+              </span>
+              {% else %}
+              <span class="badge rounded-pill bg-secondary">
+                {{ booking.booking_status }}
+              </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 text-center">
+    <p class="fs-5 fw-bold mb-2">No bookings yet</p>
+    <p class="text-muted mb-0">Bookings for this property will appear here once guests start reserving rooms.</p>
+  </div>
+  {% endif %}
+
+</main>
+
+{% endblock content %}

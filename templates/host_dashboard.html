@@ -9,17 +9,20 @@
       <h1 class="fw-bold mb-1">Host dashboard</h1>
       <p class="text-muted mb-0">Manage your properties and track bookings.</p>
     </div>
-
     <a href="/host/properties/new" class="btn btn-primary">
       + Add property
     </a>
   </div>
 
-  {% if properties %}
+  {% if request.query_params.get("message") %}
+  <div class="alert alert-success rounded-3 mb-4">
+    {{ request.query_params.get("message") }}
+  </div>
+  {% endif %}
 
+  {% if properties %}
   <div class="row g-4">
     {% for hotel in properties %}
-
     <div class="col-md-6 col-lg-4">
       <div class="bg-white rounded-4 shadow-sm h-100 overflow-hidden">
 
@@ -30,38 +33,20 @@
           class="w-100 property-card-img"
         >
         {% endif %}
+
         <div class="p-4">
           <h5 class="fw-bold mb-1">{{ hotel.name }}</h5>
           <p class="text-muted small mb-3">{{ hotel.city }}</p>
-
           <p class="text-muted small mb-4">
             {{ hotel.description[:100] }}{% if hotel.description|length > 100 %}...{% endif %}
           </p>
-
-          <div class="mb-3">
-            <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-primary btn-sm">
-              Manage property
-            </a>
-          </div>
-
-          <div class="d-flex gap-2 flex-wrap">
-            <a href="/host/properties/{{ hotel.id }}/edit" class="btn btn-outline-primary btn-sm">
-              Edit property
-            </a>
-
-            <a href="/host/properties/{{ hotel.id }}/rooms/new" class="btn btn-outline-secondary btn-sm">
-              Add room
-            </a>
-
-            <a href="/host/properties/{{ hotel.id }}/bookings" class="btn btn-outline-secondary btn-sm">
-              View bookings
-            </a>
-          </div>
+          <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-primary btn-sm">
+            Manage property
+          </a>
         </div>
 
       </div>
     </div>
-
     {% endfor %}
   </div>
 
@@ -70,7 +55,6 @@
   <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 text-center">
     <p class="fs-5 fw-bold mb-2">No properties yet</p>
     <p class="text-muted mb-4">Add your first property to start accepting bookings.</p>
-
     <a href="/host/properties/new" class="btn btn-primary">
       Add your first property
     </a>

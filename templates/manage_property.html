@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="mb-4">
+    <a href="/host/dashboard" class="text-muted small text-decoration-none">
+      ← Back to dashboard
+    </a>
+  </div>
+
+  {% if request.query_params.get("message") %}
+  <div class="alert alert-success rounded-3 mb-4">
+    {{ request.query_params.get("message") }}
+  </div>
+  {% endif %}
+
+  <!-- Property header -->
+  <div class="d-flex justify-content-between align-items-start mb-5">
+    <div>
+      <h1 class="fw-bold mb-1">{{ hotel.name }}</h1>
+      <p class="text-muted mb-0">{{ hotel.city }}</p>
+    </div>
+    <a href="/host/properties/{{ hotel.id }}/edit" class="btn btn-outline-primary btn-sm">
+      Edit property
+    </a>
+  </div>
+
+  <!-- Property details -->
+  <div class="bg-white rounded-4 shadow-sm p-4 mb-4">
+    <h5 class="fw-bold mb-3">Property details</h5>
+
+    {% if hotel.image_path %}
+    <img
+      src="{{ url_for('static', path=hotel.image_path) }}"
+      alt="{{ hotel.name }}"
+      class="rounded-3 mb-3"
+      style="max-height: 220px; object-fit: cover; width: 100%;"
+    >
+    {% endif %}
+
+    <p class="text-muted mb-1"><span class="fw-semibold text-dark">Address:</span> {{ hotel.address }}</p>
+    <p class="text-muted mb-1"><span class="fw-semibold text-dark">City:</span> {{ hotel.city }}</p>
+    <p class="text-muted mb-0"><span class="fw-semibold text-dark">Description:</span> {{ hotel.description }}</p>
+  </div>
+
+  <!-- Rooms -->
+  <div class="bg-white rounded-4 shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">Rooms</h5>
+      <a href="/host/properties/{{ hotel.id }}/rooms/new" class="btn btn-primary btn-sm">
+        + Add room
+      </a>
+    </div>
+
+    {% if rooms %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Type</th>
+            <th>Price per night</th>
+            <th>Max guests</th>
+            <th>Inventory</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for room in rooms %}
+          <tr>
+            <td>{{ room.room_type }}</td>
+            <td>${{ room.price_per_night }}</td>
+            <td>{{ room.max_guests }}</td>
+            <td>{{ room.total_inventory }}</td>
+            <td>
+            <td>
+              <a href="/host/properties/{{ hotel.id }}/rooms/{{ room.id }}/edit"
+                class="btn btn-sm rounded-3 px-3"
+                style="background-color: #f0f4ff; color: #3d6bce; border: 1px solid #c5d3f5;">
+                Edit
+              </a>
+            </td>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% else %}
+    <p class="text-muted mb-0">No rooms added yet. Add your first room to start accepting bookings.</p>
+    {% endif %}
+
+  </div>
+
+  <!-- Bookings -->
+  <div class="bg-white rounded-4 shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0">Bookings</h5>
+      <a href="/host/properties/{{ hotel.id }}/bookings" class="btn btn-outline-secondary btn-sm">
+        View all bookings
+      </a>
+    </div>
+  </div>
+
+</main>
+
+{% endblock content %}

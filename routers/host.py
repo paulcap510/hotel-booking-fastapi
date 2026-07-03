@@ -17,6 +17,99 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory="templates")
 
+@router.get("/properties/{hotel_id}/bookings")
+def host_manage_bookings_page(request: Request, hotel_id: int, db: Session = Depends(get_db)):
+
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    bookings = (
+        db.query(models.Booking)
+        .join(models.Room)
+        .filter(models.Room.hotel_id == hotel_id)
+        .order_by(models.Booking.check_in_date.asc())
+        .all()
+    )
+
+    return templates.TemplateResponse(request, "host_manage_bookings_page.html",
+            {
+                "hotel": hotel,
+                "bookings": bookings,
+            })
+
+
+
+@router.get("/properties/{hotel_id}/rooms/{room_id}/edit")
+def edit_room_form(request: Request, hotel_id: int, room_id: int, db: Session = Depends(get_db)):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    room = db.query(models.Room).filter(models.Room.id == room_id).first()
+
+    if room is None:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    return templates.TemplateResponse(request, "edit_room.html",
+            {
+                "hotel": hotel,
+                "room": room,
+            })
+
+
+@router.get("/properties/{hotel_id}/manage")
+def manage_specific_property_page(request: Request, hotel_id: int, db: Session = Depends(get_db)):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    rooms = db.query(models.Room).filter(models.Room.hotel_id == hotel_id).all()
+
+    return templates.TemplateResponse(
+        request, "manage_property.html", {"hotel": hotel, "rooms": rooms}
+    )
+
+
 @router.get("/properties/{hotel_id}/rooms/new")
 def new_room_form(request: Request, hotel_id: int, db: Session = Depends(get_db)):
     session_id = request.cookies.get("session_id")
@@ -38,6 +131,52 @@ def new_room_form(request: Request, hotel_id: int, db: Session = Depends(get_db)
 
     return templates.TemplateResponse(
         request, "add_room.html", {"hotel": hotel}
+    )
+
+
+@router.post("/properties/{hotel_id}/rooms/{room_id}/edit")
+def edit_room(
+    request: Request,
+    hotel_id: int,
+    room_id: int,
+    room_type: str = Form(...),
+    price_per_night: int = Form(...),
+    max_guests: int = Form(...),
+    total_inventory: int = Form(1),
+    db: Session = Depends(get_db),
+):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    room = db.query(models.Room).filter(models.Room.id == room_id).first()
+
+    if room is None:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    room.room_type = room_type
+    room.price_per_night = price_per_night
+    room.max_guests = max_guests
+    room.total_inventory = total_inventory
+
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/host/properties/{hotel_id}/manage?message=Room+updated+successfully",
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
 
@@ -75,11 +214,12 @@ def create_room(
         max_guests=max_guests,
         total_inventory=total_inventory,
     )
+
     db.add(new_room)
     db.commit()
 
     return RedirectResponse(
-        url=f"/host/dashboard/",
+        url=f"/host/properties/{hotel_id}/manage?message=Room+added+successfully",
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
