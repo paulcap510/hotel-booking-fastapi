@@ -99,7 +99,6 @@ def host_page_delete_room(request: Request, hotel_id: int, room_id: int, db: Ses
 
 
 
-
 @router.get("/properties/{hotel_id}/rooms/{room_id}/edit")
 def edit_room_form(request: Request, hotel_id: int, room_id: int, db: Session = Depends(get_db)):
     session_id = request.cookies.get("session_id")
@@ -180,6 +179,43 @@ def new_room_form(request: Request, hotel_id: int, db: Session = Depends(get_db)
         request, "add_room.html", {"hotel": hotel}
     )
 
+
+@router.post("/properties/{hotel_id}/edit")
+def edit_property(
+    request: Request,
+    hotel_id: int,
+    name: str = Form(...),
+    city: str = Form(...),
+    description: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    hotel.name = name
+    hotel.city = city
+    hotel.description = description
+
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/host/properties/{hotel_id}/manage?message=Property+updated+successfully",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
 
 @router.post("/properties/{hotel_id}/rooms/{room_id}/edit")
 def edit_room(
