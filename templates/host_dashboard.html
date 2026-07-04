@@ -40,9 +40,18 @@
           <p class="text-muted small mb-4">
             {{ hotel.description[:100] }}{% if hotel.description|length > 100 %}...{% endif %}
           </p>
-          <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-primary btn-sm">
-            Manage property
-          </a>
+
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-primary btn-sm">
+              Manage property
+            </a>
+            {% if not hotel.is_active %}
+            <span class="badge rounded-pill px-3 py-2"
+                  style="background-color: #fee2e2; color: #991b1b;">
+              Inactive
+            </span>
+            {% endif %}
+          </div>
         </div>
 
       </div>

@@ -27,14 +27,24 @@
       <h1 class="fw-bold mb-1">{{ hotel.name }}</h1>
       <p class="text-muted mb-0">{{ hotel.city }}</p>
     </div>
+
     <button type="button" class="btn btn-outline-primary btn-sm"
             data-bs-toggle="modal" data-bs-target="#editPropertyModal">
       Edit property
     </button>
 
-    <!-- <a href="/host/properties/{{ hotel.id }}/edit" class="btn btn-outline-primary btn-sm">
-      Edit property
-    </a> -->
+        {% if hotel.is_active %}
+    <button type="button" class="btn btn-outline-danger btn-sm"
+            data-bs-toggle="modal" data-bs-target="#deactivatePropertyModal">
+      Deactivate property
+    </button>
+    {% else %}
+    <form method="post" action="/host/properties/{{ hotel.id }}/reactivate">
+      <button type="submit" class="btn btn-outline-success btn-sm rounded-3">
+        Reactivate property
+      </button>
+    </form>
+    {% endif %}
   </div>
 
   <!-- Property details -->
@@ -200,4 +210,32 @@
     </div>
   </div>
 </div>
+
+
+<div class="modal fade" id="deactivatePropertyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Deactivate property?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-muted">
+        <p>Deactivating <strong>{{ hotel.name }}</strong> will immediately remove it from search results and prevent guests from making new bookings.</p>
+        <p class="mb-0">Existing bookings will not be affected. You can reactivate this property at any time from your dashboard.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-3"
+                data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form method="post" action="/host/properties/{{ hotel.id }}/deactivate">
+          <button type="submit" class="btn btn-danger btn-sm rounded-3 px-3">
+            Yes, deactivate
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}

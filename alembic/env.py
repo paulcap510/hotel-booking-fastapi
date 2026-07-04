@@ -68,7 +68,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata,
+            render_as_batch=True, #Tells Alembic to use SQLite's only safe way to modify existing tables: copy the table to a temporary table, make the changes, then copy it back
+            compare_type=True, #Tells autogenerate to detect when a column's type has changed
         )
 
         with context.begin_transaction():
@@ -79,3 +81,5 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+
+

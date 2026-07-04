@@ -494,3 +494,74 @@ def become_host(request: Request, db: Session = Depends(get_db)):
                 "user": user,
             })
 
+
+
+
+@router.patch("/api/hotels/{hotel_id}/deactivate")
+def deactivate_hotel(hotel_id: int, db: Session = Depends(get_db)):
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Hotel not found")
+
+    hotel.is_active = False
+    db.commit()
+
+    return {"message": "Hotel deactivated successfully"}
+
+
+@router.post("/properties/{hotel_id}/deactivate")
+def deactivate_property(request: Request, hotel_id: int, db: Session = Depends(get_db)):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    hotel.is_active = False
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/host/properties/{hotel_id}/manage?message=Property+deactivated+successfully",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+
+@router.post("/properties/{hotel_id}/reactivate")
+def reactivate_property(request: Request, hotel_id: int, db: Session = Depends(get_db)):
+    session_id = request.cookies.get("session_id")
+    user_id = get_user_id_from_session(session_id)
+
+    if user_id is None:
+        return RedirectResponse(
+            url="/login?message=Please+log+in+to+manage+your+property",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if hotel.owner_id != user_id:
+        raise HTTPException(status_code=403, detail="You don't own this property")
+
+    hotel.is_active = True
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/host/dashboard?message=Property+reactivated+successfully",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )

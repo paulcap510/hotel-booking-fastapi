@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from datetime import date
 
 import models
 from database import get_db
@@ -26,6 +28,8 @@ def create_booking(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+
+
     return create_booking_for_user(
         db=db,
         room_id=room_id,
@@ -276,3 +280,49 @@ def update_booking_details(
 
 
 
+
+
+
+@router.post("/booking/rooms/{room_id}", include_in_schema=False)
+def submit_booking_form(
+    room_id: int,
+    guest_name: str = Form(...),
+    guest_email: str = Form(...),
+    check_in_date: date = Form(...),
+    check_out_date: date = Form(...),
+    number_of_guests: int = Form(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+
+    room = db.query(models.Room).filter(models.Room.id == room_id).first()
+
+    if room is None:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    hotel = db.query(models.Hotel).filter(models.Hotel.id == room.hotel_id).first()
+
+    if hotel is None:
+        raise HTTPException(status_code=404, detail="Hotel not found")
+
+    if not hotel.is_active:
+        return RedirectResponse(
+            url=f"/hotels/{hotel.id}?error=This+property+is+no+longer+accepting+bookings",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    new_booking = create_booking_for_user(
+        db=db,
+        room_id=room_id,
+        user_id=current_user.id,
+        guest_name=guest_name,
+        guest_email=guest_email,
+        check_in_date=check_in_date,
+        check_out_date=check_out_date,
+        number_of_guests=number_of_guests,
+    )
+
+    return RedirectResponse(
+        url=f"/booking/confirmation/{new_booking.id}",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
