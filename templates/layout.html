@@ -22,7 +22,7 @@
   }
 
   body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Inter', Arial, Helvetica, sans-serif;
     background-color: var(--hotels-light);
     color: #111;
   }
@@ -64,22 +64,23 @@
   color: #d34851 !important;
 }
 
-  .nav-pill {
-    background-color: var(--hotels-red);
-    border: 1px solid var(--hotels-red);
-    border-radius: 999px;
-    padding: 0.45rem 1.1rem !important;
-    color: #fff !important;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background-color 0.25s ease, box-shadow 0.25s ease;
-  }
+.nav-pill {
+  background-color: #e61e2a;
+  border: 1px solid #e61e2a;
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem !important;
+  color: #fff !important;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
 
-  .nav-pill:hover {
-    background-color: #c91924;
-    box-shadow: 0 0 18px rgba(230, 30, 42, 0.55);
-    color: #fff !important;
-  }
+.nav-pill:hover {
+  background-color: #7a0009;
+  border-color: #7a0009;
+  color: #fff !important;
+}
+
 
   .hero {
     min-height: 500px;
@@ -151,9 +152,14 @@
     font-weight: 800;
   }
 
-  .search-btn:hover {
+  /* .search-btn:hover {
     background-color: #10175c;
-  }
+  } */
+.search-btn:hover {
+  background-color: #1c2470;
+  box-shadow: 0 6px 16px rgba(6, 11, 63, 0.4);
+  transform: translateY(-1px);
+}
 
   .business-check {
     margin-top: 1.4rem;
@@ -161,24 +167,68 @@
     color: var(--hotels-blue);
   }
 
-  .hotel-card {
-    border: none;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
-  }
+  .experience-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-  .hotel-img-placeholder {
-    height: 160px;
-    background: linear-gradient(135deg, #d9dde8, #aab3c7);
-  }
+.experience-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.14);
+}
 
+.experience-card .card-title {
+  color: var(--hotels-navy);
+}
+
+.price-badge {
+  display: inline-block;
+  background-color: rgba(6, 11, 63, 0.06);
+  color: var(--hotels-navy);
+  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.btn-view-experience {
+  background-color: transparent;
+  border: 1.5px solid var(--hotels-navy);
+  color: var(--hotels-navy);
+  font-weight: 700;
+  border-radius: 999px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-view-experience:hover {
+  background-color: var(--hotels-navy);
+  color: #fff;
+}
   @media (prefers-reduced-motion: reduce) {
     .nav-link,
     .nav-pill {
       transition: none !important;
     }
   }
+
+  .btn-auth-primary {
+  background-color: var(--hotels-navy);
+  border: none;
+  color: #fff;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-auth-primary:hover {
+  background-color: #1c2470;
+  color: #fff;
+}
+
+.form-control:focus {
+  border-color: var(--hotels-navy);
+  box-shadow: 0 0 0 0.2rem rgba(6, 11, 63, 0.15);
+}
+
 
   @media (max-width: 768px) {
     .search-card {
@@ -261,6 +311,9 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       const logoutButton = document.getElementById("logout-button");
@@ -294,7 +347,6 @@
 </div>
 
 <script>
-  // If the URL says the email was just updated, show the confirmation modal
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("email_updated") === "true") {
     const emailUpdatedModal = new bootstrap.Modal(document.getElementById("emailUpdatedModal"));

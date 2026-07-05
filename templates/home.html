@@ -53,6 +53,45 @@
   font-size: 0.95rem;
 }
 
+.location-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.location-input-wrapper input {
+  padding-right: 28px;
+}
+
+.location-input-wrapper::after {
+  content: "📍";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.6;
+  font-size: 0.95rem;
+}
+
+.guests-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.guests-input-wrapper input {
+  padding-right: 28px;
+}
+
+.guests-input-wrapper::after {
+  content: "👤";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
 
 </style>
 
@@ -64,6 +103,19 @@
 
           <div class="row g-3 align-items-end">
             <div class="col-md-3">
+          <div class="search-input-box">
+            <label>Where</label>
+            <div class="location-input-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                name="city"
+                placeholder="Where to?"
+              />
+            </div>
+          </div>
+        </div>
+            <!-- <div class="col-md-3">
               <div class="search-input-box">
                 <label>Where</label>
                 <input
@@ -73,7 +125,7 @@
                   placeholder="Where to?"
                 />
               </div>
-            </div>
+            </div> -->
 
             <div class="col-md-2">
               <div class="search-input-box">
@@ -110,16 +162,17 @@
             <div class="col-md-2">
               <div class="search-input-box">
                 <label>Guests</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="guests"
-                  min="1"
-                  value="1"
-                />
+                <div class="guests-input-wrapper">
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="guests"
+                    min="1"
+                    value="1"
+                  />
+                </div>
               </div>
             </div>
-
             <div class="col-md-3">
               <button type="submit" class="btn btn-primary search-btn w-100">
                 Search
@@ -139,7 +192,6 @@
   </div>
 </section>
 
-
 <main class="container py-5">
   <h2 class="fw-bold mb-4 text-center">Featured experiences</h2>
 
@@ -147,7 +199,7 @@
 
     <!-- Experience 1 -->
     <div class="col-md-4">
-      <div class="card hotel-card h-100">
+      <div class="card experience-card h-100">
 
         <div class="ratio ratio-16x9">
           <img
@@ -164,11 +216,9 @@
             Paddle through scenic waterways with a guided kayaking experience designed for travelers who want something active and outdoors.
           </p>
 
-          <p class="fw-bold mb-3">
-            From $45/person
-          </p>
+          <span class="price-badge">From $45/person</span>
 
-          <a href="#" class="btn btn-outline-primary w-100 mt-auto">
+          <a href="#" class="btn btn-view-experience w-100 mt-auto">
             View experience
           </a>
         </div>
@@ -177,7 +227,7 @@
 
     <!-- Experience 2 -->
     <div class="col-md-4">
-      <div class="card hotel-card h-100">
+      <div class="card experience-card h-100">
 
         <div class="ratio ratio-16x9">
           <img
@@ -194,11 +244,9 @@
             Explore local neighborhoods through street food, small restaurants, markets, and hidden spots with a knowledgeable local guide.
           </p>
 
-          <p class="fw-bold mb-3">
-            From $60/person
-          </p>
+          <span class="price-badge">From $60/person</span>
 
-          <a href="#" class="btn btn-outline-primary w-100 mt-auto">
+          <a href="#" class="btn btn-view-experience w-100 mt-auto">
             View experience
           </a>
         </div>
@@ -207,7 +255,7 @@
 
     <!-- Experience 3 -->
     <div class="col-md-4">
-      <div class="card hotel-card h-100">
+      <div class="card experience-card h-100">
 
         <div class="ratio ratio-16x9">
           <img
@@ -224,11 +272,9 @@
             Discover Tokyo after dark with a guided nightlife experience through bars, food alleys, neon districts, and late-night local favorites.
           </p>
 
-          <p class="fw-bold mb-3">
-            From $75/person
-          </p>
+          <span class="price-badge">From $75/person</span>
 
-          <a href="#" class="btn btn-outline-primary w-100 mt-auto">
+          <a href="#" class="btn btn-view-experience w-100 mt-auto">
             View experience
           </a>
         </div>
@@ -237,7 +283,6 @@
 
   </div>
 </main>
-
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
   const checkInPicker = flatpickr("#check-in", {
