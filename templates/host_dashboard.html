@@ -9,9 +9,14 @@
       <h1 class="fw-bold mb-1">Host dashboard</h1>
       <p class="text-muted mb-0">Manage your properties and track bookings.</p>
     </div>
-    <a href="/host/properties/new" class="btn btn-primary">
-      + Add property
-    </a>
+    <div class="d-flex gap-2">
+      <a href="/experiences/create_experience" class="btn btn-primary">
+        + Add experience
+      </a>
+      <a href="/host/properties/new" class="btn btn-primary">
+        + Add property
+      </a>
+    </div>
   </div>
 
   {% if request.query_params.get("message") %}
@@ -20,56 +25,109 @@
   </div>
   {% endif %}
 
-  {% if properties %}
-  <div class="row g-4">
-    {% for hotel in properties %}
-    <div class="col-md-6 col-lg-4">
-      <div class="bg-white rounded-4 shadow-sm h-100 overflow-hidden">
+  <!-- Properties section -->
+  <section class="mb-5">
+    <h2 class="fw-bold fs-4 mb-3">Properties</h2>
 
-        {% if hotel.image_path %}
-        <img
-          src="{{ url_for('static', path=hotel.image_path) }}"
-          alt="{{ hotel.name }}"
-          class="w-100 property-card-img"
-        >
-        {% endif %}
+    {% if properties %}
+    <div class="row g-4">
+      {% for hotel in properties %}
+      <div class="col-md-6 col-lg-4">
+        <div class="bg-white rounded-4 shadow-sm h-100 overflow-hidden">
 
-        <div class="p-4">
-          <h5 class="fw-bold mb-1">{{ hotel.name }}</h5>
-          <p class="text-muted small mb-3">{{ hotel.city }}</p>
-          <p class="text-muted small mb-4">
-            {{ hotel.description[:100] }}{% if hotel.description|length > 100 %}...{% endif %}
-          </p>
+          {% if hotel.image_path %}
+          <img
+            src="{{ url_for('static', path=hotel.image_path) }}"
+            alt="{{ hotel.name }}"
+            class="w-100 property-card-img"
+          >
+          {% endif %}
 
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-primary btn-sm">
-              Manage property
-            </a>
-            {% if not hotel.is_active %}
-            <span class="badge rounded-pill px-3 py-2"
-                  style="background-color: #fee2e2; color: #991b1b;">
-              Inactive
-            </span>
-            {% endif %}
+          <div class="p-4">
+            <h5 class="fw-bold mb-1">{{ hotel.name }}</h5>
+            <p class="text-muted small mb-3">{{ hotel.city }}</p>
+            <p class="text-muted small mb-4">
+              {{ hotel.description[:100] }}{% if hotel.description|length > 100 %}...{% endif %}
+            </p>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-primary btn-sm">
+                Manage property
+              </a>
+              {% if not hotel.is_active %}
+              <span class="badge rounded-pill px-3 py-2"
+                    style="background-color: #fee2e2; color: #991b1b;">
+                Inactive
+              </span>
+              {% endif %}
+            </div>
           </div>
+
         </div>
-
       </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
 
-  {% else %}
+    {% else %}
 
-  <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 text-center">
-    <p class="fs-5 fw-bold mb-2">No properties yet</p>
-    <p class="text-muted mb-4">Add your first property to start accepting bookings.</p>
-    <a href="/host/properties/new" class="btn btn-primary">
-      Add your first property
-    </a>
-  </div>
+    <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 text-center">
+      <p class="fs-5 fw-bold mb-2">No properties yet</p>
+      <p class="text-muted mb-4">Add your first property to start accepting bookings.</p>
+      <a href="/host/properties/new" class="btn btn-primary">
+        Add your first property
+      </a>
+    </div>
 
-  {% endif %}
+    {% endif %}
+  </section>
+
+  <!-- Experiences section -->
+  <section>
+    <h2 class="fw-bold fs-4 mb-3">Experiences</h2>
+
+    {% if experiences %}
+    <div class="row g-4">
+      {% for experience in experiences %}
+      <div class="col-md-6 col-lg-4">
+        <div class="bg-white rounded-4 shadow-sm h-100 overflow-hidden">
+
+          {% if experience.image_path %}
+          <img
+            src="{{ url_for('static', path=experience.image_path) }}"
+            alt="{{ experience.title }}"
+            class="w-100 property-card-img"
+          >
+          {% endif %}
+
+          <div class="p-4">
+            <h5 class="fw-bold mb-1">{{ experience.title }}</h5>
+            <p class="text-muted small mb-3">{{ experience.location }}</p>
+            <p class="text-muted small mb-4">
+              {{ experience.description[:100] }}{% if experience.description|length > 100 %}...{% endif %}
+            </p>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="fw-bold small">${{ experience.price_per_person }}/person</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+
+    <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 text-center">
+      <p class="fs-5 fw-bold mb-2">No experiences yet</p>
+      <p class="text-muted mb-4">Add your first experience to start attracting guests.</p>
+      <a href="/experiences/create_experience" class="btn btn-primary">
+        Add your first experience
+      </a>
+    </div>
+
+    {% endif %}
+  </section>
 
 </main>
 

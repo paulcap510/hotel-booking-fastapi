@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from routers import hotels, rooms, bookings, users, host
+from routers import hotels, rooms, bookings, users, host, experiences
 from datetime import date
 
 import models
@@ -47,6 +47,7 @@ app.include_router(rooms.router)
 app.include_router(bookings.router)
 app.include_router(users.router)
 app.include_router(host.router)
+app.include_router(experiences.router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
