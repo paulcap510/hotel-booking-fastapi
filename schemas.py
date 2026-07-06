@@ -106,7 +106,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-
 #! EMAIL UPDATE
 class EmailUpdate(BaseModel):
     email: EmailStr
@@ -119,3 +118,23 @@ class PasswordResetRequest(BaseModel):
 class PasswordReset(BaseModel):
     token: str
     new_password: str = Field(min_length=8)
+
+
+
+
+
+class ExperienceBase(BaseModel):
+    title: str
+    description: str
+    price_per_person: int
+    location: str
+
+class ExperienceCreate(ExperienceBase):
+    pass
+
+class ExperienceResponse(ExperienceBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    image_path: str
+    user_id: int

@@ -34,9 +34,6 @@ class Room(Base):
     hotel = relationship("Hotel", back_populates="rooms")
     bookings = relationship("Booking", back_populates="room", cascade="all, delete-orphan")
 
-
-
-
 class Booking(Base):
     __tablename__ = "bookings"
 
@@ -67,3 +64,14 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_host: Mapped[bool] = mapped_column(Boolean, default=False)
+
+class Experience(Base):
+    __tablename__ = "experiences"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    description: Mapped[str] = mapped_column(String, nullable=False)
+    price_per_person: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
+    location: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    image_path: Mapped[str] = mapped_column(String, nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
