@@ -82,7 +82,7 @@
   </section>
 
   <!-- Experiences section -->
-  <section>
+<section>
     <h2 class="fw-bold fs-4 mb-3">Experiences</h2>
 
     {% if experiences %}
@@ -108,6 +108,17 @@
 
             <div class="d-flex align-items-center gap-2 flex-wrap">
               <span class="fw-bold small">${{ experience.price_per_person }}/person</span>
+
+              <a href="/experiences/{{ experience.id }}/edit" class="btn btn-outline-primary btn-sm">
+                Manage experience
+              </a>
+
+              {% if not experience.is_active %}
+              <span class="badge rounded-pill px-3 py-2"
+                    style="background-color: #fee2e2; color: #991b1b;">
+                Inactive
+              </span>
+              {% endif %}
             </div>
           </div>
 
@@ -128,6 +139,7 @@
 
     {% endif %}
   </section>
+
 
 </main>
 

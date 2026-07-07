@@ -74,4 +74,5 @@ class Experience(Base):
     price_per_person: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
     location: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
     image_path: Mapped[str] = mapped_column(String, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
