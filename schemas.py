@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from datetime import date
 from utils.booking_status import BookingStatus
-
+from datetime import date, datetime
 
 #! Hotels
 class HotelBase(BaseModel):
@@ -106,7 +106,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-
 #! EMAIL UPDATE
 class EmailUpdate(BaseModel):
     email: EmailStr
@@ -119,3 +118,35 @@ class PasswordResetRequest(BaseModel):
 class PasswordReset(BaseModel):
     token: str
     new_password: str = Field(min_length=8)
+
+
+
+
+
+class ExperienceBase(BaseModel):
+    title: str
+    description: str
+    price_per_person: int
+    location: str
+
+class ExperienceCreate(ExperienceBase):
+    pass
+
+
+class ExperienceRequestBase(BaseModel):
+    requested_date: date
+    num_guests: int
+    message: str | None = None
+
+
+class ExperienceRequestCreate(ExperienceRequestBase):
+    pass
+
+class ExperienceRequestResponse(ExperienceRequestBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    experience_id: int
+    user_id: int
+    status: str
+    created_at: datetime

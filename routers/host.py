@@ -52,8 +52,6 @@ def host_manage_bookings_page(request: Request, hotel_id: int, db: Session = Dep
                 "bookings": bookings,
             })
 
-
-
 @router.post("/properties/{hotel_id}/rooms/{room_id}/delete")
 def host_page_delete_room(request: Request, hotel_id: int, room_id: int, db: Session = Depends(get_db)):
     session_id = request.cookies.get("session_id")
@@ -429,12 +427,14 @@ def host_dashboard(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/host/become", status_code=status.HTTP_303_SEE_OTHER)
 
     properties = db.query(models.Hotel).filter(models.Hotel.owner_id == user_id).all()
+    experiences = db.query(models.Experience).filter(models.Experience.user_id == user_id).all()
 
     return templates.TemplateResponse(request, "host_dashboard.html",
             {
                 "request": request,
                 "user": user,
                 "properties": properties,
+                "experiences": experiences,
             })
 
 

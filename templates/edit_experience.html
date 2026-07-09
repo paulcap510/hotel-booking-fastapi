@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+
+      <div class="mb-4">
+        <a href="{{ url_for('host_dashboard') }}" class="text-decoration-none text-muted small">
+          &larr; Back to dashboard
+        </a>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h1 class="fw-bold mb-0">Edit experience</h1>
+        <a href="/experiences/{{ experience.id }}/bookings" class="btn btn-outline-primary btn-sm">
+          View booking requests
+        </a>
+      </div>
+      <p class="text-muted mb-5">Update the details for this experience.</p>
+
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+
+        <form method="post" action="/experiences/{{ experience.id }}/edit">
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Experience title</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="title"
+              value="{{ experience.title }}"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Location</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="location"
+              value="{{ experience.location }}"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Description</label>
+            <textarea
+              class="form-control"
+              name="description"
+              rows="4"
+              required
+            >{{ experience.description }}</textarea>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Price per person</label>
+            <div class="input-group input-group-lg">
+              <span class="input-group-text">$</span>
+              <input
+                type="number"
+                class="form-control"
+                name="price_per_person"
+                min="1"
+                value="{{ experience.price_per_person }}"
+                required
+              >
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-100">
+            Save changes
+          </button>
+
+        </form>
+
+        <hr class="my-4">
+
+        {% if experience.is_active %}
+        <form method="post" action="/experiences/{{ experience.id }}/deactivate">
+          <button type="submit" class="btn btn-outline-danger w-100">
+            Deactivate experience
+          </button>
+        </form>
+        {% else %}
+        <form method="post" action="/experiences/{{ experience.id }}/reactivate">
+          <button type="submit" class="btn btn-outline-success w-100">
+            Reactivate experience
+          </button>
+        </form>
+        {% endif %}
+
+      </section>
+
+    </div>
+  </div>
+
+</main>
+
+{% endblock content %}

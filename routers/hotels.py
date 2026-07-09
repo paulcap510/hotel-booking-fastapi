@@ -18,6 +18,7 @@ def get_hotels(db: Session = Depends(get_db)):
     return hotels
 
 
+
 @router.get("/{hotel_id}", response_model=HotelResponse)
 def get_hotel(hotel_id: int, db: Session = Depends(get_db)):
     hotel = db.query(models.Hotel).filter(models.Hotel.id == hotel_id).first()

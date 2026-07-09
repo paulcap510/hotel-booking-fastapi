@@ -83,7 +83,7 @@ def login(
         key="session_id",
         value=session_id,
         httponly=True,
-        secure=False,     # Set secure=True once you're running on https
+        secure=False,     # Set secure=True once running on https
         samesite="lax",
         max_age=60 * 60 * 24 * 7,  # 1 week
     )

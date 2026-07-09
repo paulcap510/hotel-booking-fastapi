@@ -34,18 +34,18 @@
     </button>
 
         {% if hotel.is_active %}
-    <button type="button" class="btn btn-outline-danger btn-sm"
+        <button type="button" class="btn btn-outline-danger btn-sm"
             data-bs-toggle="modal" data-bs-target="#deactivatePropertyModal">
-      Deactivate property
-    </button>
-    {% else %}
-    <form method="post" action="/host/properties/{{ hotel.id }}/reactivate">
-      <button type="submit" class="btn btn-outline-success btn-sm rounded-3">
-        Reactivate property
-      </button>
-    </form>
-    {% endif %}
-  </div>
+              Deactivate property
+        </button>
+        {% else %}
+        <form method="post" action="/host/properties/{{ hotel.id }}/reactivate">
+          <button type="submit" class="btn btn-outline-success btn-sm rounded-3">
+            Reactivate property
+          </button>
+        </form>
+        {% endif %}
+    </div>
 
   <!-- Property details -->
   <div class="bg-white rounded-4 shadow-sm p-4 mb-4">
