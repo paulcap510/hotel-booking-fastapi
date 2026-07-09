@@ -1,12 +1,12 @@
 from database import Base
-from sqlalchemy import Integer, String, Boolean, ForeignKey
+from sqlalchemy import Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm import relationship
 from datetime import date
 from sqlalchemy import Integer, String, Boolean, ForeignKey, Date
 from enum import Enum
 from utils.booking_status import BookingStatus
-
+from datetime import datetime, timezone
 
 class Hotel(Base):
     __tablename__ = "hotels"
@@ -76,3 +76,18 @@ class Experience(Base):
     image_path: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+
+class ExperienceRequest(Base):
+    __tablename__ = "experience_requests"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    experience_id: Mapped[int] = mapped_column(ForeignKey("experiences.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    requested_date: Mapped[date] = mapped_column(Date, nullable=False)
+    num_guests: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_price: Mapped[int] = mapped_column(Integer, nullable=False)
+    message: Mapped[str] = mapped_column(String, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    experience = relationship("Experience")

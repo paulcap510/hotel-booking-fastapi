@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <div class="mb-4">
+        <a href="{{ url_for('host_dashboard') }}" class="text-decoration-none text-muted small">
+          &larr; Back to dashboard
+        </a>
+      </div>
+
+      {% if request.query_params.get("message") %}
+      <div class="alert alert-success rounded-3 mb-4">
+        {{ request.query_params.get("message") }}
+      </div>
+      {% endif %}
+
+      <h1 class="fw-bold mb-1">{{ experience.title }}</h1>
+      <p class="text-muted mb-4">Booking requests for this experience</p>
+
+      {% if requests %}
+      <div class="d-flex flex-column gap-3">
+        {% for req in requests %}
+        <div class="bg-white rounded-4 shadow-sm p-4">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+              <p class="fw-bold mb-1">{{ req.requested_date }} — {{ req.num_guests }} guest{{ 's' if req.num_guests != 1 }}</p>
+              <p class="text-muted small mb-2">Total: ${{ req.total_price }}</p>
+              {% if req.message %}
+              <p class="text-muted small mb-0">"{{ req.message }}"</p>
+              {% endif %}
+            </div>
+
+            <div>
+              {% if req.status == "pending" %}
+              <span class="badge rounded-pill px-3 py-2" style="background-color: #fef3c7; color: #92400e;">
+                Pending
+              </span>
+              {% elif req.status == "confirmed" %}
+              <span class="badge rounded-pill px-3 py-2" style="background-color: #dcfce7; color: #166534;">
+                Confirmed
+              </span>
+              {% elif req.status == "declined" %}
+              <span class="badge rounded-pill px-3 py-2" style="background-color: #fee2e2; color: #991b1b;">
+                Declined
+              </span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if req.status == "pending" %}
+          <div class="d-flex gap-2 mt-3">
+            <form method="post" action="/experiences/requests/{{ req.id }}/confirm">
+              <button type="submit" class="btn btn-success btn-sm">
+                Confirm
+              </button>
+            </form>
+            <form method="post" action="/experiences/requests/{{ req.id }}/decline">
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                Decline
+              </button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="bg-white rounded-4 shadow-sm p-4 text-center">
+        <p class="text-muted mb-0">No booking requests yet.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</main>
+
+{% endblock content %}

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from datetime import date
 from utils.booking_status import BookingStatus
-
+from datetime import date, datetime
 
 #! Hotels
 class HotelBase(BaseModel):
@@ -132,9 +132,21 @@ class ExperienceBase(BaseModel):
 class ExperienceCreate(ExperienceBase):
     pass
 
-class ExperienceResponse(ExperienceBase):
+
+class ExperienceRequestBase(BaseModel):
+    requested_date: date
+    num_guests: int
+    message: str | None = None
+
+
+class ExperienceRequestCreate(ExperienceRequestBase):
+    pass
+
+class ExperienceRequestResponse(ExperienceRequestBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    image_path: str
+    experience_id: int
     user_id: int
+    status: str
+    created_at: datetime

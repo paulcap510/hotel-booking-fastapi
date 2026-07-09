@@ -8,6 +8,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from routers import hotels, rooms, bookings, users, host, experiences
 from datetime import date
+import random
 
 import models
 from database import get_db, SessionLocal
@@ -62,12 +63,20 @@ def home(request:Request, db: Session = Depends(get_db)):
         rooms = (db.query(models.Room).filter(models.Room.hotel_id == hotel.id).all())
         hotel.starting_price = calculate_starting_price(rooms)
 
+    active_experiences = (
+        db.query(models.Experience)
+        .filter(models.Experience.is_active == True)
+        .all()
+    )
+    experiences = random.sample(active_experiences, min(3, len(active_experiences)))
+
     return templates.TemplateResponse(request, "home.html",
                                       {
-                                          "request": request,
-                                          "hotels": hotels,
-
+                                        "request": request,
+                                        "hotels": hotels,
+                                        "experiences": experiences,
                                       })
+
 
 @app.get("/hotel_info/{hotel_id}", response_class=HTMLResponse, include_in_schema=False)
 def hotel_info(

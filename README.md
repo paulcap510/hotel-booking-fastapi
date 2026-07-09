@@ -16,12 +16,25 @@ This is a hotel booking platform similar to Hotels.com or Agoda. Users can creat
 - Role-based authorization: admin-only booking deletion (is_admin flag; no admin UI yet)
 - Navbar reflects real login state across the whole site
 - Support/FAQ page with live search
--
+
+### Host / Property Management
+- Users can become a host (`is_host`) and access a host dashboard
+- Hosts can list, edit, deactivate, and reactivate properties
+- Hosts can add, edit, and delete rooms for their properties
+- Hosts can view and manage bookings for their properties
+
+### Experiences
+- Hosts can create, edit, deactivate, and reactivate experience listings (e.g. tours, activities), including image upload
+- Guests can browse experiences (homepage features a random rotating selection) and view experience detail pages
+- Guests can submit a request to book an experience (date, guest count, optional message); total price is calculated and stored at request time
+- Hosts can view incoming requests for their experiences and confirm or decline them
+- Guests can track the status of their requests (pending/confirmed/declined) on a dedicated "My Experiences" page
+
+### Experience Booking: Request-based, not instant-book
+Unlike hotel room bookings (which are instant, capacity-checked reservations), experiences use a request-based flow: a guest submits a request, and the host must confirm or decline it. This mirrors how many real-world tour/activity platforms and bespoke service providers operate (as opposed to fixed-inventory, slot-based systems like Airbnb Experiences). This was a deliberate scope choice. A full slot/capacity-based scheduling system was considered but decided against for this project's scope in favor of the simpler request/response model.
+
 ### Planned / Not yet built
 - [ ] Password reset emails are mocked — reset links are printed to the server console rather than sent via a real email provider. Production would integrate a transactional email service (e.g. SendGrid, SES).
-- [ ] User profile editing (name, email)
-- [ ] Password reset
-- [ ] Host/property-owner accounts
 - [ ] Reviews and ratings (currently hardcoded placeholder data)
 
 ## Tech Stack
@@ -34,7 +47,7 @@ This is a hotel booking platform similar to Hotels.com or Agoda. Users can creat
 ## Architecture Decisions
 
 ### Session-based Auth
-This app is server-rendered (FastAPI + Jinja2), so the browser and server are always talking to each other directly — there's no separate frontend client or third-party API consuming this auth. JWTs are designed for stateless auth across systems that don't share a session store (e.g. a SPA talking to a separate API, or multiple services validating a token independently). Since that's not the architecture here, session cookies are simpler, easier to revoke, and avoid the storage/XSS pitfalls of handling JWTs in a browser context.
+Since this app is fully server-rendered (FastAPI + Jinja2) with no separate frontend or third-party API involved, session cookies were chosen over JWTs, which simpler to revoke, and avoids the storage/XSS considerations of handling tokens in the browser. JWTs are better suited to stateless auth across systems that don't share a session store (e.g. a SPA calling a separate API), which isn't the case here.
 
 A middleware checks the session cookie on every request and attaches the current user (or `None`) to `request.state.user`. This is what lets the navbar, and any other server-rendered page, reflect login state without each route needing its own login-check logic.
 
@@ -51,6 +64,8 @@ cd hotel-booking-fastapi
 
 pip install -r requirements.txt
 
+alembic upgrade head
+
 uvicorn main:app --reload
 \`\`\`
 
@@ -63,4 +78,6 @@ uvicorn main:app --reload
 - [ ] Hotel images are a single field for now; a real implementation would support multiple images per hotel (gallery, primary image for search results).
 - [ ] No rate limiting on login.
 - [ ] Search currently has limited demo data (a handful of hotels); search/filter logic is implemented and tested, but not yet backed by a large realistic dataset.
-- [ ] Host/property-owner accounts not yet implemented — currently all users are guests; a real marketplace would let hosts list and manage their own properties.
+- [ ] Confirming or declining an experience request doesn't trigger any notification to the guest (they must check "My Experiences" manually). In production, this would trigger an email notification to the guest; out of scope for this project.
+- [ ] No guest-facing way to cancel a pending experience request once submitted.
+- [ ] Experience request price (`total_price`) is calculated and stored at request time to protect against the host later changing the experience's price while a request is still pending — but if a request is later modified, the price is not recalculated.
