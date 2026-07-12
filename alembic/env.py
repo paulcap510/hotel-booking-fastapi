@@ -1,16 +1,17 @@
 from logging.config import fileConfig
-
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
-
 from database import Base
+from config import settings
 import models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Override sqlalchemy.url with the value from .env, so secrets never live in alembic.ini
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -69,8 +70,8 @@ def run_migrations_online() -> None:
     with connectable.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata,
-            render_as_batch=True, #Tells Alembic to use SQLite's only safe way to modify existing tables: copy the table to a temporary table, make the changes, then copy it back
-            compare_type=True, #Tells autogenerate to detect when a column's type has changed
+            render_as_batch=True,
+            compare_type=True,
         )
 
         with context.begin_transaction():
@@ -81,5 +82,3 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-
-
