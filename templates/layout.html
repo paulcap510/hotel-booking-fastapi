@@ -229,6 +229,143 @@
   box-shadow: 0 0 0 0.2rem rgba(6, 11, 63, 0.15);
 }
 
+.btn-hotel-primary {
+  background: linear-gradient(135deg, var(--hotels-navy), #1c2470);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.65rem 1.5rem;
+  box-shadow: 0 4px 14px rgba(6, 11, 63, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn-hotel-primary:hover {
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(6, 11, 63, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-hotel-primary .btn-arrow {
+  transition: transform 0.2s ease;
+}
+
+.btn-hotel-primary:hover .btn-arrow {
+  transform: translateX(3px);
+}
+
+
+.btn-hotel-confirm {
+  background: linear-gradient(135deg, var(--hotels-navy), #1c2470);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(6, 11, 63, 0.25);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn-hotel-confirm:hover {
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(6, 11, 63, 0.35);
+  transform: translateY(-2px);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: var(--hotels-navy);
+  border-color: var(--hotels-navy);
+}
+
+.flatpickr-day.today {
+  border-color: var(--hotels-red);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+  color: var(--hotels-navy);
+}
+
+.flatpickr-weekday {
+  color: var(--hotels-blue);
+  font-weight: 700;
+}
+
+.flatpickr-day:hover {
+  background: rgba(6, 11, 63, 0.08);
+}
+
+.flatpickr-calendar {
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  border: none;
+}
+
+.date-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.date-input-wrapper input {
+  padding-right: 28px;
+}
+
+.date-input-wrapper::after {
+  content: "📅";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.6;
+  font-size: 0.95rem;
+}
+
+.location-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.location-input-wrapper input {
+  padding-right: 28px;
+}
+
+.location-input-wrapper::after {
+  content: "📍";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.6;
+  font-size: 0.95rem;
+}
+
+.guests-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.guests-input-wrapper input {
+  padding-right: 28px;
+}
+
+.guests-input-wrapper::after {
+  content: "👤";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
 
   @media (max-width: 768px) {
     .search-card {
@@ -326,6 +463,7 @@
           window.location.href = "/";
         });
       }
+
     </script>
     <!-- Email updated confirmation modal -->
 <div class="modal fade" id="emailUpdatedModal" tabindex="-1" aria-hidden="true">

@@ -8,7 +8,6 @@ password_hash = PasswordHash.recommended()
 # creates a password hasher using argon2 with the recommended settings
 
 
-
 def hash_password(password: str) -> str:
     return password_hash.hash(password)
 

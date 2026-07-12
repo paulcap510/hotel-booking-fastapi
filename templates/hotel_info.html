@@ -139,12 +139,11 @@
               </div>
 
               {% if room.available and check_in and check_out %}
-                <a
-                  href="/booking/rooms/{{ room.id }}?guests={{ guests }}&check_in={{ check_in }}&check_out={{ check_out }}"
-                  class="btn btn-primary"
-                >
+              <a href="/booking/rooms/{{ room.id }}?guests={{ guests }}&check_in={{ check_in }}&check_out={{ check_out }}" class="btn btn-hotel-primary">
                   Reserve
+                  <span class="btn-arrow">&rarr;</span>
                 </a>
+
               {% elif check_in and check_out and not room.available %}
                 <button class="btn btn-outline-secondary" disabled>
                   Sold out

@@ -1,35 +1,124 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<style>
+  .search-input-box input,
+.location-input-wrapper input,
+.date-input-wrapper input,
+.guests-input-wrapper input {
+  background-color: #f8f9fb;
+}
 
+.search-input-box input:focus,
+.location-input-wrapper input:focus,
+.date-input-wrapper input:focus,
+.guests-input-wrapper input:focus {
+  background-color: #ffffff;
+  border-color: var(--hotels-navy);
+  box-shadow: 0 0 0 0.15rem rgba(6, 11, 63, 0.1);
+}
+.btn-hotel-primary {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.search-card-outer {
+  border: 1.5px solid #c7cbd8;
+  box-shadow: 0 12px 32px rgba(6, 11, 63, 0.18) !important;
+}
+
+</style>
 <main class="container py-5">
 
-  <!-- Search summary/header -->
+  <!-- Search bar -->
+<div class="bg-white rounded-4 shadow-sm search-card-outer p-4 mb-4">
+  <form action="/search" method="get">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <div class="search-input-box">
+          <label>Where</label>
+          <div class="location-input-wrapper">
+            <input
+              type="text"
+              class="form-control"
+              name="city"
+              value="{{ search_city }}"
+              placeholder="Where to?"
+            />
+          </div>
+        </div>
+      </div>
 
-  <section class="bg-white rounded-4 shadow-sm p-4 mb-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div class="col-md-2">
+        <div class="search-input-box">
+          <label>Check-in</label>
+          <div class="date-input-wrapper">
+            <input
+              type="text"
+              class="form-control"
+              name="check_in"
+              id="check-in"
+              value="{{ check_in }}"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+      </div>
 
-  <div>
-    <h1 class="fw-bold mb-2">
-      Search results{% if search_city %} for {{ search_city }}{% endif %}
-    </h1>
+      <div class="col-md-2">
+        <div class="search-input-box">
+          <label>Check-out</label>
+          <div class="date-input-wrapper">
+            <input
+              type="text"
+              class="form-control"
+              name="check_out"
+              id="check-out"
+              value="{{ check_out }}"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+      </div>
 
-    <p class="text-muted mb-0">
-    {% if hotels %}
-        {{ hotels|length }} hotel{% if hotels|length != 1 %}s{% endif %} found{% if guests %} for {{ guests }} guest{% if guests != 1 %}s{% endif %}{% endif %}.
-    {% else %}
-        No hotels found for your search.
-    {% endif %}
-    </p>
-  </div>
+      <div class="col-md-2">
+        <div class="search-input-box">
+          <label>Guests</label>
+          <div class="guests-input-wrapper">
+            <input
+              type="number"
+              class="form-control"
+              name="guests"
+              min="1"
+              value="{{ guests }}"
+            />
+          </div>
+        </div>
+      </div>
 
-  <a href="/" class="btn btn-outline-primary">
-    Change search
-  </a>
-
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-hotel-primary fs-5 w-100 py-4">
+          Search
+        </button>
+      </div>
+    </div>
+  </form>
 </div>
 
-  </section>
+  <!-- Search summary/header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="fw-bold mb-2">
+        Search results{% if search_city %} for {{ search_city }}{% endif %}
+      </h1>
+
+      <p class="text-muted mb-0">
+      {% if hotels %}
+          {{ hotels|length }} hotel{% if hotels|length != 1 %}s{% endif %} found{% if guests %} for {{ guests }} guest{% if guests != 1 %}s{% endif %}{% endif %}.
+      {% else %}
+          No hotels found for your search.
+      {% endif %}
+      </p>
+    </div>
+  </div>
 
   <!-- Search layout -->
 
@@ -175,13 +264,11 @@
                   <p class="text-muted small mb-3">
                     per night
                   </p>
+                  <a href="/hotel_info/{{ hotel.id }}?check_in={{ check_in }}&check_out={{ check_out }}&guests={{ guests }}" class="btn btn-hotel-primary w-100">
+  View rooms
+  <span class="btn-arrow">&rarr;</span>
+</a>
 
-                  <a
-                      href="/hotel_info/{{ hotel.id }}?check_in={{ check_in }}&check_out={{ check_out }}&guests={{ guests }}"
-                      class="btn btn-primary w-100 fw-bold"
-                  >
-                    View rooms
-                  </a>
                 </div>
 
               </div>
@@ -215,6 +302,29 @@
 
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  const checkInPicker = flatpickr("#check-in", {
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    onChange: function (selectedDates) {
+      const newCheckIn = selectedDates[0];
+      const currentCheckOut = checkOutPicker.selectedDates[0];
+
+      checkOutPicker.set("minDate", newCheckIn);
+
+      // Only clear check-out if it's now before the new check-in date
+      if (currentCheckOut && currentCheckOut <= newCheckIn) {
+        checkOutPicker.clear();
+      }
+    },
+  });
+
+  const checkOutPicker = flatpickr("#check-out", {
+    dateFormat: "Y-m-d",
+    minDate: "today",
+  });
+</script>
 </main>
 
 {% endblock content %}
