@@ -40,7 +40,7 @@ Unlike hotel room bookings (which are instant, capacity-checked reservations), e
 ## Tech Stack
 - Backend: FastAPI
 - Templates: Jinja2
-- Database: SQLite (via SQLAlchemy ORM), migrations via Alembic
+- Database: PostgreSQL (via SQLAlchemy ORM), migrations via Alembic
 - Auth: Session-based (see below)
 - Frontend: Bootstrap 5, Flatpickr for date selection
 
@@ -57,17 +57,58 @@ Room availability isn't stored as a static value. It's calculated at request tim
 ### Shared booking logic
 Booking creation is consolidated into a single function (`create_booking_for_user`) used by both the JSON API route and the HTML form route, so validation rules and the availability/transaction-safety logic only need to live in one place. The same pattern is used for fetching a user's bookings (`get_bookings_for_user`), shared between the JSON API and the Jinja-rendered My Trips page.
 
-## Setup / Running locally
-\`\`\`bash
+### Database: SQLite → PostgreSQL migration
+This project started on SQLite for fast local iteration (zero setup, no separate server process). Once the app reached a stable feature set, it was migrated to PostgreSQL to move toward a more production-realistic setup — real concurrent write support, proper role-based permissions, and no reliance on SQLite's workarounds for schema changes (e.g. Alembic's `batch_alter_table`, needed because SQLite can't alter constraints on existing tables directly; Postgres supports this natively).
+
+The migration had two parts:
+- **Schema**: replayed via the existing Alembic migration history. One early migration (the initial "baseline") turned out to be a no-op — it had been generated against a SQLite database that already had tables created outside of Alembic's awareness, so it recorded no actual changes. This surfaced for the first time against a genuinely empty Postgres database. Resolved by building the schema directly from current models (`Base.metadata.create_all()`) and using `alembic stamp head` to bring Alembic's version tracking in sync with that state.
+-
+- **Data**: existing SQLite data (users, hotels, rooms, bookings, experiences, experience requests) was migrated with a custom script (`migrate_data.py`) that reads directly from SQLite and writes into Postgres via the existing SQLAlchemy models, preserving original primary keys (via `session.merge()`) so foreign key relationships stayed intact. Table order respects foreign key dependencies (parents before children). Password hashes transferred as opaque strings with no special handling needed, since hashing is one-way and login only ever re-hashes and compares — never decodes.
+
+One pre-existing data integrity issue surfaced during migration: a handful of `rooms` rows referenced a `hotel_id` that no longer existed in `hotels` (orphaned from earlier local testing). SQLite hadn't enforced this relationship at insert time; Postgres correctly rejected it. Resolved by deleting the orphaned rows before completing the migration.
+
+### Configuration
+Database connection details are stored in a `.env` file (not committed to version control) and loaded via `pydantic-settings`. See `.env.example` for the required variables.
+
+```bash
 git clone https://github.com/paulcap510/hotel-booking-fastapi.git
 cd hotel-booking-fastapi
 
 pip install -r requirements.txt
+```
 
+Create a PostgreSQL database and role, e.g.:
+
+```bash
+psql postgres
+```
+```sql
+CREATE DATABASE hotels_db;
+CREATE USER your_app_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE hotels_db TO your_app_user;
+```
+
+On Postgres 15+, also grant schema-level permissions (database-level privileges alone aren't sufficient to create tables):
+```bash
+psql -d hotels_db
+```
+```sql
+GRANT ALL ON SCHEMA public TO your_app_user;
+```
+
+Create a `.env` file in the project root (see `.env.example`) with your connection string:
+```
+DATABASE_URL=postgresql://your_app_user:your_password@localhost:5432/hotels_db
+```
+
+Then run:
+```bash
 alembic upgrade head
-
 uvicorn main:app --reload
-\`\`\`
+```
+
+This creates all tables via Alembic migrations against your PostgreSQL database. No sample data is included — sign up for an account, then use "Become a host" to create test hotels and experiences.
+
 
 ## Next Steps / Limitations
 - [ ] Sessions are currently stored in memory; they reset on server restart and won't work across multiple server instances. Should move to a database table or Redis before any real deployment.
@@ -81,3 +122,4 @@ uvicorn main:app --reload
 - [ ] Confirming or declining an experience request doesn't trigger any notification to the guest (they must check "My Experiences" manually). In production, this would trigger an email notification to the guest; out of scope for this project.
 - [ ] No guest-facing way to cancel a pending experience request once submitted.
 - [ ] Experience request price (`total_price`) is calculated and stored at request time to protect against the host later changing the experience's price while a request is still pending — but if a request is later modified, the price is not recalculated.
+- [ ] `migrate_data.py` was a one-time script for the SQLite → Postgres data migration; not intended to be re-run against a populated Postgres database.
