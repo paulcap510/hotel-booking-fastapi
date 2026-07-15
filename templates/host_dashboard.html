@@ -10,12 +10,16 @@
       <p class="text-muted mb-0">Manage your properties and track bookings.</p>
     </div>
     <div class="d-flex gap-2">
-      <a href="/experiences/create_experience" class="btn btn-primary">
-        + Add experience
-      </a>
-      <a href="/host/properties/new" class="btn btn-primary">
-        + Add property
-      </a>
+
+      <div class="d-flex gap-2">
+  <a href="/experiences/create_experience" class="btn btn-host-action">
+    + Add experience
+  </a>
+  <a href="/host/properties/new" class="btn btn-host-action">
+    + Add property
+  </a>
+</div>
+
     </div>
   </div>
 
@@ -51,16 +55,17 @@
             </p>
 
             <div class="d-flex align-items-center gap-2 flex-wrap">
-              <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-primary btn-sm">
-                Manage property
-              </a>
-              {% if not hotel.is_active %}
-              <span class="badge rounded-pill px-3 py-2"
-                    style="background-color: #fee2e2; color: #991b1b;">
-                Inactive
-              </span>
-              {% endif %}
-            </div>
+  <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-manage-outline btn-sm">
+    Manage property
+  </a>
+  {% if not hotel.is_active %}
+  <span class="badge rounded-pill px-3 py-2"
+        style="background-color: #fee2e2; color: #991b1b;">
+    Inactive
+  </span>
+  {% endif %}
+</div>
+
           </div>
 
         </div>
@@ -99,31 +104,35 @@
           >
           {% endif %}
 
+
           <div class="p-4">
-            <h5 class="fw-bold mb-1">{{ experience.title }}</h5>
-            <p class="text-muted small mb-3">{{ experience.location }}</p>
-            <p class="text-muted small mb-4">
-              {{ experience.description[:100] }}{% if experience.description|length > 100 %}...{% endif %}
-            </p>
+              <h5 class="fw-bold mb-1">{{ experience.title }}</h5>
+              <p class="text-muted small mb-3">{{ experience.location }}</p>
+              <p class="text-muted small mb-3">
+                {{ experience.description[:100] }}{% if experience.description|length > 100 %}...{% endif %}
+              </p>
 
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-              <span class="fw-bold small">${{ experience.price_per_person }}/person</span>
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="fw-bold">${{ experience.price_per_person }}/person</span>
+                {% if not experience.is_active %}
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background-color: #fee2e2; color: #991b1b;">
+                  Inactive
+                </span>
+                {% endif %}
+              </div>
 
-              <a href="/experiences/{{ experience.id }}/edit" class="btn btn-outline-primary btn-sm">
-                Manage experience
-              </a>
-
-            <a href="/experiences/{{ experience.id }}/bookings" class="btn btn-outline-dark btn-sm">
-              View requests
-            </a>
-              {% if not experience.is_active %}
-              <span class="badge rounded-pill px-3 py-2"
-                    style="background-color: #fee2e2; color: #991b1b;">
-                Inactive
-              </span>
-              {% endif %}
-            </div>
+              <div class="d-flex flex-column gap-2">
+                <a href="/experiences/{{ experience.id }}/edit" class="btn btn-manage-outline btn-sm w-100">
+                  Manage experience
+                </a>
+                <a href="/experiences/{{ experience.id }}/bookings" class="btn btn-manage-outline btn-sm w-100">
+                  View requests
+                </a>
+              </div>
           </div>
+
+
 
         </div>
       </div>
@@ -153,6 +162,37 @@
     display: block;
     background: #e9ecef;
   }
+
+  .btn-host-action {
+  background: linear-gradient(135deg, var(--hotels-navy), #1c2470);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0.55rem 1.1rem;
+  box-shadow: 0 4px 14px rgba(6, 11, 63, 0.2);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn-host-action:hover {
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(6, 11, 63, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-manage-outline {
+  background-color: transparent;
+  border: 1.5px solid var(--hotels-navy);
+  color: var(--hotels-navy);
+  font-weight: 600;
+  border-radius: 10px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-manage-outline:hover {
+  background-color: var(--hotels-navy);
+  color: #fff;
+}
 </style>
 
 {% endblock content %}

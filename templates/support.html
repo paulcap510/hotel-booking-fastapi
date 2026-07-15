@@ -112,7 +112,7 @@
   <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 text-center">
     <h5 class="fw-bold mb-2">Still need help?</h5>
     <p class="text-muted mb-4">Our team is happy to help with anything not covered above.</p>
-    <a href="mailto:support@hothotels.example" class="btn btn-primary btn-lg px-5">
+    <a href="mailto:support@hothotels.example" class="btn btn-contact btn-lg w-50 btn-lg px-5">
       Contact us
     </a>
   </div>
@@ -165,6 +165,23 @@
   .faq-answer-inner {
     padding: 0 1.25rem 1.1rem;
   }
+
+  .btn-contact {
+  background: linear-gradient(135deg, var(--hotels-navy), #1c2470);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(6, 11, 63, 0.25);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn-contact:hover {
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(6, 11, 63, 0.35);
+  transform: translateY(-2px);
+}
+
 
   @media (prefers-reduced-motion: reduce) {
     .support-card,

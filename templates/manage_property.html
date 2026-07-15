@@ -28,24 +28,26 @@
       <p class="text-muted mb-0">{{ hotel.city }}</p>
     </div>
 
-    <button type="button" class="btn btn-outline-primary btn-sm"
-            data-bs-toggle="modal" data-bs-target="#editPropertyModal">
-      Edit property
-    </button>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-manage-outline btn-sm"
+              data-bs-toggle="modal" data-bs-target="#editPropertyModal">
+        Edit property
+      </button>
 
-        {% if hotel.is_active %}
-        <button type="button" class="btn btn-outline-danger btn-sm"
-            data-bs-toggle="modal" data-bs-target="#deactivatePropertyModal">
-              Deactivate property
+      {% if hotel.is_active %}
+      <button type="button" class="btn btn-deactivate btn-sm"
+              data-bs-toggle="modal" data-bs-target="#deactivatePropertyModal">
+        Deactivate property
+      </button>
+      {% else %}
+      <form method="post" action="/host/properties/{{ hotel.id }}/reactivate">
+        <button type="submit" class="btn btn-reactivate btn-sm">
+          Reactivate property
         </button>
-        {% else %}
-        <form method="post" action="/host/properties/{{ hotel.id }}/reactivate">
-          <button type="submit" class="btn btn-outline-success btn-sm rounded-3">
-            Reactivate property
-          </button>
-        </form>
-        {% endif %}
+      </form>
+      {% endif %}
     </div>
+  </div>
 
   <!-- Property details -->
   <div class="bg-white rounded-4 shadow-sm p-4 mb-4">
@@ -69,7 +71,7 @@
   <div class="bg-white rounded-4 shadow-sm p-4 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h5 class="fw-bold mb-0">Rooms</h5>
-      <a href="/host/properties/{{ hotel.id }}/rooms/new" class="btn btn-primary btn-sm">
+      <a href="/host/properties/{{ hotel.id }}/rooms/new" class="btn btn-host-action btn-sm">
         + Add room
       </a>
     </div>
@@ -83,6 +85,7 @@
             <th>Price per night</th>
             <th>Max guests</th>
             <th>Inventory</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -93,58 +96,47 @@
             <td>{{ room.max_guests }}</td>
             <td>{{ room.total_inventory }}</td>
             <td>
-            <td>
               <div class="d-flex gap-2 justify-content-end">
                 <a href="/host/properties/{{ hotel.id }}/rooms/{{ room.id }}/edit"
-                  class="btn btn-sm rounded-3 px-3"
-                  style="background-color: #f0f4ff; color: #3d6bce; border: 1px solid #c5d3f5;">
+                  class="btn btn-room-edit btn-sm">
                   Edit
                 </a>
 
+                <!-- Delete trigger button (no form here) -->
+                <button type="button"
+                        class="btn btn-room-delete btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal{{ room.id }}">
+                  Delete
+                </button>
 
-
-                  <!-- Delete trigger button (no form here) -->
-                  <button type="button"
-                          class="btn btn-sm rounded-3 px-3"
-                          style="background-color: #fff0f0; color: #b91c1c; border: 1px solid #fca5a5;"
-                          data-bs-toggle="modal"
-                          data-bs-target="#deleteModal{{ room.id }}">
-                    Delete
-                  </button>
-
-                  <!-- Modal (one per room, outside the table) -->
-                  <div class="modal fade" id="deleteModal{{ room.id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                      <div class="modal-content rounded-4 border-0 shadow">
-                        <div class="modal-header border-0 pb-0">
-                          <h5 class="modal-title fw-bold">Delete room?</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body text-muted">
-                          Are you sure you want to delete <strong>{{ room.room_type }}</strong>?
-                          This cannot be undone.
-                        </div>
-                        <div class="modal-footer border-0 pt-0">
-                          <button type="button" class="btn btn-outline-secondary btn-sm rounded-3"
-                                  data-bs-dismiss="modal">
-                            Cancel
+                <!-- Modal (one per room, outside the table) -->
+                <div class="modal fade" id="deleteModal{{ room.id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content rounded-4 border-0 shadow">
+                      <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">Delete room?</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body text-muted">
+                        Are you sure you want to delete <strong>{{ room.room_type }}</strong>?
+                        This cannot be undone.
+                      </div>
+                      <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-3"
+                                data-bs-dismiss="modal">
+                          Cancel
+                        </button>
+                        <form method="post" action="/host/properties/{{ hotel.id }}/rooms/{{ room.id }}/delete">
+                          <button type="submit" class="btn btn-room-delete btn-sm">
+                            Yes, delete
                           </button>
-                          <form method="post" action="/host/properties/{{ hotel.id }}/rooms/{{ room.id }}/delete">
-                            <button type="submit"
-                                    class="btn btn-sm rounded-3 px-3"
-                                    style="background-color: #fff0f0; color: #b91c1c; border: 1px solid #fca5a5;">
-                              Yes, delete
-                            </button>
-                          </form>
-                        </div>
+                        </form>
                       </div>
                     </div>
                   </div>
-
-
-
+                </div>
               </div>
-            </td>
             </td>
           </tr>
           {% endfor %}
@@ -162,7 +154,7 @@
   <div class="bg-white rounded-4 shadow-sm p-4">
     <div class="d-flex justify-content-between align-items-center">
       <h5 class="fw-bold mb-0">Bookings</h5>
-      <a href="/host/properties/{{ hotel.id }}/bookings" class="btn btn-outline-secondary btn-sm">
+      <a href="/host/properties/{{ hotel.id }}/bookings" class="btn btn-manage-outline btn-sm">
         View all bookings
       </a>
     </div>
@@ -202,7 +194,7 @@
         <div class="modal-footer border-0 pt-0">
           <button type="button" class="btn btn-outline-secondary btn-sm rounded-3"
                   data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary btn-sm rounded-3">
+          <button type="submit" class="btn btn-hotel-confirm btn-sm">
             Save changes
           </button>
         </div>
@@ -229,7 +221,7 @@
           Cancel
         </button>
         <form method="post" action="/host/properties/{{ hotel.id }}/deactivate">
-          <button type="submit" class="btn btn-danger btn-sm rounded-3 px-3">
+          <button type="submit" class="btn btn-deactivate btn-sm">
             Yes, deactivate
           </button>
         </form>

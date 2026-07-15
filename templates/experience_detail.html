@@ -1,46 +1,114 @@
 {% extends "layout.html" %}
 {% block content %}
 <main class="container py-5">
-  <div class="row justify-content-center">
+
+  <div class="mb-4">
+    <a href="/" class="text-decoration-none text-muted small">
+      &larr; Back to experiences
+    </a>
+  </div>
+
+  {% if request.query_params.get("message") %}
+  <div class="alert alert-success rounded-3 mb-4">
+    {{ request.query_params.get("message") }}
+  </div>
+  {% endif %}
+
+  <!-- Hero image -->
+  <div class="experience-hero rounded-4 overflow-hidden mb-4">
+    {% if experience.image_path %}
+    <img
+      src="{{ url_for('static', path=experience.image_path) }}"
+      alt="{{ experience.title }}"
+      class="w-100 experience-detail-img"
+    >
+    {% endif %}
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Left: details -->
     <div class="col-lg-8">
-      <div class="mb-4">
-        <a href="/" class="text-decoration-none text-muted small">
-          &larr; Back to experiences
+      <span class="badge experience-badge mb-3">Experience</span>
+
+      <h1 class="fw-bold mb-2">{{ experience.title }}</h1>
+
+      <div class="d-flex align-items-center gap-2 text-muted mb-4">
+        <span class="location-pin">📍</span>
+        <span>{{ experience.location }}</span>
+      </div>
+
+      <hr class="my-4">
+
+      <h5 class="fw-bold mb-3">About this experience</h5>
+      <p class="text-muted experience-description">{{ experience.description }}</p>
+    </div>
+
+    <!-- Right: sticky booking card -->
+    <div class="col-lg-4">
+      <div class="bg-white rounded-4 shadow-sm p-4 sticky-top experience-booking-card" style="top: 90px;">
+
+        <p class="text-muted small mb-1">Price</p>
+        <p class="fs-3 fw-bold mb-4">
+          ${{ experience.price_per_person }}
+          <span class="fs-6 fw-normal text-muted">/ person</span>
+        </p>
+
+        <a href="/experiences/{{ experience.id }}/request" class="btn btn-hotel-confirm btn-lg w-100">
+          Request to book
         </a>
-      </div>
 
-      {% if request.query_params.get("message") %}
-      <div class="alert alert-success rounded-3 mb-4">
-        {{ request.query_params.get("message") }}
-      </div>
-      {% endif %}
+        <p class="text-muted small text-center mt-3 mb-0">
+          The host will confirm your request within 24 hours.
+        </p>
 
-      <div class="bg-white rounded-4 shadow-sm overflow-hidden">
-        {% if experience.image_path %}
-        <img
-          src="{{ url_for('static', path=experience.image_path) }}"
-          alt="{{ experience.title }}"
-          class="w-100 experience-detail-img"
-        >
-        {% endif %}
-        <div class="p-4 p-md-5">
-          <h1 class="fw-bold mb-2">{{ experience.title }}</h1>
-          <p class="text-muted mb-4">{{ experience.location }}</p>
-          <p class="mb-4">{{ experience.description }}</p>
-          <p class="fs-4 fw-bold">${{ experience.price_per_person }} / person</p>
-          <a href="/experiences/{{ experience.id }}/request" class="btn btn-primary btn-lg w-100">
-            Request to book
-          </a>
-        </div>
       </div>
     </div>
+
   </div>
+
 </main>
+
 <style>
+  .experience-hero {
+    box-shadow: 0 12px 32px rgba(6, 11, 63, 0.12);
+  }
+
   .experience-detail-img {
-    height: 360px;
+    height: 420px;
     object-fit: cover;
     display: block;
+    width: 100%;
+  }
+
+  .experience-badge {
+    background-color: rgba(6, 11, 63, 0.08);
+    color: var(--hotels-navy);
+    font-weight: 700;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .location-pin {
+    font-size: 0.9rem;
+  }
+
+  .experience-description {
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .experience-booking-card {
+    border: 1.5px solid #e2e5ee;
+  }
+
+  @media (max-width: 991px) {
+    .experience-booking-card {
+      position: static !important;
+    }
   }
 </style>
 {% endblock content %}
