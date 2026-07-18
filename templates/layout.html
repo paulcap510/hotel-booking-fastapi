@@ -49,7 +49,21 @@
     font-size: 1.8rem;
     font-weight: 800;
     letter-spacing: -1px;
+    transition: opacity 0.2 ease;
   }
+
+
+  .navbar-brand:hover {
+    opacity: 0.8;
+  }
+  .navbar-brand .brand-icon {
+  transition: transform 0.2s ease;
+}
+
+.navbar-brand:hover .brand-icon {
+  transform: rotate(-4deg) scale(1.05);
+}
+
 
 .nav-link {
   color: rgba(255, 255, 255, 0.8) !important;
@@ -61,7 +75,7 @@
 }
 
 .nav-link:hover {
-  color: #d34851 !important;
+  color: #ef505a !important;
 }
 
 .nav-pill {
@@ -456,6 +470,64 @@
 }
 
 
+.site-footer {
+  background-color: var(--hotels-navy);
+  border-top: 1px solid #e2e5ee;
+}
+
+.footer-brand {
+  display: flex;
+  color: #fff;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--hotels-navy);
+}
+
+.footer-heading {
+  font-weight: 700;
+  color: #fff;
+  opacity: 0.9;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.65rem;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  font-size: 0.92rem;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #fff;
+  text-decoration-color: var(--hotels-red);
+}
+
+
+.footer-divider {
+  border-color: rgba(255, 255, 255, 0.15);
+  margin: 2rem 0 1.5rem;
+}
+
+.footer-fineprint {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
   @media (max-width: 768px) {
     .search-card {
       padding: 1.25rem;
@@ -538,6 +610,71 @@
     {% block content %}
     {% endblock content %}
 
+
+    <!-- Footer -->
+    <footer class="site-footer mt-5">
+      <div class="container py-5">
+        <div class="footer-brand mb-4">
+          <span class="brand-icon">H</span>
+          Hot Hotels
+        </div>
+
+        <div class="row g-4">
+          <div class="col-6 col-md-4 col-lg-2">
+            <h6 class="footer-heading">Top destinations</h6>
+            <ul class="footer-links">
+              <li><a href="/search?city=Tokyo">Hotels in Tokyo</a></li>
+              <!-- <li><a href="/search?city=Shibuya">Hotels in Shibuya</a></li> -->
+              <!-- <li><a href="/search?city=Palma de Mallorca">Hotels in Mallorca</a></li>
+              <li><a href="/search?city=Ithaca">Hotels in Ithaca</a></li> -->
+              <li><a href="/search?city=Bangkok">Hotels in Bangkok</a></li>
+            </ul>
+          </div>
+
+          <div class="col-6 col-md-4 col-lg-2">
+            <h6 class="footer-heading">Support &amp; FAQs</h6>
+            <ul class="footer-links">
+              <li><a href="{{ url_for('my_bookings_page') }}">Your bookings</a></li>
+              <li><a href="/support">FAQs</a></li>
+              <li><a href="/support">Contact us</a></li>
+            </ul>
+          </div>
+
+          <div class="col-6 col-md-4 col-lg-2">
+            <h6 class="footer-heading">For hosts</h6>
+            <ul class="footer-links">
+              <li><a href="/host/become">Become a host</a></li>
+              <li><a href="/host/dashboard">Host dashboard</a></li>
+              <li><a href="/experiences/create_experience">List an experience</a></li>
+            </ul>
+          </div>
+
+          <div class="col-6 col-md-4 col-lg-2">
+            <h6 class="footer-heading">Policies</h6>
+            <ul class="footer-links">
+              <li><a href="#">Terms &amp; Conditions</a></li>
+              <li><a href="#">Privacy</a></li>
+              <li><a href="#">Cookies</a></li>
+            </ul>
+          </div>
+
+          <div class="col-6 col-md-4 col-lg-2">
+            <h6 class="footer-heading">Other information</h6>
+            <ul class="footer-links">
+              <li><a href="/support"">About us</a></li>
+              <li><a href="/">Careers</a></li>
+              <!-- <li><a href="#">Travel guides</a></li> -->
+            </ul>
+          </div>
+        </div>
+
+        <hr class="footer-divider">
+
+        <p class="footer-fineprint mb-0">
+          &copy; 2026 Hot Hotels. Built as a portfolio project.
+        </p>
+      </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
