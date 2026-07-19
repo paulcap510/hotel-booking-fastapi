@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container py-5">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+
+      <div class="mb-4">
+        <a href="/bookings/{{ booking.id }}" class="text-decoration-none text-muted small">
+          &larr; Back to booking
+        </a>
+      </div>
+
+      <h1 class="fw-bold mb-2">Leave a review</h1>
+      <p class="text-muted mb-5">{{ booking.room.hotel.name }} &middot; {{ booking.room.hotel.city }}</p>
+
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+
+        <form method="post" action="/bookings/{{ booking.id }}/review">
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Rating</label>
+            <select class="form-select form-select-lg" name="review_score" required>
+              <option value="" selected disabled>Select a rating</option>
+              <option value="10">10 - Excellent</option>
+              <option value="9">9 - Excellent</option>
+              <option value="8">8 - Very good</option>
+              <option value="7">7 - Very good</option>
+              <option value="6">6 - Good</option>
+              <option value="5">5 - Good</option>
+              <option value="4">4 - Fair</option>
+              <option value="3">3 - Fair</option>
+              <option value="2">2 - Poor</option>
+              <option value="1">1 - Poor</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Your review</label>
+            <textarea
+              class="form-control"
+              name="review_description"
+              rows="5"
+              placeholder="Tell other guests about your stay..."
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-hotel-confirm btn-lg w-100">
+            Submit review
+          </button>
+
+        </form>
+
+      </section>
+
+    </div>
+  </div>
+
+</main>
+
+{% endblock content %}

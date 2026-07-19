@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from routers import hotels, rooms, bookings, users, host, experiences
+from routers import hotels, rooms, bookings, users, host, experiences, reviews
 from datetime import date
 import random
 
@@ -49,6 +49,7 @@ app.include_router(bookings.router)
 app.include_router(users.router)
 app.include_router(host.router)
 app.include_router(experiences.router)
+app.include_router(reviews.router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -594,6 +595,8 @@ def forgot_password_form(
         "request": request,
         "message": "If that email is registered, a reset link has been sent.",
     })
+
+
 
 
 
