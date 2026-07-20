@@ -1,6 +1,6 @@
 # Hotel Booking Platform
 
-This is a hotel booking platform similar to Hotels.com or Agoda. Users can create accounts, search for hotels, view and manage their bookings, and get help through a dedicated support page.
+This is a hotel booking platform similar to Hotels.com or Agoda. Users can create accounts, search for hotels, view and **manage** their bookings, and get help through a dedicated support page.
 
 ## Features
 
@@ -33,9 +33,12 @@ This is a hotel booking platform similar to Hotels.com or Agoda. Users can creat
 ### Experience Booking: Request-based, not instant-book
 Unlike hotel room bookings (which are instant, capacity-checked reservations), experiences use a request-based flow: a guest submits a request, and the host must confirm or decline it. This mirrors how many real-world tour/activity platforms and bespoke service providers operate (as opposed to fixed-inventory, slot-based systems like Airbnb Experiences). This was a deliberate scope choice. A full slot/capacity-based scheduling system was considered but decided against for this project's scope in favor of the simpler request/response model.
 
+### Reviews
+- Guests can leave a review (1–10 score + written description) on a completed booking, restricted to stays where checkout has already passed
+- Hotel ratings are computed live from all reviews tied to that hotel's bookings, not stored/cached, so they always reflect current data
+-
 ### Planned / Not yet built
 - [ ] Password reset emails are mocked — reset links are printed to the server console rather than sent via a real email provider. Production would integrate a transactional email service (e.g. SendGrid, SES).
-- [ ] Reviews and ratings (currently hardcoded placeholder data)
 
 ## Tech Stack
 - Backend: FastAPI
@@ -123,3 +126,4 @@ This creates all tables via Alembic migrations against your PostgreSQL database.
 - [ ] No guest-facing way to cancel a pending experience request once submitted.
 - [ ] Experience request price (`total_price`) is calculated and stored at request time to protect against the host later changing the experience's price while a request is still pending — but if a request is later modified, the price is not recalculated.
 - [ ] `migrate_data.py` was a one-time script for the SQLite → Postgres data migration; not intended to be re-run against a populated Postgres database.
+- [ ] On Render's free tier, files uploaded through the live app (hotel/experience photos) don't persist across service restarts, since the free tier uses ephemeral storage. Images committed to the repo (seed data) are unaffected, since they're deployed as part of the codebase. A production setup would use object storage (e.g. S3, Cloudinary) for user uploads.
