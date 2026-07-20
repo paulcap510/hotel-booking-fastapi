@@ -70,6 +70,13 @@ The migration had two parts:
 
 One pre-existing data integrity issue surfaced during migration: a handful of `rooms` rows referenced a `hotel_id` that no longer existed in `hotels` (orphaned from earlier local testing). SQLite hadn't enforced this relationship at insert time; Postgres correctly rejected it. Resolved by deleting the orphaned rows before completing the migration.
 
+### Deployment: Render + Neon
+The app is deployed with the backend (FastAPI) on Render and the database on Neon, rather than using Render's own managed Postgres. Render's free Postgres tier is deleted after 30 days unless upgraded to a paid plan — not a viable option for a portfolio project meant to stay live indefinitely. Neon's free tier has no such expiration; the tradeoff is a cold-start delay (a few seconds) after periods of inactivity, which is a reasonable one for a demo project with intermittent traffic.
+
+Deploying surfaced the SQLite-origin baseline migration issue described above, since it was the first time the full migration history was replayed against a genuinely fresh database outside of local development. This was resolved by squashing the migration history into a single, verified-correct baseline generated from the current models, rather than patching the broken migration in place — removing the underlying issue for any future environment, not just this one.
+
+Environment-specific configuration (database URL, secret key) is set directly in Render's environment variable settings, not via a committed file — the app's `.env` file (local-only, gitignored) and Render's dashboard-configured variables are entirely separate; deploying does not require editing or committing any local environment file.
+
 ### Configuration
 Database connection details are stored in a `.env` file (not committed to version control) and loaded via `pydantic-settings`. See `.env.example` for the required variables.
 
