@@ -51,7 +51,8 @@ class Booking(Base):
     total_price: Mapped[int] = mapped_column(Integer, nullable=False)
     booking_status: Mapped[str] = mapped_column(String(20), nullable=False, default=BookingStatus.confirmed)
 
-    room = relationship("Room", back_populates="bookings")
+    room = relationship("Room", uselist=False, back_populates="bookings")
+    review = relationship("Review", uselist=False, back_populates="booking")
 
 
 class User(Base):
@@ -93,7 +94,6 @@ class ExperienceRequest(Base):
     experience = relationship("Experience")
 
 
-#** Tenative Reviews
 class Review(Base):
     __tablename__ = "reviews"
 
@@ -106,4 +106,5 @@ class Review(Base):
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
 
-    booking = relationship("Booking")
+    booking = relationship("Booking", back_populates="review")
+    user = relationship("User")

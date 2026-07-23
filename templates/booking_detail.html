@@ -31,7 +31,7 @@
             <p class="fw-bold mb-0">{{ booking.guest_name }}</p>
           </div>
           <div class="col-6">
-            <p class="text-muted small mb-1">Guest email</p>
+            <p class="text-muted small mb-1">Guest l</p>
             <p class="fw-bold mb-0">{{ booking.guest_email }}</p>
           </div>
         </div>
@@ -57,6 +57,22 @@
         <a href="/bookings/{{ booking.id }}/manage" class="btn btn-primary w-100">
           Manage booking
         </a>
+
+
+        {% if booking.check_out_date <= today %}
+          {% if booking.review %}
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success-subtle text-success-emphasis fw-bold">
+              {{ booking.review.review_score }}/10
+            </span>
+            <span class="text-muted small">You reviewed this stay</span>
+          </div>
+          {% else %}
+          <a href="/bookings/{{ booking.id }}/review" class="btn btn-manage-outline w-100">
+            Leave a review
+          </a>
+          {% endif %}
+        {% endif %}
 
       </section>
 

@@ -1,6 +1,33 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<style>
+.booking-card-current {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.booking-card-upcoming {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.booking-card-past {
+  background-color: #fdfcf9;
+  border: 1px solid #e5decf;
+}
+
+.badge-completed {
+  background-color: #ede4d3;
+  color: #6b5a3d;
+  font-weight: 700;
+}
+.booking-card-cancelled {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+</style>
+
 
 <main class="container py-5">
 
@@ -83,41 +110,57 @@
   </section>
 
   <!-- Past stays -->
-  <section>
-    <h4 class="fw-bold mb-3">Past trips</h4>
+   <!-- Past stays -->
+    <section>
+      <h4 class="fw-bold mb-3">Past trips</h4>
 
-    {% if past_bookings %}
-    <div class="row g-4">
-      {% for booking in past_bookings %}
-      <div class="col-md-6 col-lg-4">
-        <div class="bg-white rounded-4 shadow-sm p-4 h-100 opacity-75">
-          <span class="badge bg-secondary-subtle text-secondary-emphasis mb-2">Completed</span>
-          <h5 class="fw-bold mb-1">{{ booking.room.hotel.name }}</h5>
-          <p class="text-muted small mb-3">{{ booking.room.hotel.city }} &middot; {{ booking.room.room_type }}</p>
+      {% if past_bookings %}
+      <div class="row g-4">
+        {% for booking in past_bookings %}
+        <div class="col-md-6 col-lg-4">
+          <div class="bg-white rounded-4 shadow-sm p-4 h-100 border border-secondary-subtle">
+            <span class="badge badge-completed mb-2">Completed</span>
+            <!-- <span class="badge bg-secondary-subtle text-secondary-emphasis mb-2">Completed</span> -->
+            <h5 class="fw-bold mb-1">{{ booking.room.hotel.name }}</h5>
+            <p class="text-muted small mb-3">{{ booking.room.hotel.city }} &middot; {{ booking.room.room_type }}</p>
 
-          <div class="d-flex justify-content-between mb-1">
-            <span class="text-muted small">Check-in</span>
-            <span class="fw-bold small">{{ booking.check_in_date }}</span>
-          </div>
-          <div class="d-flex justify-content-between mb-3">
-            <span class="text-muted small">Check-out</span>
-            <span class="fw-bold small">{{ booking.check_out_date }}</span>
-          </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted small">Check-in</span>
+              <span class="fw-bold small">{{ booking.check_in_date }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+              <span class="text-muted small">Check-out</span>
+              <span class="fw-bold small">{{ booking.check_out_date }}</span>
+            </div>
 
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="fw-bold">${{ booking.total_price }}</span>
-            <a href="/bookings/{{ booking.id }}" class="btn btn-outline-secondary btn-sm">View details</a>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fw-bold">${{ booking.total_price }}</span>
+              <a href="/bookings/{{ booking.id }}" class="btn btn-outline-secondary btn-sm">View details</a>
+            </div>
+
+            {% if booking.review %}
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-success-subtle text-success-emphasis fw-bold">
+                {{ booking.review.review_score }}/10
+              </span>
+              <span class="text-muted small">You reviewed this stay</span>
+            </div>
+            {% else %}
+            <a href="/bookings/{{ booking.id }}/review" class="btn btn-host-action btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+              <span>&#9733;</span> Leave a review
+            </a>
+            {% endif %}
           </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="bg-white rounded-4 shadow-sm p-4 text-center text-muted">
-      No past trips yet.
-    </div>
-    {% endif %}
-  </section>
+      {% else %}
+      <div class="bg-white rounded-4 shadow-sm p-4 text-center text-muted">
+        No past trips yet.
+      </div>
+      {% endif %}
+    </section>
+
 
   {% if cancelled_bookings %}
   <section class="mt-5">

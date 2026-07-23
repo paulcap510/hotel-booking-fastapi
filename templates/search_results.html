@@ -237,20 +237,25 @@
               <div class="p-4 h-100 border-start d-flex flex-column justify-content-between">
 
                 <div class="text-md-end">
-                  <div class="d-flex justify-content-md-end align-items-center mb-2">
-                    <span class="badge bg-success fs-6">
-                      8.7
-                    </span>
+                <div class="d-flex justify-content-md-end align-items-center mb-2">
+    {% if hotel.average_rating is not none %}
+    <span class="badge bg-success fs-6">
+      {{ "%.1f"|format(hotel.average_rating) }}
+    </span>
+    {% endif %}
                   </div>
 
+                  {% if hotel.average_rating is not none %}
                   <p class="fw-bold mb-1">
-                    Excellent
+                    {{ hotel.review_count }} review{% if hotel.review_count != 1 %}s{% endif %}
                   </p>
-
+                  {% else %}
                   <p class="text-muted small mb-4">
-                    Guest rating placeholder
+                    No reviews yet
                   </p>
+                  {% endif %}
                 </div>
+
 
                 <div class="text-md-end">
                   <p class="text-muted small mb-1">
