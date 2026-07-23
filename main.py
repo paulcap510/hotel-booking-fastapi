@@ -350,6 +350,7 @@ def my_bookings_page(
         "current_bookings": current,
         "past_bookings": past,
         "cancelled_bookings": cancelled,
+        "today": date.today(),
     })
 
 

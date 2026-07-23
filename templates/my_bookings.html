@@ -138,18 +138,24 @@
               <a href="/bookings/{{ booking.id }}" class="btn btn-outline-secondary btn-sm">View details</a>
             </div>
 
+            {% if booking.check_out_date <= today and booking.booking_status != "cancelled" %}
             {% if booking.review %}
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center justify-content-center gap-2">
               <span class="badge bg-success-subtle text-success-emphasis fw-bold">
                 {{ booking.review.review_score }}/10
               </span>
               <span class="text-muted small">You reviewed this stay</span>
             </div>
             {% else %}
-            <a href="/bookings/{{ booking.id }}/review" class="btn btn-host-action btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
-              <span>&#9733;</span> Leave a review
-            </a>
+            <div class="text-center">
+              <a href="/bookings/{{ booking.id }}/review" class="btn btn-host-action w-50">
+                <span>&#9733;</span> Leave a review
+              </a>
+            </div>
             {% endif %}
+          {% endif %}
+
+
           </div>
         </div>
         {% endfor %}

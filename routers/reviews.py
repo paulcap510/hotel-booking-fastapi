@@ -38,6 +38,9 @@ def submit_review_page(request: Request, booking_id: int, db: Session = Depends(
     if booking.check_out_date > date.today():
         raise HTTPException(status_code=400, detail="You can only review a stay after checkout")
 
+    if booking.booking_status == "cancelled":
+        raise HTTPException(status_code=400, detail="Cannot review a cancelled booking")
+
     existing_review = db.query(models.Review).filter(models.Review.booking_id == booking_id).first()
     if existing_review:
         raise HTTPException(status_code=400, detail="You've already reviewed this booking")
@@ -75,6 +78,9 @@ def submit_review(
 
     if booking.check_out_date > date.today():
         raise HTTPException(status_code=400, detail="You can only review a stay after checkout")
+
+    if booking.booking_status == "cancelled":
+        raise HTTPException(status_code=400, detail="Cannot review a cancelled booking")
 
     if not (1 <= review_score <= 10):
         raise HTTPException(status_code=400, detail="Review score must be between 1 and 10")
