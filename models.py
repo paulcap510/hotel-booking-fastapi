@@ -51,7 +51,8 @@ class Booking(Base):
     total_price: Mapped[int] = mapped_column(Integer, nullable=False)
     booking_status: Mapped[str] = mapped_column(String(20), nullable=False, default=BookingStatus.confirmed)
 
-    room = relationship("Room", back_populates="bookings")
+    room = relationship("Room", uselist=False, back_populates="bookings")
+    review = relationship("Review", uselist=False, back_populates="booking")
 
 
 class User(Base):
@@ -91,3 +92,19 @@ class ExperienceRequest(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     experience = relationship("Experience")
+
+
+class Review(Base):
+    __tablename__ = "reviews"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    booking_id: Mapped[int] = mapped_column(ForeignKey("bookings.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    review_score: Mapped[int] = mapped_column(Integer, nullable=False)
+    review_description: Mapped[str] = mapped_column(String(1000), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    booking = relationship("Booking", back_populates="review")
+    user = relationship("User")

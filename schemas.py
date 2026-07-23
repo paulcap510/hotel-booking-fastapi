@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, EmailStr
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator
 from datetime import date
 from utils.booking_status import BookingStatus
 from datetime import date, datetime
@@ -149,4 +149,34 @@ class ExperienceRequestResponse(ExperienceRequestBase):
     experience_id: int
     user_id: int
     status: str
+    created_at: datetime
+
+
+
+#! Review Schemas
+class ReviewBase(BaseModel):
+    review_score: int
+    review_description: str
+
+    @field_validator("review_score")
+    @classmethod
+    def score_must_be_valid(cls, v):
+        if not (1 <= v <= 10):
+            raise ValueError("Score must be between 1 and 10")
+        return v
+
+class ReviewCreate(ReviewBase):
+    booking_id: int
+
+# For direct Swagger/admin testing. Everything supplied explicitly
+class ReviewAdminCreate(ReviewBase):
+    booking_id: int
+    user_id: int
+
+class ReviewResponse(ReviewBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    booking_id: int
+    user_id: int
     created_at: datetime

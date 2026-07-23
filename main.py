@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from routers import hotels, rooms, bookings, users, host, experiences
+from routers import hotels, rooms, bookings, users, host, experiences, reviews
 from datetime import date
 import random
 
@@ -17,6 +17,7 @@ from utils.pricing import calculate_nights, calculate_total_price, calculate_sta
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
 from utils.booking_queries import get_bookings_for_user
+from utils.reviews import get_hotel_average_rating, get_recent_hotel_reviews
 from routers.users import get_current_user
 from auth import get_user_id_from_session, create_reset_token, get_user_id_from_reset_token, delete_reset_token, hash_password
 
@@ -49,6 +50,7 @@ app.include_router(bookings.router)
 app.include_router(users.router)
 app.include_router(host.router)
 app.include_router(experiences.router)
+app.include_router(reviews.router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -94,6 +96,9 @@ def hotel_info(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Hotel not found"
         )
+
+    average_rating, review_count = get_hotel_average_rating(db, hotel_id)
+    recent_reviews = get_recent_hotel_reviews(db, hotel_id)
 
     if check_in and check_out:
         booking_count_table = (
@@ -157,6 +162,9 @@ def hotel_info(
             "hotel": hotel,
             "rooms": rooms,
             "guests": guests,
+            "average_rating": average_rating,
+            "review_count": review_count,
+            "recent_reviews": recent_reviews,
         },
     )
 
@@ -186,6 +194,10 @@ def search_hotels(request: Request, city: str = "", guests: int = 1,
 
         hotel.starting_price = calculate_starting_price(rooms)
 
+        average_rating, review_count = get_hotel_average_rating(db, hotel.id)
+        hotel.average_rating = average_rating
+        hotel.review_count = review_count
+
     return templates.TemplateResponse(
         request,
         "search_results.html",
@@ -196,7 +208,6 @@ def search_hotels(request: Request, city: str = "", guests: int = 1,
             "check_in": check_in,
             "check_out": check_out,
             "guests": guests,
-
         },
     )
 
@@ -339,6 +350,7 @@ def my_bookings_page(
         "current_bookings": current,
         "past_bookings": past,
         "cancelled_bookings": cancelled,
+        "today": date.today(),
     })
 
 
@@ -371,6 +383,7 @@ def booking_detail_page(
         "booking": booking,
         "room": booking.room,
         "hotel": booking.room.hotel,
+        "today": date.today(),
     })
 
 
@@ -594,6 +607,8 @@ def forgot_password_form(
         "request": request,
         "message": "If that email is registered, a reset link has been sent.",
     })
+
+
 
 
 

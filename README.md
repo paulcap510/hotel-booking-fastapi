@@ -1,6 +1,6 @@
 # Hotel Booking Platform
 
-This is a hotel booking platform similar to Hotels.com or Agoda. Users can create accounts, search for hotels, view and manage their bookings, and get help through a dedicated support page.
+This is a hotel booking platform similar to Hotels.com or Agoda. Users can create accounts, search for hotels, view and **manage** their bookings, and get help through a dedicated support page.
 
 ## Features
 
@@ -33,9 +33,12 @@ This is a hotel booking platform similar to Hotels.com or Agoda. Users can creat
 ### Experience Booking: Request-based, not instant-book
 Unlike hotel room bookings (which are instant, capacity-checked reservations), experiences use a request-based flow: a guest submits a request, and the host must confirm or decline it. This mirrors how many real-world tour/activity platforms and bespoke service providers operate (as opposed to fixed-inventory, slot-based systems like Airbnb Experiences). This was a deliberate scope choice. A full slot/capacity-based scheduling system was considered but decided against for this project's scope in favor of the simpler request/response model.
 
+### Reviews
+- Guests can leave a review (1–10 score + written description) on a completed booking, restricted to stays where checkout has already passed
+- Hotel ratings are computed live from all reviews tied to that hotel's bookings, not stored/cached, so they always reflect current data
+-
 ### Planned / Not yet built
 - [ ] Password reset emails are mocked — reset links are printed to the server console rather than sent via a real email provider. Production would integrate a transactional email service (e.g. SendGrid, SES).
-- [ ] Reviews and ratings (currently hardcoded placeholder data)
 
 ## Tech Stack
 - Backend: FastAPI
@@ -66,6 +69,13 @@ The migration had two parts:
 - **Data**: existing SQLite data (users, hotels, rooms, bookings, experiences, experience requests) was migrated with a custom script (`migrate_data.py`) that reads directly from SQLite and writes into Postgres via the existing SQLAlchemy models, preserving original primary keys (via `session.merge()`) so foreign key relationships stayed intact. Table order respects foreign key dependencies (parents before children). Password hashes transferred as opaque strings with no special handling needed, since hashing is one-way and login only ever re-hashes and compares — never decodes.
 
 One pre-existing data integrity issue surfaced during migration: a handful of `rooms` rows referenced a `hotel_id` that no longer existed in `hotels` (orphaned from earlier local testing). SQLite hadn't enforced this relationship at insert time; Postgres correctly rejected it. Resolved by deleting the orphaned rows before completing the migration.
+
+### Deployment: Render + Neon
+The app is deployed with the backend (FastAPI) on Render and the database on Neon, rather than using Render's own managed Postgres. Render's free Postgres tier is deleted after 30 days unless upgraded to a paid plan — not a viable option for a portfolio project meant to stay live indefinitely. Neon's free tier has no such expiration; the tradeoff is a cold-start delay (a few seconds) after periods of inactivity, which is a reasonable one for a demo project with intermittent traffic.
+
+Deploying surfaced the SQLite-origin baseline migration issue described above, since it was the first time the full migration history was replayed against a genuinely fresh database outside of local development. This was resolved by squashing the migration history into a single, verified-correct baseline generated from the current models, rather than patching the broken migration in place — removing the underlying issue for any future environment, not just this one.
+
+Environment-specific configuration (database URL, secret key) is set directly in Render's environment variable settings, not via a committed file — the app's `.env` file (local-only, gitignored) and Render's dashboard-configured variables are entirely separate; deploying does not require editing or committing any local environment file.
 
 ### Configuration
 Database connection details are stored in a `.env` file (not committed to version control) and loaded via `pydantic-settings`. See `.env.example` for the required variables.
@@ -123,3 +133,4 @@ This creates all tables via Alembic migrations against your PostgreSQL database.
 - [ ] No guest-facing way to cancel a pending experience request once submitted.
 - [ ] Experience request price (`total_price`) is calculated and stored at request time to protect against the host later changing the experience's price while a request is still pending — but if a request is later modified, the price is not recalculated.
 - [ ] `migrate_data.py` was a one-time script for the SQLite → Postgres data migration; not intended to be re-run against a populated Postgres database.
+- [ ] On Render's free tier, files uploaded through the live app (hotel/experience photos) don't persist across service restarts, since the free tier uses ephemeral storage. Images committed to the repo (seed data) are unaffected, since they're deployed as part of the codebase. A production setup would use object storage (e.g. S3, Cloudinary) for user uploads.
