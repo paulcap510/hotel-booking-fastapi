@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 import shutil
 import models
 from pathlib import Path
-
+from utils.geocoding import geocode_city
 
 
 router = APIRouter(
@@ -340,12 +340,16 @@ def add_new_property(
 
     image_path = f"uploads/hotels/{image.filename}"
 
+    geocode_result = geocode_city(city)
+
     new_hotel = models.Hotel(
         name=name,
         description=description,
         image_path=image_path,
         city=city,
         owner_id=user_id,
+        latitude=geocode_result["latitude"] if geocode_result else None,
+        longitude=geocode_result["longitude"] if geocode_result else None,
     )
 
     db.add(new_hotel)
