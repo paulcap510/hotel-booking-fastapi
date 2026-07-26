@@ -23,6 +23,13 @@ This is a hotel booking platform similar to Hotels.com or Agoda. Users can creat
 - Hosts can add, edit, and delete rooms for their properties
 - Hosts can view and manage bookings for their properties
 
+### Location-based Search
+Hotel search resolves the searched city to coordinates via OpenStreetMap's Nominatim geocoding API, then returns hotels within a 20-mile radius (distance calculated via the Haversine formula) rather than relying on exact string matching against a `city` field. This means a search for "Tokyo" correctly surfaces hotels listed under "Shibuya" or "Yokohama," an earlier version of this feature stored a precomputed "metro area" per hotel at creation time and matched against that, but this was dropped in favor of live radius search once it became clear that administrative city/region boundaries (e.g., whether Shibuya or Tokyo is the "city") are inconsistent even within a single geocoding provider's own data. Radius search sidesteps that ambiguity entirely, since physical distance doesn't depend on how a place's administrative hierarchy happens to be labeled.
+
+Each hotel's coordinates are geocoded once, at creation time, and stored — the search itself only geocodes the search term live (one request per search), not every hotel on every search.
+
+Nominatim was chosen over Google's Geocoding API specifically to avoid requiring a billing account for a portfolio project. It's free and requires no API key, but has real constraints worth knowing: a 1 request/second rate limit, a required identifying User-Agent header, and results are only guaranteed reliable for reasonably well-known place names.
+****
 ### Experiences
 - Hosts can create, edit, deactivate, and reactivate experience listings (e.g. tours, activities), including image upload
 - Guests can browse experiences (homepage features a random rotating selection) and view experience detail pages
@@ -134,3 +141,5 @@ This creates all tables via Alembic migrations against your PostgreSQL database.
 - [ ] Experience request price (`total_price`) is calculated and stored at request time to protect against the host later changing the experience's price while a request is still pending — but if a request is later modified, the price is not recalculated.
 - [ ] `migrate_data.py` was a one-time script for the SQLite → Postgres data migration; not intended to be re-run against a populated Postgres database.
 - [ ] On Render's free tier, files uploaded through the live app (hotel/experience photos) don't persist across service restarts, since the free tier uses ephemeral storage. Images committed to the repo (seed data) are unaffected, since they're deployed as part of the codebase. A production setup would use object storage (e.g. S3, Cloudinary) for user uploads.
+- [ ] Geocoding failures (Nominatim down, rate-limited, or an unrecognized place name) currently fall back to plain substring matching on `city` rather than radius search; a production system might retry, cache more aggressively, or use a paid provider with an SLA.
+- [ ] The 20-mile search radius is a fixed constant, not user-adjustable or distance-unit-aware (miles only).
