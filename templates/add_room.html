@@ -31,9 +31,11 @@
                min="1" value="1" required>
       </div>
 
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Add room</button>
-        <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-outline-secondary">Cancel</a>
+      <div class="text-center">
+        <button type="submit" class="btn btn-host-action w-50">Add room</button>
+      </div>
+      <div class="text-center mt-2">
+        <a href="/host/properties/{{ hotel.id }}/manage" class="btn btn-manage-outline w-50">Cancel</a>
       </div>
 
     </form>

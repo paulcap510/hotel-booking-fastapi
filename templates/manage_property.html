@@ -162,6 +162,7 @@
 
 </main>
 
+
 <div class="modal fade" id="editPropertyModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow">
@@ -180,9 +181,19 @@
 
           <div class="mb-3">
             <label for="city" class="form-label">City</label>
-            <input type="text" class="form-control" id="city" name="city"
+            <input type="text" class="form-control" id="edit-city-input" name="city"
                    value="{{ hotel.city }}" required>
+            <button type="button" id="edit-check-location-btn" class="btn btn-manage-outline btn-sm mt-2">
+              📍 Confirm location
+            </button>
+            <div id="edit-location-status" class="form-text mt-2"></div>
+            <div id="edit-location-candidates" class="mt-2 d-flex flex-column gap-2"></div>
           </div>
+
+          <input type="hidden" name="latitude" id="edit-latitude-input">
+          <input type="hidden" name="longitude" id="edit-longitude-input">
+
+          <div id="edit-map-preview" style="height: 200px; border-radius: 12px; display: none;" class="mb-3"></div>
 
           <div class="mb-3">
             <label for="description" class="form-label">Description</label>
@@ -202,7 +213,6 @@
     </div>
   </div>
 </div>
-
 
 <div class="modal fade" id="deactivatePropertyModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -229,5 +239,82 @@
     </div>
   </div>
 </div>
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  const editCheckLocationBtn = document.getElementById("edit-check-location-btn");
+  const editCityInput = document.getElementById("edit-city-input");
+  const editLocationStatus = document.getElementById("edit-location-status");
+  const editCandidatesContainer = document.getElementById("edit-location-candidates");
+  const editMapContainer = document.getElementById("edit-map-preview");
+  const editLatitudeInput = document.getElementById("edit-latitude-input");
+  const editLongitudeInput = document.getElementById("edit-longitude-input");
+
+  let editMap = null;
+  let editMarker = null;
+
+  function showEditLocationOnMap(lat, lon) {
+    editLatitudeInput.value = lat;
+    editLongitudeInput.value = lon;
+    editMapContainer.style.display = "block";
+
+    if (!editMap) {
+      editMap = L.map("edit-map-preview").setView([lat, lon], 12);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+      }).addTo(editMap);
+      editMarker = L.marker([lat, lon]).addTo(editMap);
+    } else {
+      editMap.invalidateSize();
+      editMap.setView([lat, lon], 12);
+      editMarker.setLatLng([lat, lon]);
+    }
+  }
+
+  editCheckLocationBtn.addEventListener("click", async function () {
+    const city = editCityInput.value.trim();
+    editCandidatesContainer.innerHTML = "";
+    editMapContainer.style.display = "none";
+
+    if (!city) {
+      editLocationStatus.textContent = "Enter a city first.";
+      return;
+    }
+
+    editLocationStatus.textContent = "Checking...";
+
+    const response = await fetch(`/host/properties/geocode-preview?city=${encodeURIComponent(city)}`);
+    const data = await response.json();
+
+    if (!data.results || data.results.length === 0) {
+      editLocationStatus.textContent = "Could not find that location.";
+      return;
+    }
+
+    if (data.results.length === 1) {
+      editLocationStatus.textContent = "Location found — confirm this looks correct below.";
+      showEditLocationOnMap(data.results[0].latitude, data.results[0].longitude);
+      return;
+    }
+
+    editLocationStatus.textContent = "Multiple matches found — pick the correct one:";
+
+    data.results.forEach(function (result) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn-manage-outline btn-sm text-start";
+      btn.textContent = result.display_name;
+      btn.addEventListener("click", function () {
+        showEditLocationOnMap(result.latitude, result.longitude);
+        editLocationStatus.textContent = "Selected: " + result.display_name;
+        editCandidatesContainer.innerHTML = "";
+      });
+      editCandidatesContainer.appendChild(btn);
+    });
+  });
+</script>
 
 {% endblock content %}

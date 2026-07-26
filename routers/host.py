@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 import shutil
 import models
 from pathlib import Path
-from utils.geocoding import geocode_city
+from utils.geocoding import geocode_city, geocode_city_candidates
 
 
 router = APIRouter(
@@ -204,6 +204,13 @@ def edit_property(
     if hotel.owner_id != user_id:
         raise HTTPException(status_code=403, detail="You don't own this property")
 
+
+    if city != hotel.city:
+        geocode_result = geocode_city(city)
+        if geocode_result:
+            hotel.latitude = geocode_result["latitude"]
+            hotel.longitude = geocode_result["longitude"]
+
     hotel.name = name
     hotel.city = city
     hotel.description = description
@@ -360,6 +367,21 @@ def add_new_property(
         url="/host/dashboard/",
         status_code=status.HTTP_303_SEE_OTHER,
     )
+
+
+
+@router.get("/properties/geocode-preview")
+def geocode_preview(city: str, db: Session = Depends(get_db)):
+    results = geocode_city_candidates(city)
+    return {"results": results}
+
+# @router.get("/properties/geocode-preview")
+# def geocode_preview(city: str, db: Session = Depends(get_db)):
+#     result = geocode_city(city)
+#     if result is None:
+#         return {"found": False}
+#     return {"found": True, "latitude": result["latitude"], "longitude": result["longitude"]}
+
 
 @router.get("/properties/manage", response_class=HTMLResponse, include_in_schema=False)
 def manage_properties_page(request: Request, db: Session = Depends(get_db)):
