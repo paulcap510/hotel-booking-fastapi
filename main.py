@@ -16,6 +16,8 @@ from database import get_db, SessionLocal
 from utils.pricing import calculate_nights, calculate_total_price, calculate_starting_price
 from utils.inventory import calculate_available_inventory
 from utils.booking_status import BookingStatus
+from utils.geocoding import geocode_city
+from utils.distance import distance_miles
 from utils.booking_queries import get_bookings_for_user
 from utils.reviews import get_hotel_average_rating, get_recent_hotel_reviews
 from routers.users import get_current_user
@@ -168,24 +170,45 @@ def hotel_info(
         },
     )
 
+
+
+#! worth caching identical repeat searches if you want to be considerate of their free service (their policy explicitly asks for caching of repeated identical queries)
+#! Fallback to text search if geocoding fails: keeps the feature working even if Nominatim is briefly down or rate-limited
+
 @app.get("/search", response_class=HTMLResponse)
 def search_hotels(request: Request, city: str = "", guests: int = 1,
                         check_in: date | None = None,
                         check_out: date | None = None,
                         db: Session = Depends(get_db)):
-    hotels = (
+
+    all_hotels = (
         db.query(models.Hotel)
         .join(models.Room)
-        .filter(or_(
-            models.Hotel.city.ilike(f"%{city}%"),
-            models.Hotel.metro_area.ilike(f"%{city}%"),
-        ))
         .filter(models.Hotel.is_active == True)
         .filter(models.Room.max_guests >= guests)
         .distinct()
         .all()
     )
 
+    hotels = []
+
+    if city:
+        search_location = geocode_city(city)
+
+        if search_location:
+            for hotel in all_hotels:
+                if hotel.latitude and hotel.longitude:
+                    distance = distance_miles(
+                        search_location["latitude"], search_location["longitude"],
+                        hotel.latitude, hotel.longitude
+                    )
+                    if distance <= 20:
+                        hotels.append(hotel)
+        else:
+            # geocoding failed — fall back to plain text match
+            hotels = [h for h in all_hotels if city.lower() in h.city.lower()]
+    else:
+        hotels = all_hotels
 
     for hotel in hotels:
         rooms = (
@@ -194,9 +217,7 @@ def search_hotels(request: Request, city: str = "", guests: int = 1,
             .filter(models.Room.max_guests >= guests)
             .all()
         )
-
         hotel.starting_price = calculate_starting_price(rooms)
-
         average_rating, review_count = get_hotel_average_rating(db, hotel.id)
         hotel.average_rating = average_rating
         hotel.review_count = review_count
@@ -213,6 +234,7 @@ def search_hotels(request: Request, city: str = "", guests: int = 1,
             "guests": guests,
         },
     )
+
 
 @app.get("/booking/rooms/{room_id}", response_class=HTMLResponse, include_in_schema=False)
 def booking_page(request: Request, room_id: int, check_in: date | None = None, check_out: date | None = None, guests: int = 1, db: Session = Depends(get_db)):

@@ -23,17 +23,8 @@ def geocode_city(city: str):
     result = results[0]
     address = result.get("address", {})
 
-    metro_area = (
-        address.get("city")
-        or address.get("town")
-        or address.get("state")
-        or address.get("municipality")
-        or address.get("province")
-        or address.get("county")
-    )
 
     return {
-        "metro_area": metro_area,
         "latitude": float(result["lat"]),
         "longitude": float(result["lon"]),
     }
