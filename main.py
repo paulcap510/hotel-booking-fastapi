@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from routers import hotels, rooms, bookings, users, host, experiences, reviews
 from datetime import date
@@ -103,11 +103,11 @@ def hotel_info(
     if check_in and check_out:
         booking_count_table = (
             db.query(
-                models.Booking.room_id.label("room_id"), #? show the room ID from Bookings table
-                func.count(models.Booking.id).label("bookings_for_dates") #? count bookings for each room ID
+                models.Booking.room_id.label("room_id"),
+                func.count(models.Booking.id).label("bookings_for_dates")
             )
             .filter(models.Booking.booking_status == models.BookingStatus.confirmed)
-            .filter(models.Booking.check_in_date < check_out) #? filtering bookings based on the dates
+            .filter(models.Booking.check_in_date < check_out)
             .filter(models.Booking.check_out_date > check_in)
             .group_by(models.Booking.room_id)
             .subquery()
@@ -117,7 +117,7 @@ def hotel_info(
             db.query(
                 models.Room,
                 func.coalesce(
-                    booking_count_table.c.bookings_for_dates, #? get bookings_for_dates column from the temporary subquery table
+                    booking_count_table.c.bookings_for_dates,
                     0
                 ).label("bookings_for_dates")
             )
@@ -176,7 +176,10 @@ def search_hotels(request: Request, city: str = "", guests: int = 1,
     hotels = (
         db.query(models.Hotel)
         .join(models.Room)
-        .filter(models.Hotel.city.ilike(f"%{city}%"))
+        .filter(or_(
+            models.Hotel.city.ilike(f"%{city}%"),
+            models.Hotel.metro_area.ilike(f"%{city}%"),
+        ))
         .filter(models.Hotel.is_active == True)
         .filter(models.Room.max_guests >= guests)
         .distinct()
@@ -250,51 +253,6 @@ def booking_page(request: Request, room_id: int, check_in: date | None = None, c
     },
         )
 
-
-#! moving to routers/bookings
-# @app.post("/booking/rooms/{room_id}", include_in_schema=False)
-# def submit_booking_form(
-#     room_id: int,
-#     guest_name: str = Form(...),
-#     guest_email: str = Form(...),
-#     check_in_date: date = Form(...),
-#     check_out_date: date = Form(...),
-#     number_of_guests: int = Form(...),
-#     db: Session = Depends(get_db),
-#     current_user: models.User = Depends(get_current_user),
-# ):
-
-#     room = db.query(models.Room).filter(models.Room.id == room_id).first()
-
-#     if room is None:
-#         raise HTTPException(status_code=404, detail="Room not found")
-
-#     hotel = db.query(models.Hotel).filter(models.Hotel.id == room.hotel_id).first()
-
-#     if hotel is None:
-#         raise HTTPException(status_code=404, detail="Hotel not found")
-
-#     if not hotel.is_active:
-#         return RedirectResponse(
-#             url=f"/hotels/{hotel.id}?error=This+property+is+no+longer+accepting+bookings",
-#             status_code=status.HTTP_303_SEE_OTHER,
-#         )
-
-#     new_booking = create_booking_for_user(
-#         db=db,
-#         room_id=room_id,
-#         user_id=current_user.id,
-#         guest_name=guest_name,
-#         guest_email=guest_email,
-#         check_in_date=check_in_date,
-#         check_out_date=check_out_date,
-#         number_of_guests=number_of_guests,
-#     )
-
-#     return RedirectResponse(
-#         url=f"/booking/confirmation/{new_booking.id}",
-#         status_code=status.HTTP_303_SEE_OTHER,
-#     )
 
 @app.get("/booking/confirmation/{booking_id}", include_in_schema=False)
 def booking_confirmation_page(request: Request, booking_id: int, db: Session = Depends(get_db)):

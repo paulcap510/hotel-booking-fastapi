@@ -18,6 +18,10 @@ class Hotel(Base):
     city: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
+    metro_area: Mapped[str | None] = mapped_column(String, nullable=True)
+    latitude: Mapped[float | None] = mapped_column(nullable=True)
+    longitude: Mapped[float | None] = mapped_column(nullable=True)
+
     rooms = relationship("Room", back_populates="hotel", cascade="all, delete-orphan")
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
 
