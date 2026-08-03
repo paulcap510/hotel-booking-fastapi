@@ -6,99 +6,145 @@
 <section class="hero">
   <div class="container">
     <h1 class="hero-title">Your next stay starts here</h1>
-      <div class="search-card">
-        <form action="/search" method="get">
 
-          <div class="row g-3 align-items-end">
-            <div class="col-md-3">
+
+<div class="search-card">
+
+  <div class="search-tabs">
+    <button type="button" class="search-tab active" data-target="tab-hotels">
+      🏨 Hotels
+    </button>
+    <button type="button" class="search-tab" data-target="tab-flights">
+      ✈️ Flights
+    </button>
+    <button type="button" class="search-tab" data-target="tab-cars">
+      🚗 Rental Cars
+    </button>
+  </div>
+
+  <!-- Hotels panel — real, working -->
+  <div id="tab-hotels" class="search-panel active">
+    <form action="/search" method="get" class="stacked-search-form">
+
+      <div class="search-input-box">
+        <label>Where</label>
+        <div class="location-input-wrapper">
+          <input type="text" class="form-control" name="city" placeholder="Where to?">
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-6">
           <div class="search-input-box">
-            <label>Where</label>
-            <div class="location-input-wrapper">
-              <input
-                type="text"
-                class="form-control"
-                name="city"
-                placeholder="Where to?"
-              />
+            <label>Check-in</label>
+            <div class="date-input-wrapper">
+              <input type="text" class="form-control" name="check_in" id="check-in" placeholder="Select date" autocomplete="off" required>
             </div>
           </div>
         </div>
-            <!-- <div class="col-md-3">
-              <div class="search-input-box">
-                <label>Where</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="city"
-                  placeholder="Where to?"
-                />
-              </div>
-            </div> -->
-
-            <div class="col-md-2">
-              <div class="search-input-box">
-                <label>Check-in</label>
-                <div class="date-input-wrapper">
-                  <input
-                    type="text"
-                    class="form-control"
-                    name="check_in"
-                    id="check-in"
-                    placeholder="Select date"
-                    autocomplete="off"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-2">
-              <div class="search-input-box">
-                <label>Check-out</label>
-                <div class="date-input-wrapper">
-                  <input
-                    type="text"
-                    class="form-control"
-                    name="check_out"
-                    id="check-out"
-                    placeholder="Select date"
-                    autocomplete="off"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-2">
-              <div class="search-input-box">
-                <label>Guests</label>
-                <div class="guests-input-wrapper">
-                  <input
-                    type="number"
-                    class="form-control"
-                    name="guests"
-                    min="1"
-                    value="1"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <button type="submit" class="btn btn-primary search-btn w-100">
-                Search
-              </button>
+        <div class="col-6">
+          <div class="search-input-box">
+            <label>Check-out</label>
+            <div class="date-input-wrapper">
+              <input type="text" class="form-control" name="check_out" id="check-out" placeholder="Select date" autocomplete="off" required>
             </div>
           </div>
-
-          <div class="form-check business-check">
-            <input class="form-check-input" type="checkbox" id="businessTrip" />
-            <label class="form-check-label" for="businessTrip">
-              I'm traveling for business
-            </label>
-          </div>
-
-        </form>
+        </div>
       </div>
+
+      <div class="search-input-box">
+        <label>Guests</label>
+        <div class="guests-input-wrapper">
+          <input type="number" class="form-control" name="guests" min="1" value="1">
+        </div>
+      </div>
+
+      <div id="search-validation-message" class="alert alert-danger rounded-3 mt-3" style="display: none;">
+        Please select both a check-in and check-out date.
+      </div>
+      <button type="submit" class="btn btn-primary search-btn w-100">
+        Search
+      </button>
+
+      <div class="form-check business-check mt-3">
+        <input class="form-check-input" type="checkbox" id="businessTrip">
+        <label class="form-check-label" for="businessTrip">
+          I'm traveling for business
+        </label>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Flights panel — placeholder -->
+  <div id="tab-flights" class="search-panel">
+    <div class="search-panel-wrapper">
+      <div class="stacked-search-form">
+        <div class="search-input-box">
+          <label>From</label>
+          <input type="text" class="form-control" disabled placeholder="Departure city">
+        </div>
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="search-input-box">
+              <label>Depart</label>
+              <input type="text" class="form-control" disabled placeholder="Select date">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="search-input-box">
+              <label>Return</label>
+              <input type="text" class="form-control" disabled placeholder="Select date">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary search-btn w-100" disabled>
+          Search
+        </button>
+      </div>
+      <div class="coming-soon-overlay">
+        <span class="coming-soon-text">Coming soon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rental cars panel — placeholder -->
+  <div id="tab-cars" class="search-panel">
+    <div class="search-panel-wrapper">
+      <div class="stacked-search-form">
+        <div class="search-input-box">
+          <label>Pick-up location</label>
+          <input type="text" class="form-control" disabled placeholder="City or airport">
+        </div>
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="search-input-box">
+              <label>Pick-up</label>
+              <input type="text" class="form-control" disabled placeholder="Select date">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="search-input-box">
+              <label>Drop-off</label>
+              <input type="text" class="form-control" disabled placeholder="Select date">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary search-btn w-100" disabled>
+          Search
+        </button>
+      </div>
+      <div class="coming-soon-overlay">
+        <span class="coming-soon-text">Coming soon</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
   </div>
 </section>
+
 <main class="container py-5">
   <h2 class="fw-bold mb-4 text-center">Featured experiences</h2>
   <div class="row g-4">
@@ -135,7 +181,6 @@
     dateFormat: "Y-m-d",
     minDate: "today",
     onChange: function (selectedDates) {
-      // Once a check-in date is picked, don't let check-out be before it
       checkOutPicker.set("minDate", selectedDates[0]);
     },
   });
@@ -144,5 +189,35 @@
     dateFormat: "Y-m-d",
     minDate: "today",
   });
+
+  const tabs = document.querySelectorAll(".search-tab");
+  const panels = document.querySelectorAll(".search-panel");
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(t => t.classList.remove("active"));
+      panels.forEach(p => p.classList.remove("active"));
+
+      tab.classList.add("active");
+      document.getElementById(tab.dataset.target).classList.add("active");
+    });
+  });
+
+  const hotelSearchForm = document.querySelector("#tab-hotels form");
+  const validationMessage = document.getElementById("search-validation-message");
+
+  hotelSearchForm.addEventListener("submit", function (event) {
+    const checkIn = document.getElementById("check-in").value;
+    const checkOut = document.getElementById("check-out").value;
+
+    if (!checkIn || !checkOut) {
+      event.preventDefault();
+      validationMessage.style.display = "block";
+    } else {
+      validationMessage.style.display = "none";
+    }
+
+  });
 </script>
+
 {% endblock content %}

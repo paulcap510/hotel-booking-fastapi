@@ -8,6 +8,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from routers import hotels, rooms, bookings, users, host, experiences, reviews
 from datetime import date
+from config import settings
 import random
 
 import models
@@ -613,7 +614,6 @@ def reset_password_page(
     })
 
 
-#* backend for handling form submission
 @app.post("/account/reset-password", include_in_schema=False)
 def reset_password_form(
     request: Request,
@@ -656,6 +656,12 @@ def reset_password_form(
     delete_reset_token(token)
 
     return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+#! Startup check to ensure local development is not pointing at productio database
+if "neon.tech" in settings.database_url:
+    print("=" * 50)
+    print("⚠️  WARNING: Running locally against NEON (production) database!")
+    print("=" * 50)
 
 #! Error handling the 404
 @app.exception_handler(StarletteHTTPException)
