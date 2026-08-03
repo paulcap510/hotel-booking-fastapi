@@ -2,9 +2,13 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 import models
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 LOCAL_URL = "postgresql://paul_app:your_local_password@localhost:5432/hotels_db"
-NEON_URL = "postgresql://neondb_owner:npg_XA13wjKcDbeg@ep-silent-smoke-adllut7y-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+NEON_URL = os.getenv("DATABASE_URL")
 
 local_engine = sqlalchemy.create_engine(LOCAL_URL)
 neon_engine = sqlalchemy.create_engine(NEON_URL)
