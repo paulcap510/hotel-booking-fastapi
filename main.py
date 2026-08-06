@@ -787,9 +787,14 @@ def ai_search(request: Request, query: str = None, db: Session = Depends(get_db)
 
     if query:
         filters = extract_filters(query)
-        hotels, explanation = filter_hotels_with_explanation(db, filters)
-        recommendation = generate_recommendation(query, hotels, explanation)
-        recommendation = insert_hotel_links(recommendation, hotels)
+        if filters is None:
+            recommendation = (
+                "We could not process your search right now. Please try again."
+            )
+        else:
+            hotels, explanation = filter_hotels_with_explanation(db, filters)
+            recommendation = generate_recommendation(query, hotels, explanation)
+            recommendation = insert_hotel_links(recommendation, hotels)
 
     return templates.TemplateResponse(
         request,

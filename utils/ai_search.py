@@ -41,17 +41,22 @@ Rules:
   "worst reviews"). Otherwise it is "positive".
 - If no city was mentioned, use null. If no price was mentioned, use null.
 """
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": query},
+            ],
+            response_format={"type": "json_object"},
+        )
+    except Exception:
+        return None
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": query},
-        ],
-        response_format={"type": "json_object"},
-    )
-
-    return json.loads(response.choices[0].message.content)
+    try:
+        return json.loads(response.choices[0].message.content)
+    except (json.JSONDecodeError, KeyError, IndexError):
+        return None
 
 
 def filter_hotels(db: Session, filters: dict):
@@ -179,14 +184,14 @@ that instead. Format each hotel name in brackets like [Hotel Name], with no URL,
  Do not invent details not present in the description or reviews above.
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-        ],
-    )
-
-    return response.choices[0].message.content
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "system", "content": system_prompt}],
+        )
+        return response.choices[0].message.content
+    except Exception:
+        return "We're having trouble generating a recommendation right now. Please try again in a moment."
 
 
 def markdown_links_to_html(text: str) -> str:

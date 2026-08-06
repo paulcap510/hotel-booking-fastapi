@@ -61,9 +61,11 @@ Unlike hotel room bookings (which are instant, capacity-checked reservations), e
 
 - Backend: FastAPI
 - Templates: Jinja2
-- Database: PostgreSQL (via SQLAlchemy ORM), migrations via Alembic
+- Database: PostgreSQL (via SQLAlchemy ORM), migrations via Alembic; `pgvector` extension for embedding storage and similarity search
 - Auth: Session-based (see below)
 - Frontend: Bootstrap 5, Flatpickr for date selection
+- Geocoding: OpenStreetMap Nominatim (free tier — see Architecture Decisions)
+- AI: OpenAI API (`gpt-4o-mini` for query understanding and recommendation generation, `text-embedding-3-small` for review embeddings)
 
 ## Architecture Decisions
 
@@ -149,6 +151,20 @@ uvicorn main:app --reload
 
 This creates all tables via Alembic migrations against your PostgreSQL database. No sample data is included — sign up for an account, then use "Become a host" to create test hotels and experiences.
 
+### AI-Powered Hotel Search
+
+Guests can describe what they're looking for in natural language (e.g. "a pet-friendly hotel in Tokyo with a gym, under $200, with good reviews about the pet experience"), and the system returns a natural-language recommendation grounded in real hotel and review data.
+
+The pipeline uses a hybrid structured/semantic approach rather than routing everything through a single AI call:
+
+- **Structured extraction**: an LLM call (OpenAI `gpt-4o-mini`) parses the request into explicit filters — city, max price, and any explicitly-named amenities — returned as JSON. Only amenities the guest explicitly names are treated as hard constraints; vague/subjective language (e.g. "rustic," "posh") is deliberately excluded from this step, since it has no corresponding database column.
+- **SQL/radius filtering**: the extracted filters run as a real query against the `Hotel`/`Room` tables, reusing the same geolocation-based radius search built for the standard hotel search (so "Tokyo" correctly includes Shibuya-area hotels).
+- **Graceful fallback**: if no hotel satisfies every hard constraint, the system automatically retries with individual constraints relaxed (price first, then amenities one at a time) and reports exactly which constraint was blocking a match, rather than returning an unexplained empty result.
+- **Semantic reasoning**: for the matching (or closest-alternative) hotels, a second LLM call reads each hotel's actual description and real guest reviews (via `pgvector` similarity search on OpenAI `text-embedding-3-small` embeddings, computed once per review at creation time and stored directly in Postgres) alongside the guest's original, full request, and writes a natural-language recommendation — including subjective qualities and negative-sentiment requests (e.g. "hotels with rude staff") that a fixed filter schema can't represent.
+- Hotel names in the response are converted to real links to the hotel's detail page in application code (not trusted to the LLM's own formatting), and both LLM calls fail gracefully with a friendly message rather than a raw error if the OpenAI API is unavailable.
+
+This was a deliberate architecture choice over either (a) a single rigid extraction schema for everything, which breaks down for genuinely subjective or open-ended requests, or (b) giving the AI direct database access, which introduces real prompt-injection risk; structured filtering stays under direct application control, and free-form reasoning is scoped to read-only, application-fetched text.
+
 ## Next Steps / Limitations
 
 - [ ] Sessions are currently stored in memory; they reset on server restart and won't work across multiple server instances. Should move to a database table or Redis before any real deployment.
@@ -167,3 +183,5 @@ This creates all tables via Alembic migrations against your PostgreSQL database.
 - [ ] Geocoding failures (Nominatim down, rate-limited, or an unrecognized place name) currently fall back to plain substring matching on `city` rather than radius search; a production system might retry, cache more aggressively, or use a paid provider with an SLA.
 - [ ] The 20-mile search radius is a fixed constant, not user-adjustable or distance-unit-aware (miles only).
 - [ ] This AI search matches based on price, amenities, and review sentiment; it does not check real-time room availability for specific dates. A production version would integrate the same availability logic used in the standard hotel search
+- [ ] AI search does not check real-time room availability for specific dates (no check-in/check-out date filtering). This is a recognized limitaiton. A production version would integrate the same date-aware inventory logic used in the standard hotel search.
+- [ ] Currently a single-turn form, not a conversational interface; a chat UI is a natural extension once the underlying pipeline is proven.
