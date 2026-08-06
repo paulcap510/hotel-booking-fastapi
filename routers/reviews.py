@@ -3,21 +3,24 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from datetime import date
+from utils.embeddings import get_embedding
+from utils.booking_status import BookingStatus
 
 from database import get_db
 from auth import get_user_id_from_session
 import models
 
-router = APIRouter(
-    prefix="/bookings",
-    tags=["Reviews"]
-)
+router = APIRouter(prefix="/bookings", tags=["Reviews"])
 
 templates = Jinja2Templates(directory="templates")
 
 
-@router.get("/{booking_id}/review", response_class=HTMLResponse, include_in_schema=False)
-def submit_review_page(request: Request, booking_id: int, db: Session = Depends(get_db)):
+@router.get(
+    "/{booking_id}/review", response_class=HTMLResponse, include_in_schema=False
+)
+def submit_review_page(
+    request: Request, booking_id: int, db: Session = Depends(get_db)
+):
     session_id = request.cookies.get("session_id")
     user_id = get_user_id_from_session(session_id)
 
@@ -32,23 +35,26 @@ def submit_review_page(request: Request, booking_id: int, db: Session = Depends(
     if booking is None:
         raise HTTPException(status_code=404, detail="Booking not found")
 
-    if booking.user_id != user_id:
-        raise HTTPException(status_code=403, detail="You don't own this booking")
+    if booking.booking_status != BookingStatus.completed:
+        raise HTTPException(
+            status_code=400, detail="You can only review a completed stay"
+        )
 
-    if booking.check_out_date > date.today():
-        raise HTTPException(status_code=400, detail="You can only review a stay after checkout")
-
-    if booking.booking_status == "cancelled":
-        raise HTTPException(status_code=400, detail="Cannot review a cancelled booking")
-
-    existing_review = db.query(models.Review).filter(models.Review.booking_id == booking_id).first()
+    existing_review = (
+        db.query(models.Review).filter(models.Review.booking_id == booking_id).first()
+    )
     if existing_review:
-        raise HTTPException(status_code=400, detail="You've already reviewed this booking")
+        raise HTTPException(
+            status_code=400, detail="You've already reviewed this booking"
+        )
 
-    return templates.TemplateResponse(request, "submit_review.html", {
-        "booking": booking,
-    })
-
+    return templates.TemplateResponse(
+        request,
+        "submit_review.html",
+        {
+            "booking": booking,
+        },
+    )
 
 
 @router.post("/{booking_id}/review")
@@ -77,23 +83,36 @@ def submit_review(
         raise HTTPException(status_code=403, detail="You don't own this booking")
 
     if booking.check_out_date > date.today():
-        raise HTTPException(status_code=400, detail="You can only review a stay after checkout")
+        raise HTTPException(
+            status_code=400, detail="You can only review a stay after checkout"
+        )
 
-    if booking.booking_status == "cancelled":
-        raise HTTPException(status_code=400, detail="Cannot review a cancelled booking")
+    if booking.booking_status != BookingStatus.completed:
+        raise HTTPException(
+            status_code=400, detail="You can only review a completed stay"
+        )
 
     if not (1 <= review_score <= 10):
-        raise HTTPException(status_code=400, detail="Review score must be between 1 and 10")
+        raise HTTPException(
+            status_code=400, detail="Review score must be between 1 and 10"
+        )
 
-    existing_review = db.query(models.Review).filter(models.Review.booking_id == booking_id).first()
+    existing_review = (
+        db.query(models.Review).filter(models.Review.booking_id == booking_id).first()
+    )
     if existing_review:
-        raise HTTPException(status_code=400, detail="You've already reviewed this booking")
+        raise HTTPException(
+            status_code=400, detail="You've already reviewed this booking"
+        )
+
+    embedding = get_embedding(review_description)
 
     new_review = models.Review(
         booking_id=booking_id,
         user_id=user_id,
         review_score=review_score,
         review_description=review_description,
+        embedding=embedding,
     )
 
     db.add(new_review)
