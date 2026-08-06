@@ -10,6 +10,13 @@ from routers import hotels, rooms, bookings, users, host, experiences, reviews
 from datetime import date
 from config import settings
 import random
+from utils.ai_search import (
+    extract_filters,
+    filter_hotels_with_explanation,
+    generate_recommendation,
+    insert_hotel_links,
+)
+
 
 import models
 from database import get_db, SessionLocal
@@ -773,14 +780,23 @@ def reset_password_form(
     return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
 
+#! AI Search
 @app.get("/search/ai", response_class=HTMLResponse, include_in_schema=False)
-def ai_search_page(request: Request, query: str = None):
+def ai_search(request: Request, query: str = None, db: Session = Depends(get_db)):
+    recommendation = None
+
+    if query:
+        filters = extract_filters(query)
+        hotels, explanation = filter_hotels_with_explanation(db, filters)
+        recommendation = generate_recommendation(query, hotels, explanation)
+        recommendation = insert_hotel_links(recommendation, hotels)
+
     return templates.TemplateResponse(
         request,
         "ai_search.html",
         {
             "query": query,
-            "results": None,
+            "recommendation": recommendation,
         },
     )
 
