@@ -658,6 +658,11 @@
               <a class="nav-link" href="{{ url_for('support_page' )}}">Support</a>
             </li>
 
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('ai_search' )}}">Try AI Search!</a>
+            </li>
+
+
             {% if not request.state.user %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('login_page') }}">Sign in</a>

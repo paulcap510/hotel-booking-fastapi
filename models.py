@@ -7,6 +7,7 @@ from sqlalchemy import Integer, String, Boolean, ForeignKey, Date
 from enum import Enum
 from utils.booking_status import BookingStatus
 from datetime import datetime, timezone
+from pgvector.sqlalchemy import Vector
 
 
 class Hotel(Base):
@@ -148,6 +149,7 @@ class Review(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(1536), nullable=True)
 
     booking = relationship("Booking", back_populates="review")
     user = relationship("User")

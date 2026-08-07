@@ -1,0 +1,50 @@
+{% extends "layout.html" %} {% block content %}
+
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="text-center mb-5">
+        <h1 class="fw-bold mb-2">Describe your ideal stay</h1>
+        <p class="text-muted">
+          Tell us what you're looking for — amenities, budget, or what other
+          guests have said.
+        </p>
+      </div>
+
+      <section class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+        <form method="get" action="/search/ai">
+          <div class="mb-4">
+            <label class="form-label fw-bold">What are you looking for?</label>
+            <p class="text-muted small mb-2">
+              Be sure to include a specific city in your search.
+            </p>
+            <textarea
+              class="form-control form-control-lg"
+              name="query"
+              rows="3"
+              placeholder="e.g. A pet-friendly hotel in Tokyo with a gym, under $200 a night, with good reviews about the pet experience"
+              required
+            >
+{{ query or '' }}</textarea
+            >
+          </div>
+
+          <button type="submit" class="btn btn-hotel-confirm btn-lg w-100">
+            Search
+          </button>
+        </form>
+      </section>
+
+      {% if recommendation %}
+      <div class="bg-white rounded-4 shadow-sm p-4 p-md-5 mt-4">
+        <h4 class="fw-bold mb-3">Recommendation</h4>
+        <p class="mb-0" style="white-space: pre-line">
+          {{ recommendation | safe }}
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+{% endblock content %}
