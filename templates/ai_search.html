@@ -52,12 +52,16 @@
           </a>
           {% endif %}
 
-          <a
-            href="/search/ai?query={{ query | urlencode }}"
+          <button
+            type="button"
             class="btn btn-manage-outline"
+            onclick="
+              document.querySelector('textarea[name=query]').scrollIntoView();
+              document.querySelector('textarea[name=query]').focus();
+            "
           >
             Refine your search
-          </a>
+          </button>
         </div>
       </div>
       {% endif %}
