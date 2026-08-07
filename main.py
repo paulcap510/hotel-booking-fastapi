@@ -782,8 +782,12 @@ def reset_password_form(
 
 #! AI Search
 @app.get("/search/ai", response_class=HTMLResponse, include_in_schema=False)
-def ai_search(request: Request, query: str = None, db: Session = Depends(get_db)):
+def ai_search(
+    request: Request, query: str = None, offset: int = 0, db: Session = Depends(get_db)
+):
     recommendation = None
+    has_more = False
+    next_offset = offset + 2
 
     if query:
         filters = extract_filters(query)
@@ -792,7 +796,10 @@ def ai_search(request: Request, query: str = None, db: Session = Depends(get_db)
                 "We could not process your search right now. Please try again."
             )
         else:
-            hotels, explanation = filter_hotels_with_explanation(db, filters)
+            all_matches, explanation = filter_hotels_with_explanation(db, filters)
+            hotels = all_matches[offset : offset + 2]
+            has_more = len(all_matches) > offset + 2
+
             recommendation = generate_recommendation(query, hotels, explanation)
             recommendation = insert_hotel_links(recommendation, hotels)
 
@@ -802,6 +809,8 @@ def ai_search(request: Request, query: str = None, db: Session = Depends(get_db)
         {
             "query": query,
             "recommendation": recommendation,
+            "has_more": has_more,
+            "next_offset": next_offset,
         },
     )
 

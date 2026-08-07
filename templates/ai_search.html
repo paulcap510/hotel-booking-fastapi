@@ -41,6 +41,24 @@
         <p class="mb-0" style="white-space: pre-line">
           {{ recommendation | safe }}
         </p>
+
+        <div class="d-flex gap-2 justify-content-center mt-4">
+          {% if has_more %}
+          <a
+            href="/search/ai?query={{ query | urlencode }}&offset={{ next_offset }}"
+            class="btn btn-manage-outline"
+          >
+            Show me more options
+          </a>
+          {% endif %}
+
+          <a
+            href="/search/ai?query={{ query | urlencode }}"
+            class="btn btn-manage-outline"
+          >
+            Refine your search
+          </a>
+        </div>
       </div>
       {% endif %}
     </div>
