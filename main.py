@@ -782,8 +782,12 @@ def reset_password_form(
 
 #! AI Search
 @app.get("/search/ai", response_class=HTMLResponse, include_in_schema=False)
-def ai_search(request: Request, query: str = None, db: Session = Depends(get_db)):
+def ai_search(
+    request: Request, query: str = None, offset: int = 0, db: Session = Depends(get_db)
+):
     recommendation = None
+    has_more = False
+    next_offset = offset + 2
 
     if query:
         filters = extract_filters(query)
@@ -792,7 +796,10 @@ def ai_search(request: Request, query: str = None, db: Session = Depends(get_db)
                 "We could not process your search right now. Please try again."
             )
         else:
-            hotels, explanation = filter_hotels_with_explanation(db, filters)
+            all_matches, explanation = filter_hotels_with_explanation(db, filters)
+            hotels = all_matches[offset : offset + 2]
+            has_more = len(all_matches) > offset + 2
+
             recommendation = generate_recommendation(query, hotels, explanation)
             recommendation = insert_hotel_links(recommendation, hotels)
 
@@ -802,8 +809,42 @@ def ai_search(request: Request, query: str = None, db: Session = Depends(get_db)
         {
             "query": query,
             "recommendation": recommendation,
+            "has_more": has_more,
+            "next_offset": next_offset,
         },
     )
+
+
+@app.get("/search/ai/api", include_in_schema=False)
+def ai_search_api(query: str, offset: int = 0, db: Session = Depends(get_db)):
+    filters = extract_filters(query)
+    if filters is None:  # ? why would filters be None in this case
+        return JSONResponse(
+            {
+                "recommendation": "We could not process your search right now. Please try again.",
+                "has_more": False,
+                "next_offset": offset,
+            }
+        )
+
+    all_matches, explanation = filter_hotels_with_explanation(db, filters)
+    hotels = all_matches[offset : offset + 2]
+    has_more = len(all_matches) > offset + 2
+    recommendation = generate_recommendation(query, hotels, explanation)
+    recommendation = insert_hotel_links(recommendation, hotels)
+
+    return JSONResponse(
+        {
+            "recommendation": recommendation,
+            "has_more": has_more,
+            "next_offset": offset + 2,
+        }
+    )
+
+
+@app.get("/search/chat", response_class=HTMLResponse, include_in_schema=False)
+def ai_chat_page(request: Request):
+    return templates.TemplateResponse(request, "ai_chat.html", {})
 
 
 #! Startup check to ensure local development is not pointing at productio database

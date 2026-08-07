@@ -96,7 +96,9 @@ def filter_hotels_with_explanation(db, filters):
     hotels = filter_hotels(db, filters)
 
     if hotels:
-        return hotels[:2], None
+        # return hotels[:2], None
+        return hotels, None
+
     if filters.get("max_price"):
         relaxed = dict(filters)
         relaxed["max_price"] = None

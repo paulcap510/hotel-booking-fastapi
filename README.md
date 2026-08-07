@@ -165,6 +165,14 @@ The pipeline uses a hybrid structured/semantic approach rather than routing ever
 
 This was a deliberate architecture choice over either (a) a single rigid extraction schema for everything, which breaks down for genuinely subjective or open-ended requests, or (b) giving the AI direct database access, which introduces real prompt-injection risk; structured filtering stays under direct application control, and free-form reasoning is scoped to read-only, application-fetched text.
 
+### Chat Interface
+
+The AI search is also available as a conversational chat interface (`/search/chat`), built on top of the same underlying pipeline with no duplicated logic. A lightweight JSON endpoint (`/search/ai/api`) exposes the existing extraction → filtering → reasoning pipeline; the chat page's JavaScript calls it per message and renders the growing conversation as chat bubbles.
+
+Message history exists only in the browser's memory for the duration of the page session — it is not persisted server-side or in a cookie, and is lost on refresh. Each message is still processed as an independent request (no conversational memory is passed to the AI between turns); the chat interface changes only how the interaction is presented, not the underlying request/response model. This was a deliberate scope decision: true multi-turn context (where a follow-up like "also check for a pool" would be merged with an earlier request) would require passing conversation history into the extraction prompt, and was intentionally left as a documented next step rather than built into this version.
+
+"Show more options" reuses the existing pagination pattern from the form-based version (an `offset` parameter), re-running the full pipeline against the same query rather than caching results — an explicit, considered tradeoff given the project's actual scale (a handful of demo hotels), favoring simplicity over an optimization that would only matter under real production traffic.
+
 ## Next Steps / Limitations
 
 - [ ] Sessions are currently stored in memory; they reset on server restart and won't work across multiple server instances. Should move to a database table or Redis before any real deployment.
@@ -185,3 +193,4 @@ This was a deliberate architecture choice over either (a) a single rigid extract
 - [ ] This AI search matches based on price, amenities, and review sentiment; it does not check real-time room availability for specific dates. A production version would integrate the same availability logic used in the standard hotel search
 - [ ] AI search does not check real-time room availability for specific dates (no check-in/check-out date filtering). This is a recognized limitaiton. A production version would integrate the same date-aware inventory logic used in the standard hotel search.
 - [ ] Currently a single-turn form, not a conversational interface; a chat UI is a natural extension once the underlying pipeline is proven.
+- [ ] The chat interface has no true conversational memory, ane each message is processed independently. A production version might maintain conversation context server-side (or via a stateless approach like including recent message history in the extraction prompt) so follow-up refinements build on prior context rather than requiring a fully restated query.
