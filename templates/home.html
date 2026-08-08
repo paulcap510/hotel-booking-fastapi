@@ -1,154 +1,235 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {% block content %}
 
-{% block content %}
-
+<style>
+  .suggestion-message {
+    padding: 8px 12px;
+    color: #888;
+    font-style: italic;
+    pointer-events: none;
+  }
+</style>
 
 <section class="hero">
   <div class="container">
     <h1 class="hero-title">Your next stay starts here</h1>
 
-
-<div class="search-card">
-
-  <div class="search-tabs">
-    <button type="button" class="search-tab active" data-target="tab-hotels">
-      🏨 Hotels
-    </button>
-    <button type="button" class="search-tab" data-target="tab-flights">
-      ✈️ Flights
-    </button>
-    <button type="button" class="search-tab" data-target="tab-cars">
-      🚗 Rental Cars
-    </button>
-  </div>
-
-  <!-- Hotels panel — real, working -->
-  <div id="tab-hotels" class="search-panel active">
-    <form action="/search" method="get" class="stacked-search-form">
-
-      <div class="search-input-box">
-        <label>Where</label>
-        <div class="location-input-wrapper">
-          <input type="text" class="form-control" name="city" placeholder="Where to?">
-        </div>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-6">
-          <div class="search-input-box">
-            <label>Check-in</label>
-            <div class="date-input-wrapper">
-              <input type="text" class="form-control" name="check_in" id="check-in" placeholder="Select date" autocomplete="off" required>
-            </div>
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="search-input-box">
-            <label>Check-out</label>
-            <div class="date-input-wrapper">
-              <input type="text" class="form-control" name="check_out" id="check-out" placeholder="Select date" autocomplete="off" required>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="search-input-box">
-        <label>Guests</label>
-        <div class="guests-input-wrapper">
-          <input type="number" class="form-control" name="guests" min="1" value="1">
-        </div>
-      </div>
-
-      <div id="search-validation-message" class="alert alert-danger rounded-3 mt-3" style="display: none;">
-        Please select both a check-in and check-out date.
-      </div>
-      <button type="submit" class="btn btn-primary search-btn w-100">
-        Search
-      </button>
-
-      <div class="form-check business-check mt-3">
-        <input class="form-check-input" type="checkbox" id="businessTrip">
-        <label class="form-check-label" for="businessTrip">
-          I'm traveling for business
-        </label>
-      </div>
-
-    </form>
-  </div>
-
-  <!-- Flights panel — placeholder -->
-  <div id="tab-flights" class="search-panel">
-    <div class="search-panel-wrapper">
-      <div class="stacked-search-form">
-        <div class="search-input-box">
-          <label>From</label>
-          <input type="text" class="form-control" disabled placeholder="Departure city">
-        </div>
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="search-input-box">
-              <label>Depart</label>
-              <input type="text" class="form-control" disabled placeholder="Select date">
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="search-input-box">
-              <label>Return</label>
-              <input type="text" class="form-control" disabled placeholder="Select date">
-            </div>
-          </div>
-        </div>
-        <button type="button" class="btn btn-primary search-btn w-100" disabled>
-          Search
+    <div class="search-card">
+      <div class="search-tabs">
+        <button
+          type="button"
+          class="search-tab active"
+          data-target="tab-hotels"
+        >
+          🏨 Hotels
+        </button>
+        <button type="button" class="search-tab" data-target="tab-flights">
+          ✈️ Flights
+        </button>
+        <button type="button" class="search-tab" data-target="tab-cars">
+          🚗 Rental Cars
         </button>
       </div>
-      <div class="coming-soon-overlay">
-        <span class="coming-soon-text">Coming soon</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- Rental cars panel — placeholder -->
-  <div id="tab-cars" class="search-panel">
-    <div class="search-panel-wrapper">
-      <div class="stacked-search-form">
-        <div class="search-input-box">
-          <label>Pick-up location</label>
-          <input type="text" class="form-control" disabled placeholder="City or airport">
-        </div>
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="search-input-box">
-              <label>Pick-up</label>
-              <input type="text" class="form-control" disabled placeholder="Select date">
+      <!-- Hotels panel — real, working -->
+      <div id="tab-hotels" class="search-panel active">
+        <form action="/search" method="get" class="stacked-search-form">
+          <div class="search-input-box">
+            <label>Where</label>
+            <div class="location-input-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                name="city"
+                id="cityInput"
+                placeholder="Where to?"
+              />
+              <div
+                id="suggestionsDropdown"
+                class="suggestions-dropdown"
+                style="display: none"
+              ></div>
             </div>
           </div>
-          <div class="col-6">
-            <div class="search-input-box">
-              <label>Drop-off</label>
-              <input type="text" class="form-control" disabled placeholder="Select date">
+
+          <input type="hidden" name="lat" id="cityLat" />
+          <input type="hidden" name="lon" id="cityLon" />
+
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="search-input-box">
+                <label>Check-in</label>
+                <div class="date-input-wrapper">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="check_in"
+                    id="check-in"
+                    placeholder="Select date"
+                    autocomplete="off"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="search-input-box">
+                <label>Check-out</label>
+                <div class="date-input-wrapper">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="check_out"
+                    id="check-out"
+                    placeholder="Select date"
+                    autocomplete="off"
+                    required
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <button type="button" class="btn btn-primary search-btn w-100" disabled>
-          Search
-        </button>
+
+          <div class="search-input-box">
+            <label>Guests</label>
+            <div class="guests-input-wrapper">
+              <input
+                type="number"
+                class="form-control"
+                name="guests"
+                min="1"
+                value="1"
+              />
+            </div>
+          </div>
+
+          <div
+            id="search-validation-message"
+            class="alert alert-danger rounded-3 mt-3"
+            style="display: none"
+          >
+            Please select both a check-in and check-out date.
+          </div>
+          <button type="submit" class="btn btn-primary search-btn w-100">
+            Search
+          </button>
+
+          <div class="form-check business-check mt-3">
+            <input class="form-check-input" type="checkbox" id="businessTrip" />
+            <label class="form-check-label" for="businessTrip">
+              I'm traveling for business
+            </label>
+          </div>
+        </form>
       </div>
-      <div class="coming-soon-overlay">
-        <span class="coming-soon-text">Coming soon</span>
+
+      <!-- Flights panel — placeholder -->
+      <div id="tab-flights" class="search-panel">
+        <div class="search-panel-wrapper">
+          <div class="stacked-search-form">
+            <div class="search-input-box">
+              <label>From</label>
+              <input
+                type="text"
+                class="form-control"
+                disabled
+                placeholder="Departure city"
+              />
+            </div>
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="search-input-box">
+                  <label>Depart</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    disabled
+                    placeholder="Select date"
+                  />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="search-input-box">
+                  <label>Return</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    disabled
+                    placeholder="Select date"
+                  />
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary search-btn w-100"
+              disabled
+            >
+              Search
+            </button>
+          </div>
+          <div class="coming-soon-overlay">
+            <span class="coming-soon-text">Coming soon</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rental cars panel — placeholder -->
+      <div id="tab-cars" class="search-panel">
+        <div class="search-panel-wrapper">
+          <div class="stacked-search-form">
+            <div class="search-input-box">
+              <label>Pick-up location</label>
+              <input
+                type="text"
+                class="form-control"
+                disabled
+                placeholder="City or airport"
+              />
+            </div>
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="search-input-box">
+                  <label>Pick-up</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    disabled
+                    placeholder="Select date"
+                  />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="search-input-box">
+                  <label>Drop-off</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    disabled
+                    placeholder="Select date"
+                  />
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary search-btn w-100"
+              disabled
+            >
+              Search
+            </button>
+          </div>
+          <div class="coming-soon-overlay">
+            <span class="coming-soon-text">Coming soon</span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-
-</div>
-
   </div>
 </section>
 
 <main class="container py-5">
   <h2 class="fw-bold mb-4 text-center">Featured experiences</h2>
   <div class="row g-4">
-
     {% for experience in experiences %}
     <div class="col-md-4">
       <div class="card experience-card h-100">
@@ -157,67 +238,148 @@
             src="{{ url_for('static', path=experience.image_path) }}"
             class="card-img-top object-fit-cover"
             alt="{{ experience.title }}"
-          >
+          />
         </div>
         <div class="card-body d-flex flex-column">
           <h5 class="card-title fw-bold">{{ experience.title }}</h5>
           <p class="card-text text-muted">
-            {{ experience.description[:100] }}{% if experience.description|length > 100 %}...{% endif %}
+            {{ experience.description[:100] }}{% if
+            experience.description|length > 100 %}...{% endif %}
           </p>
-          <span class="price-badge">From ${{ experience.price_per_person }}/person</span>
-          <a href="/experiences/{{ experience.id }}" class="btn btn-view-experience w-100 mt-auto">
+          <span class="price-badge"
+            >From ${{ experience.price_per_person }}/person</span
+          >
+          <a
+            href="/experiences/{{ experience.id }}"
+            class="btn btn-view-experience w-100 mt-auto"
+          >
             View experience
           </a>
         </div>
       </div>
     </div>
     {% endfor %}
-
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-  const checkInPicker = flatpickr("#check-in", {
-    dateFormat: "Y-m-d",
-    minDate: "today",
+  const checkInPicker = flatpickr('#check-in', {
+    dateFormat: 'Y-m-d',
+    minDate: 'today',
     onChange: function (selectedDates) {
-      checkOutPicker.set("minDate", selectedDates[0]);
+      checkOutPicker.set('minDate', selectedDates[0]);
     },
   });
 
-  const checkOutPicker = flatpickr("#check-out", {
-    dateFormat: "Y-m-d",
-    minDate: "today",
+  const checkOutPicker = flatpickr('#check-out', {
+    dateFormat: 'Y-m-d',
+    minDate: 'today',
   });
 
-  const tabs = document.querySelectorAll(".search-tab");
-  const panels = document.querySelectorAll(".search-panel");
+  const tabs = document.querySelectorAll('.search-tab');
+  const panels = document.querySelectorAll('.search-panel');
 
   tabs.forEach(function (tab) {
-    tab.addEventListener("click", function () {
-      tabs.forEach(t => t.classList.remove("active"));
-      panels.forEach(p => p.classList.remove("active"));
+    tab.addEventListener('click', function () {
+      tabs.forEach((t) => t.classList.remove('active'));
+      panels.forEach((p) => p.classList.remove('active'));
 
-      tab.classList.add("active");
-      document.getElementById(tab.dataset.target).classList.add("active");
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).classList.add('active');
     });
   });
 
-  const hotelSearchForm = document.querySelector("#tab-hotels form");
-  const validationMessage = document.getElementById("search-validation-message");
+  const hotelSearchForm = document.querySelector('#tab-hotels form');
+  const validationMessage = document.getElementById(
+    'search-validation-message',
+  );
 
-  hotelSearchForm.addEventListener("submit", function (event) {
-    const checkIn = document.getElementById("check-in").value;
-    const checkOut = document.getElementById("check-out").value;
+  hotelSearchForm.addEventListener('submit', function (event) {
+    const checkIn = document.getElementById('check-in').value;
+    const checkOut = document.getElementById('check-out').value;
 
     if (!checkIn || !checkOut) {
       event.preventDefault();
-      validationMessage.style.display = "block";
+      validationMessage.style.display = 'block';
     } else {
-      validationMessage.style.display = "none";
+      validationMessage.style.display = 'none';
+    }
+  });
+
+  let searchTimer = null;
+  let searchController = null;
+
+  document.getElementById('cityInput').addEventListener('input', function () {
+    const typedText = this.value;
+    clearTimeout(searchTimer);
+
+    document.getElementById('cityLat').value = '';
+    document.getElementById('cityLon').value = '';
+
+    if (typedText.length < 3) {
+      document.getElementById('suggestionsDropdown').style.display = 'none';
+      return;
     }
 
+    searchTimer = setTimeout(() => {
+      if (searchController) searchController.abort();
+      searchController = new AbortController();
+
+      showDropdownMessage('Searching...');
+
+      fetch(
+        '/host/properties/geocode-preview?city=' +
+          encodeURIComponent(typedText),
+        { signal: searchController.signal },
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          renderSuggestions(data.results);
+        })
+        .catch((err) => {
+          if (err.name !== 'AbortError') console.error(err);
+        });
+    }, 300);
   });
+
+  function showDropdownMessage(text) {
+    const dropdown = document.getElementById('suggestionsDropdown');
+    dropdown.innerHTML = '';
+    const msg = document.createElement('div');
+    msg.className = 'suggestion-message';
+    msg.textContent = text;
+    dropdown.appendChild(msg);
+    dropdown.style.display = 'block';
+  }
+
+  function renderSuggestions(matches) {
+    const dropdown = document.getElementById('suggestionsDropdown');
+    dropdown.innerHTML = '';
+
+    if (matches.length === 0) {
+      showDropdownMessage('No matching cities found.');
+      return;
+    }
+
+    matches.forEach(function (match) {
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.textContent = match.display_name;
+      item.addEventListener('click', function () {
+        selectCity(match.display_name, match.latitude, match.longitude);
+      });
+      dropdown.appendChild(item);
+    });
+
+    dropdown.style.display = 'block';
+  }
+
+  function selectCity(cityName, lat, lon) {
+    document.getElementById('cityInput').value = cityName;
+    document.getElementById('cityLat').value = lat;
+    document.getElementById('cityLon').value = lon;
+    document.getElementById('suggestionsDropdown').style.display = 'none';
+  }
 </script>
 
 {% endblock content %}

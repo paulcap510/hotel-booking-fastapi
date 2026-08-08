@@ -1,109 +1,154 @@
-{% extends "layout.html" %}
-
-{% block content %}
+{% extends "layout.html" %} {% block content %}
 <style>
   .search-input-box input,
-.location-input-wrapper input,
-.date-input-wrapper input,
-.guests-input-wrapper input {
-  background-color: #f8f9fb;
-}
+  .location-input-wrapper input,
+  .date-input-wrapper input,
+  .guests-input-wrapper input {
+    background-color: #f8f9fb;
+  }
 
-.search-input-box input:focus,
-.location-input-wrapper input:focus,
-.date-input-wrapper input:focus,
-.guests-input-wrapper input:focus {
-  background-color: #ffffff;
-  border-color: var(--hotels-navy);
-  box-shadow: 0 0 0 0.15rem rgba(6, 11, 63, 0.1);
-}
-.btn-hotel-primary {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-}
-.search-card-outer {
-  border: 1.5px solid #c7cbd8;
-  box-shadow: 0 12px 32px rgba(6, 11, 63, 0.18) !important;
-}
+  .search-input-box input:focus,
+  .location-input-wrapper input:focus,
+  .date-input-wrapper input:focus,
+  .guests-input-wrapper input:focus {
+    background-color: #ffffff;
+    border-color: var(--hotels-navy);
+    box-shadow: 0 0 0 0.15rem rgba(6, 11, 63, 0.1);
+  }
+  .btn-hotel-primary {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+  .search-card-outer {
+    border: 1.5px solid #c7cbd8;
+    box-shadow: 0 12px 32px rgba(6, 11, 63, 0.18) !important;
+  }
 
+  .suggestion-message {
+    padding: 8px 12px;
+    color: #888;
+    font-style: italic;
+    pointer-events: none;
+  }
+
+  .location-input-wrapper {
+    position: relative;
+  }
+
+  .suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  .suggestion-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  .suggestion-message {
+    padding: 8px 12px;
+    color: #888;
+    font-style: italic;
+    pointer-events: none;
+  }
 </style>
 <main class="container py-5">
-
   <!-- Search bar -->
-<div class="bg-white rounded-4 shadow-sm search-card-outer p-4 mb-4">
-  <form action="/search" method="get">
-    <div class="row g-3 align-items-end">
-      <div class="col-md-3">
-        <div class="search-input-box">
-          <label>Where</label>
-          <div class="location-input-wrapper">
-            <input
-              type="text"
-              class="form-control"
-              name="city"
-              value="{{ search_city }}"
-              placeholder="Where to?"
-            />
+  <div class="bg-white rounded-4 shadow-sm search-card-outer p-4 mb-4">
+    <form action="/search" method="get">
+      <input type="hidden" name="lat" id="cityLat" />
+      <input type="hidden" name="lon" id="cityLon" />
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <div class="search-input-box">
+            <label>Where</label>
+            <div class="location-input-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                name="city"
+                id="cityInput"
+                value="{{ search_city }}"
+                placeholder="Where to?"
+              />
+              <div
+                id="suggestionsDropdown"
+                class="suggestions-dropdown"
+                style="display: none"
+              ></div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-md-2">
-        <div class="search-input-box">
-          <label>Check-in</label>
-          <div class="date-input-wrapper">
-            <input
-              type="text"
-              class="form-control"
-              name="check_in"
-              id="check-in"
-              value="{{ check_in }}"
-              autocomplete="off"
-              required
-            />
+        <div class="col-md-2">
+          <div class="search-input-box">
+            <label>Check-in</label>
+            <div class="date-input-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                name="check_in"
+                id="check-in"
+                value="{{ check_in }}"
+                autocomplete="off"
+                required
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-md-2">
-        <div class="search-input-box">
-          <label>Check-out</label>
-          <div class="date-input-wrapper">
-            <input
-              type="text"
-              class="form-control"
-              name="check_out"
-              id="check-out"
-              value="{{ check_out }}"
-              autocomplete="off"
-              required
-            />
+        <div class="col-md-2">
+          <div class="search-input-box">
+            <label>Check-out</label>
+            <div class="date-input-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                name="check_out"
+                id="check-out"
+                value="{{ check_out }}"
+                autocomplete="off"
+                required
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-md-2">
-        <div class="search-input-box">
-          <label>Guests</label>
-          <div class="guests-input-wrapper">
-            <input
-              type="number"
-              class="form-control"
-              name="guests"
-              min="1"
-              value="{{ guests }}"
-            />
+        <div class="col-md-2">
+          <div class="search-input-box">
+            <label>Guests</label>
+            <div class="guests-input-wrapper">
+              <input
+                type="number"
+                class="form-control"
+                name="guests"
+                min="1"
+                value="{{ guests }}"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-md-3">
-        <button type="submit" class="btn btn-hotel-primary fs-5 w-100 py-4">
-          Search
-        </button>
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-hotel-primary fs-5 w-100 py-4">
+            Search
+          </button>
+        </div>
       </div>
-    </div>
-  </form>
-</div>
+    </form>
+  </div>
 
   <!-- Search summary/header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
@@ -113,11 +158,10 @@
       </h1>
 
       <p class="text-muted mb-0">
-      {% if hotels %}
-          {{ hotels|length }} hotel{% if hotels|length != 1 %}s{% endif %} found{% if guests %} for {{ guests }} guest{% if guests != 1 %}s{% endif %}{% endif %}.
-      {% else %}
-          No hotels found for your search.
-      {% endif %}
+        {% if hotels %} {{ hotels|length }} hotel{% if hotels|length != 1 %}s{%
+        endif %} found{% if guests %} for {{ guests }} guest{% if guests != 1
+        %}s{% endif %}{% endif %}. {% else %} No hotels found for your search.
+        {% endif %}
       </p>
     </div>
   </div>
@@ -125,104 +169,88 @@
   <!-- Search layout -->
 
   <div class="row g-4">
-
-<!-- Left filter/sidebar placeholder -->
-<aside class="col-lg-3">
-  <div class="bg-white rounded-4 shadow-sm p-4 sticky-top" style="top: 90px;">
-    <h5 class="fw-bold mb-3">Filter results</h5>
-
-    <div class="mb-4">
-      <label class="form-label fw-bold">Destination</label>
-      <input
-        type="text"
-        class="form-control"
-        value="{{ search_city }}"
-        disabled
+    <!-- Left filter/sidebar placeholder -->
+    <aside class="col-lg-3">
+      <div
+        class="bg-white rounded-4 shadow-sm p-4 sticky-top"
+        style="top: 90px"
       >
-    </div>
+        <h5 class="fw-bold mb-3">Filter results</h5>
 
-    <div class="mb-4">
-      <label class="form-label fw-bold">Popular filters</label>
+        <div class="mb-4">
+          <label class="form-label fw-bold">Destination</label>
+          <input
+            type="text"
+            class="form-control"
+            value="{{ search_city }}"
+            disabled
+          />
+        </div>
 
-      <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" disabled>
-        <label class="form-check-label text-muted">
-          Free WiFi
-        </label>
+        <div class="mb-4">
+          <label class="form-label fw-bold">Popular filters</label>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" disabled />
+            <label class="form-check-label text-muted"> Free WiFi </label>
+          </div>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" disabled />
+            <label class="form-check-label text-muted">
+              Breakfast included
+            </label>
+          </div>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" disabled />
+            <label class="form-check-label text-muted"> Pay at property </label>
+          </div>
+        </div>
+
+        <p class="text-muted small mb-0">
+          More filters will be added later when amenities, ratings, and bookings
+          are built.
+        </p>
+      </div>
+    </aside>
+
+    <!-- Results list -->
+    <section class="col-lg-9">
+      {% if hotels %}
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0">Available stays</h2>
+
+        <span class="text-muted small"> Sorted by recommended </span>
       </div>
 
-      <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" disabled>
-        <label class="form-check-label text-muted">
-          Breakfast included
-        </label>
-      </div>
-
-      <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" disabled>
-        <label class="form-check-label text-muted">
-          Pay at property
-        </label>
-      </div>
-    </div>
-
-    <p class="text-muted small mb-0">
-      More filters will be added later when amenities, ratings, and bookings are built.
-    </p>
-  </div>
-</aside>
-
-
-<!-- Results list -->
-<section class="col-lg-9">
-
-  {% if hotels %}
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2 class="fw-bold mb-0">Available stays</h2>
-
-      <span class="text-muted small">
-        Sorted by recommended
-      </span>
-    </div>
-
-    <div class="d-flex flex-column gap-4">
-
-      {% for hotel in hotels %}
+      <div class="d-flex flex-column gap-4">
+        {% for hotel in hotels %}
         <div class="bg-white rounded-4 shadow-sm overflow-hidden">
           <div class="row g-0">
-
             <!-- Hotel image -->
             <div class="col-md-4">
               <img
                 src="{{ url_for('static', path=hotel.image_path) }}"
                 alt="{{ hotel.name }}"
                 class="img-fluid w-100 h-100"
-                style="min-height: 240px; object-fit: cover;"
-              >
+                style="min-height: 240px; object-fit: cover"
+              />
             </div>
 
             <!-- Hotel details -->
             <div class="col-md-5">
               <div class="p-4 h-100">
-
                 <div class="d-flex align-items-center gap-2 mb-2">
-                  <span class="badge bg-primary">
-                    Hotel
-                  </span>
+                  <span class="badge bg-primary"> Hotel </span>
 
-                  <span class="text-muted small">
-                    {{ hotel.city }}
-                  </span>
+                  <span class="text-muted small"> {{ hotel.city }} </span>
                 </div>
 
-                <h3 class="fw-bold mb-2">
-                  {{ hotel.name }}
-                </h3>
+                <h3 class="fw-bold mb-2">{{ hotel.name }}</h3>
 
-                <p class="text-muted mb-3">
-                  {{ hotel.description }}
-                </p>
+                <p class="text-muted mb-3">{{ hotel.description }}</p>
 
                 <ul class="list-unstyled text-muted small mb-0">
                   <li class="mb-1">✓ Free WiFi</li>
@@ -230,108 +258,174 @@
                   <li class="mb-1">✓ Comfortable rooms</li>
                   <li class="mb-1">✓ No booking fees</li>
                 </ul>
-
               </div>
             </div>
 
             <!-- Price/action card -->
             <div class="col-md-3">
-              <div class="p-4 h-100 border-start d-flex flex-column justify-content-between">
-
+              <div
+                class="p-4 h-100 border-start d-flex flex-column justify-content-between"
+              >
                 <div class="text-md-end">
-                <div class="d-flex justify-content-md-end align-items-center mb-2">
-    {% if hotel.average_rating is not none %}
-    <span class="badge bg-success fs-6">
-      {{ "%.1f"|format(hotel.average_rating) }}
-    </span>
-    {% endif %}
+                  <div
+                    class="d-flex justify-content-md-end align-items-center mb-2"
+                  >
+                    {% if hotel.average_rating is not none %}
+                    <span class="badge bg-success fs-6">
+                      {{ "%.1f"|format(hotel.average_rating) }}
+                    </span>
+                    {% endif %}
                   </div>
 
                   {% if hotel.average_rating is not none %}
                   <p class="fw-bold mb-1">
-                    {{ hotel.review_count }} review{% if hotel.review_count != 1 %}s{% endif %}
+                    {{ hotel.review_count }} review{% if hotel.review_count != 1
+                    %}s{% endif %}
                   </p>
                   {% else %}
-                  <p class="text-muted small mb-4">
-                    No reviews yet
-                  </p>
+                  <p class="text-muted small mb-4">No reviews yet</p>
                   {% endif %}
                 </div>
 
-
                 <div class="text-md-end">
-                  <p class="text-muted small mb-1">
-                    From
-                  </p>
+                  <p class="text-muted small mb-1">From</p>
 
                   <p class="fs-4 fw-bold mb-1">
                     From ${{ hotel.starting_price }}
                   </p>
 
-                  <p class="text-muted small mb-3">
-                    per night
-                  </p>
-                  <a href="/hotel_info/{{ hotel.id }}?check_in={{ check_in }}&check_out={{ check_out }}&guests={{ guests }}" class="btn btn-hotel-primary w-100">
-  View rooms
-  <span class="btn-arrow">&rarr;</span>
-</a>
-
+                  <p class="text-muted small mb-3">per night</p>
+                  <a
+                    href="/hotel_info/{{ hotel.id }}?check_in={{ check_in }}&check_out={{ check_out }}&guests={{ guests }}"
+                    class="btn btn-hotel-primary w-100"
+                  >
+                    View rooms
+                    <span class="btn-arrow">&rarr;</span>
+                  </a>
                 </div>
-
               </div>
             </div>
-
           </div>
         </div>
-      {% endfor %}
+        {% endfor %}
+      </div>
 
-    </div>
+      {% else %}
 
-  {% else %}
+      <!-- No results -->
+      <div class="bg-white rounded-4 shadow-sm p-5 text-center">
+        <h2 class="fw-bold mb-3">No hotels found</h2>
 
-    <!-- No results -->
-    <div class="bg-white rounded-4 shadow-sm p-5 text-center">
-      <h2 class="fw-bold mb-3">No hotels found</h2>
+        <p class="text-muted mb-4">
+          We could not find any hotels matching your search. Try searching for a
+          different city.
+        </p>
 
-      <p class="text-muted mb-4">
-        We could not find any hotels matching your search.
-        Try searching for a different city.
-      </p>
+        <a href="/" class="btn btn-host-action px-4"> Back to search </a>
+      </div>
 
-      <a href="/" class="btn btn-host-action px-4">
-        Back to search
-      </a>
-    </div>
-
-  {% endif %}
-
-</section>
-
+      {% endif %}
+    </section>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>
-  const checkInPicker = flatpickr("#check-in", {
-    dateFormat: "Y-m-d",
-    minDate: "today",
-    onChange: function (selectedDates) {
-      const newCheckIn = selectedDates[0];
-      const currentCheckOut = checkOutPicker.selectedDates[0];
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    const checkInPicker = flatpickr('#check-in', {
+      dateFormat: 'Y-m-d',
+      minDate: 'today',
+      onChange: function (selectedDates) {
+        const newCheckIn = selectedDates[0];
+        const currentCheckOut = checkOutPicker.selectedDates[0];
 
-      checkOutPicker.set("minDate", newCheckIn);
+        checkOutPicker.set('minDate', newCheckIn);
 
-      // Only clear check-out if it's now before the new check-in date
-      if (currentCheckOut && currentCheckOut <= newCheckIn) {
-        checkOutPicker.clear();
+        // Only clear check-out if it's now before the new check-in date
+        if (currentCheckOut && currentCheckOut <= newCheckIn) {
+          checkOutPicker.clear();
+        }
+      },
+    });
+
+    const checkOutPicker = flatpickr('#check-out', {
+      dateFormat: 'Y-m-d',
+      minDate: 'today',
+    });
+
+    let searchTimer = null;
+    let searchController = null;
+
+    document.getElementById('cityInput').addEventListener('input', function () {
+      const typedText = this.value;
+      clearTimeout(searchTimer);
+
+      document.getElementById('cityLat').value = '';
+      document.getElementById('cityLon').value = '';
+
+      if (typedText.length < 3) {
+        document.getElementById('suggestionsDropdown').style.display = 'none';
+        return;
       }
-    },
-  });
 
-  const checkOutPicker = flatpickr("#check-out", {
-    dateFormat: "Y-m-d",
-    minDate: "today",
-  });
-</script>
+      searchTimer = setTimeout(() => {
+        if (searchController) searchController.abort();
+        searchController = new AbortController();
+
+        showDropdownMessage('Searching...');
+
+        fetch(
+          '/host/properties/geocode-preview?city=' +
+            encodeURIComponent(typedText),
+          { signal: searchController.signal },
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            renderSuggestions(data.results);
+          })
+          .catch((err) => {
+            if (err.name !== 'AbortError') console.error(err);
+          });
+      }, 300);
+    });
+
+    function showDropdownMessage(text) {
+      const dropdown = document.getElementById('suggestionsDropdown');
+      dropdown.innerHTML = '';
+      const msg = document.createElement('div');
+      msg.className = 'suggestion-message';
+      msg.textContent = text;
+      dropdown.appendChild(msg);
+      dropdown.style.display = 'block';
+    }
+
+    function renderSuggestions(matches) {
+      const dropdown = document.getElementById('suggestionsDropdown');
+      dropdown.innerHTML = '';
+
+      if (matches.length === 0) {
+        showDropdownMessage('No matching cities found.');
+        return;
+      }
+
+      matches.forEach(function (match) {
+        const item = document.createElement('div');
+        item.className = 'suggestion-item';
+        item.textContent = match.display_name;
+        item.addEventListener('click', function () {
+          selectCity(match.display_name, match.latitude, match.longitude);
+        });
+        dropdown.appendChild(item);
+      });
+
+      dropdown.style.display = 'block';
+    }
+
+    function selectCity(cityName, lat, lon) {
+      document.getElementById('cityInput').value = cityName;
+      document.getElementById('cityLat').value = lat;
+      document.getElementById('cityLon').value = lon;
+      document.getElementById('suggestionsDropdown').style.display = 'none';
+    }
+  </script>
 </main>
 
 {% endblock content %}
