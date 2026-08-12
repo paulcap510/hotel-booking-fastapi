@@ -92,12 +92,18 @@
         <div class="border rounded-4 p-3">
           <h5 class="fw-bold mb-3">Property highlights</h5>
 
-          <ul class="list-unstyled mb-0">
-            <li class="mb-2">✓ Free WiFi</li>
-            <li class="mb-2">✓ Good location</li>
-            <li class="mb-2">✓ Front desk service</li>
-            <li class="mb-2">✓ Comfortable rooms</li>
-          </ul>
+            {% if all_amenities %}
+                  <ul class="list-unstyled mb-0">
+                    {% for amenity in all_amenities %}
+                      <li class="mb-2 d-flex align-items-center gap-2">
+                        <i class="bi {{ amenity.icon }} text-success"></i>
+                        {{ amenity.label }}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="text-muted small mb-0">No amenities listed</p>
+                {% endif %}
         </div>
       </div>
     </div>

@@ -131,20 +131,23 @@ def hotel_info(
         ("pet_friendly", "Pet Friendly", "bi-heart"),
         ("has_spa", "Spa", "bi-flower1"),
         ("has_kitchen", "Kitchen", "bi-house"),
-        ("has_laundry", "Laundry", "bi-washer"),
+        ("has_laundry", "Laundry", "bi-moisture"),
         ("has_balcony", "Balcony", "bi-door-open"),
-        ("has_cribs", "Cribs Available", "bi-baby"),
+        ("has_cribs", "Cribs Available", "bi-emoji-smile"),
         ("airport_shuttle", "Airport Shuttle", "bi-airplane"),
         ("accessibility_features", "Accessibility Features", "bi-universal-access"),
         ("smoke_free", "Smoke-Free", "bi-slash-circle"),
     ]
 
     top_amenities = []
+    all_amenities = []
+
     for field, label, icon in AMENITY_MAP:
         if getattr(hotel, field, False):
-            top_amenities.append({"label": label, "icon": icon})
-            if len(top_amenities) >= 3:
-                break
+            amenity = {"label": label, "icon": icon}
+            all_amenities.append(amenity)
+            if len(top_amenities) < 3:
+                top_amenities.append({"label": label, "icon": icon})
 
     if check_in and check_out:
         booking_count_table = (
@@ -211,6 +214,7 @@ def hotel_info(
             "recent_reviews": recent_reviews,
             # ? amenities
             "top_amenities": top_amenities,
+            "all_amenities": all_amenities,
         },
     )
 
