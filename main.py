@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException, status, Depends, Form
+from fastapi import FastAPI, Request, HTTPException, status, Depends, Form, Query
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -42,6 +42,25 @@ from auth import (
 )
 
 app = FastAPI()
+
+
+AMENITY_MAP = [
+    ("free_wifi", "Free Wi-Fi", "bi-wifi"),
+    ("free_breakfast", "Free Breakfast", "bi-cup-hot"),
+    ("has_pool", "Pool", "bi-water"),
+    ("has_parking", "Parking", "bi-p-square"),
+    ("has_gym", "Gym", "bi-bicycle"),
+    ("air_conditioned", "Air Conditioning", "bi-snow"),
+    ("pet_friendly", "Pet Friendly", "bi-heart"),
+    ("has_spa", "Spa", "bi-flower1"),
+    ("has_kitchen", "Kitchen", "bi-house"),
+    ("has_laundry", "Laundry", "bi-moisture"),
+    ("has_balcony", "Balcony", "bi-door-open"),
+    ("has_cribs", "Cribs Available", "bi-emoji-smile"),
+    ("airport_shuttle", "Airport Shuttle", "bi-airplane"),
+    ("accessibility_features", "Accessibility Features", "bi-universal-access"),
+    ("smoke_free", "Smoke-Free", "bi-slash-circle"),
+]
 
 
 @app.middleware("http")
@@ -119,25 +138,6 @@ def hotel_info(
 
     average_rating, review_count = get_hotel_average_rating(db, hotel_id)
     recent_reviews = get_recent_hotel_reviews(db, hotel_id)
-
-    # ? amenities test
-    AMENITY_MAP = [
-        ("free_wifi", "Free Wi-Fi", "bi-wifi"),
-        ("free_breakfast", "Free Breakfast", "bi-cup-hot"),
-        ("has_pool", "Pool", "bi-water"),
-        ("has_parking", "Parking", "bi-p-square"),
-        ("has_gym", "Gym", "bi-bicycle"),
-        ("air_conditioned", "Air Conditioning", "bi-snow"),
-        ("pet_friendly", "Pet Friendly", "bi-heart"),
-        ("has_spa", "Spa", "bi-flower1"),
-        ("has_kitchen", "Kitchen", "bi-house"),
-        ("has_laundry", "Laundry", "bi-moisture"),
-        ("has_balcony", "Balcony", "bi-door-open"),
-        ("has_cribs", "Cribs Available", "bi-emoji-smile"),
-        ("airport_shuttle", "Airport Shuttle", "bi-airplane"),
-        ("accessibility_features", "Accessibility Features", "bi-universal-access"),
-        ("smoke_free", "Smoke-Free", "bi-slash-circle"),
-    ]
 
     top_amenities = []
     all_amenities = []
@@ -230,6 +230,7 @@ def search_hotels(
     guests: int = 1,
     check_in: date | None = None,
     check_out: date | None = None,
+    amenities: list[str] = Query(default=[]),
     db: Session = Depends(get_db),
 ):
 
@@ -264,6 +265,13 @@ def search_hotels(
     else:
         hotels = all_hotels
 
+    if amenities:
+        hotels = [
+            hotel
+            for hotel in hotels
+            if all(getattr(hotel, field, False) for field in amenities)
+        ]
+
     for hotel in hotels:
         rooms = (
             db.query(models.Room)
@@ -286,6 +294,7 @@ def search_hotels(
             "check_in": check_in,
             "check_out": check_out,
             "guests": guests,
+            "amenity_options": AMENITY_MAP,
         },
     )
 

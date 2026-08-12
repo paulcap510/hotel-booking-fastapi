@@ -81,6 +81,9 @@
     <form action="/search" method="get">
       <input type="hidden" name="lat" id="cityLat" />
       <input type="hidden" name="lon" id="cityLon" />
+      {% for field in selected_amenities %}
+      <input type="hidden" name="amenities" value="{{ field }}" />
+      {% endfor %}
       <div class="row g-3 align-items-end">
         <div class="col-md-3">
           <div class="search-input-box">
@@ -188,41 +191,53 @@
       >
         <h5 class="fw-bold mb-3">Filter results</h5>
 
-        <div class="mb-4">
-          <label class="form-label fw-bold">Destination</label>
-          <input
-            type="text"
-            class="form-control"
-            value="{{ search_city }}"
-            disabled
-          />
-        </div>
+        <form action="/search" method="get">
+          <input type="hidden" name="city" value="{{ search_city }}" />
+          <input type="hidden" name="check_in" value="{{ check_in }}" />
+          <input type="hidden" name="check_out" value="{{ check_out }}" />
+          <input type="hidden" name="guests" value="{{ guests }}" />
 
-        <div class="mb-4">
-          <label class="form-label fw-bold">Popular filters</label>
-
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" disabled />
-            <label class="form-check-label text-muted"> Free WiFi </label>
+          <div class="mb-4">
+            <label class="form-label fw-bold">Destination</label>
+            <input
+              type="text"
+              class="form-control"
+              value="{{ search_city }}"
+              disabled
+            />
           </div>
 
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" disabled />
-            <label class="form-check-label text-muted">
-              Breakfast included
-            </label>
+          <div class="mb-4">
+            <label class="form-label fw-bold">Amenities</label>
+
+            {% for field, label, icon in amenity_options %}
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                name="amenities"
+                value="{{ field }}"
+                id="amenity-{{ field }}"
+                {%
+                if
+                field
+                in
+                selected_amenities
+                %}checked{%
+                endif
+                %}
+              />
+              <label class="form-check-label" for="amenity-{{ field }}">
+                {{ label }}
+              </label>
+            </div>
+            {% endfor %}
           </div>
 
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" disabled />
-            <label class="form-check-label text-muted"> Pay at property </label>
-          </div>
-        </div>
-
-        <p class="text-muted small mb-0">
-          More filters will be added later when amenities, ratings, and bookings
-          are built.
-        </p>
+          <button type="submit" class="btn btn-hotel-primary w-100">
+            Apply filters
+          </button>
+        </form>
       </div>
     </aside>
 
