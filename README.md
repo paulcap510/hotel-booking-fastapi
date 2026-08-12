@@ -17,6 +17,7 @@ This is a hotel booking platform similar to Hotels.com or Agoda. Users can creat
 - Role-based authorization: admin-only booking deletion (is_admin flag; no admin UI yet)
 - Navbar reflects real login state across the whole site
 - Support/FAQ page with live search
+- **Type-ahead search suggestions**, available on both the homepage and the search results page, letting users disambiguate ambiguous city names (e.g. Springfield, Illinois vs. Springfield, Massachusetts) by picking a specific match, complete with its own coordinates, before committing to a search. Requests are debounced and cancelled via AbortController if the user keeps typing, and the dropdown shows a loading state while a request is in flight and a distinct message if no matches are found, rather than failing silently.
 
 ### Host / Property Management
 

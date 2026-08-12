@@ -120,6 +120,32 @@ def hotel_info(
     average_rating, review_count = get_hotel_average_rating(db, hotel_id)
     recent_reviews = get_recent_hotel_reviews(db, hotel_id)
 
+    # ? amenities test
+    AMENITY_MAP = [
+        ("free_wifi", "Free Wi-Fi", "bi-wifi"),
+        ("free_breakfast", "Free Breakfast", "bi-cup-hot"),
+        ("has_pool", "Pool", "bi-water"),
+        ("has_parking", "Parking", "bi-p-square"),
+        ("has_gym", "Gym", "bi-bicycle"),
+        ("air_conditioned", "Air Conditioning", "bi-snow"),
+        ("pet_friendly", "Pet Friendly", "bi-heart"),
+        ("has_spa", "Spa", "bi-flower1"),
+        ("has_kitchen", "Kitchen", "bi-house"),
+        ("has_laundry", "Laundry", "bi-washer"),
+        ("has_balcony", "Balcony", "bi-door-open"),
+        ("has_cribs", "Cribs Available", "bi-baby"),
+        ("airport_shuttle", "Airport Shuttle", "bi-airplane"),
+        ("accessibility_features", "Accessibility Features", "bi-universal-access"),
+        ("smoke_free", "Smoke-Free", "bi-slash-circle"),
+    ]
+
+    top_amenities = []
+    for field, label, icon in AMENITY_MAP:
+        if getattr(hotel, field, False):
+            top_amenities.append({"label": label, "icon": icon})
+            if len(top_amenities) >= 3:
+                break
+
     if check_in and check_out:
         booking_count_table = (
             db.query(
@@ -183,6 +209,8 @@ def hotel_info(
             "average_rating": average_rating,
             "review_count": review_count,
             "recent_reviews": recent_reviews,
+            # ? amenities
+            "top_amenities": top_amenities,
         },
     )
 

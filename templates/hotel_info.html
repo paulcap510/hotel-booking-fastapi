@@ -18,10 +18,9 @@
         >
       </div>
 
-      <!-- Hotel summary card -->
 <!-- Hotel summary card -->
 <div class="col-md-5">
-  <div class="border rounded-4 p-4 h-100">
+  <div class="border rounded-4 p-4 h-100" style="color: var(--hotels-blue);">
     <div class="d-flex align-items-center gap-2 mb-2">
       <h1 class="fw-bold mb-0">{{ hotel.name }}</h1>
     </div>
@@ -29,28 +28,46 @@
     {% if average_rating is not none %}
     <div class="d-flex align-items-center gap-2 mb-3">
       <span class="badge bg-success fs-6">{{ "%.1f"|format(average_rating) }}</span>
-      <span class="text-muted small">
+      <!-- REMOVED text-muted here -->
+      <span class="small opacity-75">
         {{ review_count }} review{% if review_count != 1 %}s{% endif %}
       </span>
     </div>
     {% else %}
-    <p class="text-muted small mb-3">No reviews yet</p>
+    <!-- REMOVED text-muted here -->
+    <p class="small mb-3 opacity-75">No reviews yet</p>
     {% endif %}
 
-    <p class="text-muted mb-3">
+    <!-- REMOVED text-muted here -->
+    <p class="mb-3">
       {{ hotel.city }}
     </p>
 
-    <p class="text-muted mb-4">
+    <!-- REMOVED text-muted here -->
+    <p class="mb-4">
       {{ hotel.description }}
     </p>
-    <p class="text-muted mb-4">
-      Amenities [coming soon]
-    </p>
+
+    {% if top_amenities %}
+      <div class="d-flex flex-wrap gap-3 mb-4">
+        {% for amenity in top_amenities %}
+          <!-- REMOVED text-muted here -->
+          <span class="d-inline-flex align-items-center gap-1">
+            <i class="bi {{ amenity.icon }}"></i>
+            {{ amenity.label }}
+          </span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <!-- REMOVED text-muted here -->
+      <p class="mb-4">No amenities listed</p>
+    {% endif %}
 
     <!-- rest of "Your Stay" box stays exactly the same -->
 
-    </div>
+  </div>
+</div> <!-- Fixed missing closing div tag here -->
+
   </section>
 
 
