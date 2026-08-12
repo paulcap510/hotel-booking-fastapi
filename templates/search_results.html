@@ -279,10 +279,9 @@
                 <p class="text-muted mb-3">{{ hotel.description }}</p>
 
                 <ul class="list-unstyled text-muted small mb-0">
-                  <li class="mb-1">✓ Free WiFi</li>
-                  <li class="mb-1">✓ Good location</li>
-                  <li class="mb-1">✓ Comfortable rooms</li>
-                  <li class="mb-1">✓ No booking fees</li>
+                  {% for amenity in hotel.top_amenities %}
+                  <li class="mb-1">✓ {{ amenity.label }}</li>
+                  {% endfor %}
                 </ul>
               </div>
             </div>
