@@ -17,7 +17,18 @@
   }
   .btn-hotel-primary {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    width: auto;
+    padding: 0.6rem 1.75rem;
   }
+
+  .btn-hotel-primary:hover .btn-arrow {
+    transform: translateX(3px);
+  }
+
   .search-card-outer {
     border: 1.5px solid #c7cbd8;
     box-shadow: 0 12px 32px rgba(6, 11, 63, 0.18) !important;
@@ -297,10 +308,9 @@
                   <p class="text-muted small mb-3">per night</p>
                   <a
                     href="/hotel_info/{{ hotel.id }}?check_in={{ check_in }}&check_out={{ check_out }}&guests={{ guests }}"
-                    class="btn btn-hotel-primary w-100"
+                    class="btn btn-hotel-primary"
                   >
                     View rooms
-                    <span class="btn-arrow">&rarr;</span>
                   </a>
                 </div>
               </div>
