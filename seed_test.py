@@ -7,94 +7,108 @@ db = SessionLocal()
 
 HOTELS_TO_SEED = [
     {
-        "name": "Palmwood Suites",
-        "description": "A relaxed hotel with a lush, palm-lined lobby.",
-        "city": "Miami, FL",
-        "image": "https://images.unsplash.com/photo-1455587734955-081b22074882?fm=jpg&q=60&w=3000&auto=format&fit=crop",
-        "amenities": {"free_wifi": True, "has_pool": True},
+        "name": "Windowview Courtyard Hotel",
+        "description": "A striking building wrapped around a quiet courtyard.",
+        "city": "Santa Fe, NM",
+        "image": "https://images.unsplash.com/photo-1667125094717-47e0ff6d0608?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"free_wifi": True, "has_parking": True},
     },
     {
-        "name": "The Harbor Inn",
-        "description": "A cozy, well-appointed room to unwind after a day exploring.",
-        "city": "Portland, ME",
-        "image": "https://images.unsplash.com/photo-1711059985570-4c32ed12a12c?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "name": "Northside Vacancy Inn",
+        "description": "Simple, minimal rooms with plenty of natural light.",
+        "city": "Burlington, VT",
+        "image": "https://images.unsplash.com/photo-1549638441-b787d2e11f14?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"free_wifi": True, "smoke_free": True},
+    },
+    {
+        "name": "Harborview Table & Terrace",
+        "description": "Waterfront dining and calm coastal views.",
+        "city": "Newport, RI",
+        "image": "https://images.unsplash.com/photo-1498503182468-3b51cbb6cb24?fm=jpg&q=60&w=3000&auto=format&fit=crop",
         "amenities": {"free_wifi": True, "free_breakfast": True},
     },
     {
-        "name": "Coral Bay Resort",
-        "description": "A tropical-style pool retreat with pastel poolside charm.",
-        "city": "Key West, FL",
-        "image": "https://images.unsplash.com/photo-1596436889106-be35e843f974?fm=jpg&q=60&w=3000&auto=format&fit=crop",
-        "amenities": {"has_pool": True, "free_wifi": True, "smoke_free": True},
-    },
-    {
-        "name": "Lakeside Dock Lodge",
-        "description": "Lounge chairs on a private dock, right on the water.",
-        "city": "Lake Tahoe, CA",
-        "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?fm=jpg&q=60&w=3000&auto=format&fit=crop",
-        "amenities": {"has_pool": True, "free_wifi": True},
-    },
-    {
-        "name": "The Gilded Room Hotel",
-        "description": "An elegant lobby with chandelier lighting and classic details.",
-        "city": "New Orleans, LA",
-        "image": "https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?fm=jpg&q=60&w=3000&auto=format&fit=crop",
-        "amenities": {"free_wifi": True, "has_spa": True},
-    },
-    {
-        "name": "Crescent Bedding Hotel",
-        "description": "Simple, comfortable rooms with crisp white linens.",
-        "city": "Austin, TX",
-        "image": "https://images.unsplash.com/photo-1631049552057-403cdb8f0658?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "name": "The Windowlight Hotel",
+        "description": "Moody, quiet rooms perfect for unwinding after a day out.",
+        "city": "New York, NY",
+        "image": "https://images.unsplash.com/photo-1592229505726-ca121723b8ef?fm=jpg&q=60&w=3000&auto=format&fit=crop",
         "amenities": {"free_wifi": True, "air_conditioned": True},
     },
     {
-        "name": "Azure Pool House",
-        "description": "A bright blue outdoor pool right outside your room.",
-        "city": "Scottsdale, AZ",
-        "image": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "name": "Mission Bay Suites",
+        "description": "Palm-lined poolside relaxation close to the water.",
+        "city": "San Diego, CA",
+        "image": "https://images.unsplash.com/photo-1623718649591-311775a30c43?fm=jpg&q=60&w=3000&auto=format&fit=crop",
         "amenities": {"has_pool": True, "free_wifi": True, "has_parking": True},
     },
     {
-        "name": "The Tablecloth Hotel & Bistro",
-        "description": "A boutique hotel known for its in-house restaurant.",
-        "city": "Charleston, SC",
-        "image": "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?fm=jpg&q=60&w=3000&auto=format&fit=crop",
-        "amenities": {"free_breakfast": True, "free_wifi": True},
+        "name": "Hillside Garden Villa",
+        "description": "A peaceful villa-style hotel surrounded by greenery.",
+        "city": "Asheville, NC",
+        "image": "https://images.unsplash.com/photo-1614957004131-9e8f2a13123c?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"free_wifi": True, "has_balcony": True},
     },
     {
-        "name": "Oceanfront Eighty Resort",
-        "description": "A tropical-style pool with sweeping ocean views.",
-        "city": "Honolulu, HI",
-        "image": "https://images.unsplash.com/photo-1540541338287-41700207dee6?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "name": "Twin Bed Mirror Suites",
+        "description": "Bright, colorful rooms with twin beds and modern decor.",
+        "city": "Nashville, TN",
+        "image": "https://images.unsplash.com/photo-1737517302831-e7b8a8eaa97c?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"free_wifi": True, "has_cribs": True},
+    },
+    {
+        "name": "Grand Window Hotel",
+        "description": "Spacious rooms with oversized windows and city views.",
+        "city": "Denver, CO",
+        "image": "https://images.unsplash.com/photo-1675409145919-277c0fc2aa7d?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"free_wifi": True, "air_conditioned": True},
+    },
+    {
+        "name": "Sunset Pool Villas",
+        "description": "A relaxed poolside stay with warm evening light.",
+        "city": "Palm Springs, CA",
+        "image": "https://images.unsplash.com/photo-1439130490301-25e322d88054?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"has_pool": True, "free_wifi": True, "smoke_free": True},
+    },
+    {
+        "name": "Cancun-Style Poolside Resort",
+        "description": "A tropical-inspired pool and building backdrop.",
+        "city": "Fort Lauderdale, FL",
+        "image": "https://images.unsplash.com/photo-1663998468593-1f104e7c9213?fm=jpg&q=60&w=3000&auto=format&fit=crop",
         "amenities": {"has_pool": True, "free_wifi": True, "airport_shuttle": True},
     },
     {
-        "name": "Redbrick Loft Hotel",
-        "description": "A relaxed urban room with a pop of color.",
-        "city": "Brooklyn, NY",
-        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?fm=jpg&q=60&w=3000&auto=format&fit=crop",
-        "amenities": {"free_wifi": True},
+        "name": "Wood Table Inn",
+        "description": "Comfortable, no-frills rooms with a warm wooden touch.",
+        "city": "Boise, ID",
+        "image": "https://images.unsplash.com/photo-1631049035182-249067d7618e?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"free_wifi": True, "has_parking": True},
     },
     {
-        "name": "Green Terrace Hotel",
-        "description": "A calm, plant-filled lobby and lounge area.",
-        "city": "Seattle, WA",
-        "image": "https://images.unsplash.com/photo-1590447158019-883d8d5f8bc7?fm=jpg&q=60&w=3000&auto=format&fit=crop",
-        "amenities": {"free_wifi": True, "has_laundry": True},
-    },
-    {
-        "name": "Shoreline Towers",
-        "description": "High-rise hotel with beachfront views.",
-        "city": "San Diego, CA",
-        "image": "https://images.unsplash.com/photo-1454388683759-ee76c15fee26?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "name": "Empire View Hotel & Pool",
+        "description": "A grand building overlooking a scenic outdoor pool.",
+        "city": "Orlando, FL",
+        "image": "https://images.unsplash.com/photo-1709809328185-ba9ee5a06121?fm=jpg&q=60&w=3000&auto=format&fit=crop",
         "amenities": {"has_pool": True, "free_wifi": True, "has_gym": True},
     },
     {
-        "name": "Downtown Comfort Hotel",
-        "description": "Clean, modern rooms in a central location.",
-        "city": "Chicago, IL",
-        "image": "https://images.unsplash.com/photo-1631049421450-348ccd7f8949?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "name": "Coastal Terrace Resort",
+        "description": "Poolside comfort with sweeping coastal scenery nearby.",
+        "city": "Myrtle Beach, SC",
+        "image": "https://images.unsplash.com/photo-1598598795009-f80c5072e665?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"has_pool": True, "free_wifi": True},
+    },
+    {
+        "name": "Cyprus Dining Hotel",
+        "description": "A warm, welcoming dining space and comfortable stay.",
+        "city": "Savannah, GA",
+        "image": "https://images.unsplash.com/photo-1625244695851-1fc873f942bc?fm=jpg&q=60&w=3000&auto=format&fit=crop",
+        "amenities": {"free_breakfast": True, "free_wifi": True},
+    },
+    {
+        "name": "Crestline Bedding Hotel",
+        "description": "Understated, comfortable rooms with clean white linens.",
+        "city": "Minneapolis, MN",
+        "image": "https://images.unsplash.com/photo-1631049552240-59c37f38802b?fm=jpg&q=60&w=3000&auto=format&fit=crop",
         "amenities": {"free_wifi": True, "air_conditioned": True},
     },
 ]
@@ -115,7 +129,7 @@ for data in HOTELS_TO_SEED:
         **data["amenities"],
     )
     db.add(hotel)
-    db.flush()  # get hotel.id before creating the room
+    db.flush()
 
     room = models.Room(
         hotel_id=hotel.id,
@@ -130,11 +144,9 @@ for data in HOTELS_TO_SEED:
         skipped.append(data["city"])
 
     created += 1
-    print(
-        f"Created hotel '{data['name']}' in {data['city']} (id will be assigned on commit)"
-    )
+    print(f"Created hotel '{data['name']}' in {data['city']}")
 
-    time.sleep(1)  # be polite to the geocoding API
+    time.sleep(1)
 
 db.commit()
 

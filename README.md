@@ -150,7 +150,13 @@ alembic upgrade head
 uvicorn main:app --reload
 ```
 
-This creates all tables via Alembic migrations against your PostgreSQL database. No sample data is included — sign up for an account, then use "Become a host" to create test hotels and experiences.
+This creates all tables via Alembic migrations against your PostgreSQL database. A seed script (`seed_hotels.py`) populates the database with ~34 sample hotels across various US cities, each geocoded and with at least one room, so search and browsing work out of the box:
+
+​`bash
+python seed_hotels.py
+​`
+
+Sign up for an account, then use "Become a host" to create additional test hotels and experiences.
 
 ### AI-Powered Hotel Search
 
@@ -195,3 +201,4 @@ Message history exists only in the browser's memory for the duration of the page
 - [ ] AI search does not check real-time room availability for specific dates (no check-in/check-out date filtering). This is a recognized limitaiton. A production version would integrate the same date-aware inventory logic used in the standard hotel search.
 - [ ] Currently a single-turn form, not a conversational interface; a chat UI is a natural extension once the underlying pipeline is proven.
 - [ ] The chat interface has no true conversational memory, ane each message is processed independently. A production version might maintain conversation context server-side (or via a stateless approach like including recent message history in the extraction prompt) so follow-up refinements build on prior context rather than requiring a fully restated query.
+- [ ] Demo data is a curated set of ~34 hotels across US cities, generated via a seed script — not a realistic production-scale dataset (thousands of listings across many countries).
