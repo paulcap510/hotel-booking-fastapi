@@ -55,7 +55,7 @@
 
     {% if hotel.image_path %}
     <img
-      src="{{ url_for('static', path=hotel.image_path) }}"
+      src="{% if hotel.image_path.startswith('http') %}{{ hotel.image_path }}{% else %}{{ url_for('static', path=hotel.image_path) }}{% endif %}"
       alt="{{ hotel.name }}"
       class="rounded-3 mb-3"
       style="max-height: 220px; object-fit: cover; width: 100%;"

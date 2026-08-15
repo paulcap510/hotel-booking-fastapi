@@ -258,7 +258,7 @@
             <!-- Hotel image -->
             <div class="col-md-4">
               <img
-                src="{{ url_for('static', path=hotel.image_path) }}"
+                src="{% if hotel.image_path.startswith('http') %}{{ hotel.image_path }}{% else %}{{ url_for('static', path=hotel.image_path) }}{% endif %}"
                 alt="{{ hotel.name }}"
                 class="img-fluid w-100 h-100"
                 style="min-height: 240px; object-fit: cover"
@@ -279,10 +279,9 @@
                 <p class="text-muted mb-3">{{ hotel.description }}</p>
 
                 <ul class="list-unstyled text-muted small mb-0">
-                  <li class="mb-1">✓ Free WiFi</li>
-                  <li class="mb-1">✓ Good location</li>
-                  <li class="mb-1">✓ Comfortable rooms</li>
-                  <li class="mb-1">✓ No booking fees</li>
+                  {% for amenity in hotel.top_amenities %}
+                  <li class="mb-1">✓ {{ amenity.label }}</li>
+                  {% endfor %}
                 </ul>
               </div>
             </div>
@@ -362,11 +361,13 @@
         const newCheckIn = selectedDates[0];
         const currentCheckOut = checkOutPicker.selectedDates[0];
 
-        checkOutPicker.set('minDate', newCheckIn);
+        const nextDay = new Date(newCheckIn);
+        nextDay.setDate(nextDay.getDate() + 1);
+        checkOutPicker.set('minDate', nextDay);
 
         // Only clear check-out if it's now before the new check-in date
         if (currentCheckOut && currentCheckOut <= newCheckIn) {
-          checkOutPicker.clear();
+          checkOutPicker.setDate(nextDay);
         }
       },
     });

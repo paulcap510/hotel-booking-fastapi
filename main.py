@@ -284,6 +284,14 @@ def search_hotels(
         hotel.average_rating = average_rating
         hotel.review_count = review_count
 
+        top_amenities = []
+        for field, label, icon in AMENITY_MAP:
+            if getattr(hotel, field, False):
+                top_amenities.append({"label": label, "icon": icon})
+            if len(top_amenities) == 4:
+                break
+        hotel.top_amenities = top_amenities
+
     return templates.TemplateResponse(
         request,
         "search_results.html",
@@ -295,6 +303,7 @@ def search_hotels(
             "check_out": check_out,
             "guests": guests,
             "amenity_options": AMENITY_MAP,
+            "selected_amenities": amenities,
         },
     )
 
