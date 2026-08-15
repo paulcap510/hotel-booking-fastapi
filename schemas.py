@@ -1,7 +1,15 @@
-from pydantic import BaseModel, ConfigDict, Field, EmailStr, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    EmailStr,
+    field_validator,
+    model_validator,
+)
 from datetime import date
 from utils.booking_status import BookingStatus
 from datetime import date, datetime
+
 
 #! Hotels
 class HotelBase(BaseModel):
@@ -10,8 +18,10 @@ class HotelBase(BaseModel):
     image_path: str = Field(min_length=1)
     city: str = Field(min_length=1)
 
+
 class HotelCreate(HotelBase):
     pass
+
 
 class HostHotelUpdate(BaseModel):
     name: str | None = None
@@ -19,11 +29,13 @@ class HostHotelUpdate(BaseModel):
     image_path: str | None = None
     city: str | None = None
 
+
 class HotelResponse(HotelBase):
     id: int
 
-    model_config = ConfigDict(from_attributes=True) #Allow Pydantic/FastAPI to turn SQLAlchemy objects into API responses
-
+    model_config = ConfigDict(
+        from_attributes=True
+    )  # Allow Pydantic/FastAPI to turn SQLAlchemy objects into API responses
 
 
 #! ROOMS
@@ -31,10 +43,11 @@ class RoomBase(BaseModel):
     room_type: str = Field(min_length=1, max_length=100)
     price_per_night: int = Field(gt=0)
     max_guests: int = Field(gt=0)
-    # available: bool
+
 
 class RoomCreate(RoomBase):
     pass
+
 
 class RoomResponse(RoomBase):
     id: int
@@ -50,8 +63,16 @@ class BookingBase(BaseModel):
     check_out_date: date
     number_of_guests: int = Field(gt=0)
 
+    @model_validator(mode="after")
+    def validate_dates(self):
+        if self.check_out_date <= self.check_in_date:
+            raise ValueError("check_out_date must be after check_in_date")
+        return self
+
+
 class BookingCreate(BookingBase):
     pass
+
 
 class BookingResponse(BookingBase):
     id: int
@@ -63,9 +84,11 @@ class BookingResponse(BookingBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class BookingContactUpdate(BaseModel):
     guest_name: str = Field(min_length=1, max_length=100)
     guest_email: EmailStr
+
 
 class MyBookingsResponse(BaseModel):
     upcoming_bookings: list[BookingResponse]
@@ -78,10 +101,12 @@ class UserBase(BaseModel):
     email: EmailStr
     username: str
 
+
 class UserCreate(UserBase):
     password: str
-    #* TODO: Implmenet min_length = 8
+    # * TODO: Implmenet min_length = 8
     # password: str = Field(min_length=8)
+
 
 class UserPrivateResponse(UserBase):
     id: int
@@ -90,11 +115,13 @@ class UserPrivateResponse(UserBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class UserPublicResponse(BaseModel):
     id: int
     username: str
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
@@ -106,6 +133,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 #! EMAIL UPDATE
 class EmailUpdate(BaseModel):
     email: EmailStr
@@ -115,12 +143,10 @@ class EmailUpdate(BaseModel):
 class PasswordResetRequest(BaseModel):
     email: EmailStr
 
+
 class PasswordReset(BaseModel):
     token: str
     new_password: str = Field(min_length=8)
-
-
-
 
 
 class ExperienceBase(BaseModel):
@@ -128,6 +154,7 @@ class ExperienceBase(BaseModel):
     description: str
     price_per_person: int
     location: str
+
 
 class ExperienceCreate(ExperienceBase):
     pass
@@ -142,6 +169,7 @@ class ExperienceRequestBase(BaseModel):
 class ExperienceRequestCreate(ExperienceRequestBase):
     pass
 
+
 class ExperienceRequestResponse(ExperienceRequestBase):
     model_config = ConfigDict(from_attributes=True)
 
@@ -150,7 +178,6 @@ class ExperienceRequestResponse(ExperienceRequestBase):
     user_id: int
     status: str
     created_at: datetime
-
 
 
 #! Review Schemas
@@ -165,13 +192,16 @@ class ReviewBase(BaseModel):
             raise ValueError("Score must be between 1 and 10")
         return v
 
+
 class ReviewCreate(ReviewBase):
     booking_id: int
+
 
 # For direct Swagger/admin testing. Everything supplied explicitly
 class ReviewAdminCreate(ReviewBase):
     booking_id: int
     user_id: int
+
 
 class ReviewResponse(ReviewBase):
     model_config = ConfigDict(from_attributes=True)

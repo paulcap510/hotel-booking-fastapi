@@ -361,11 +361,13 @@
         const newCheckIn = selectedDates[0];
         const currentCheckOut = checkOutPicker.selectedDates[0];
 
-        checkOutPicker.set('minDate', newCheckIn);
+        const nextDay = new Date(newCheckIn);
+        nextDay.setDate(nextDay.getDate() + 1);
+        checkOutPicker.set('minDate', nextDay);
 
         // Only clear check-out if it's now before the new check-in date
         if (currentCheckOut && currentCheckOut <= newCheckIn) {
-          checkOutPicker.clear();
+          checkOutPicker.setDate(nextDay);
         }
       },
     });

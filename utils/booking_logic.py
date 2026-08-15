@@ -19,26 +19,28 @@ def create_booking_for_user(
     check_out_date: date,
     number_of_guests: int,
 ) -> models.Booking:
-    """
-    Shared booking-creation logic used by both the JSON API route
-    (create_booking) and the HTML form route (submit_booking_form).
-    Raises HTTPException on any validation failure. Returns the
-    newly created Booking on success.
-    """
+
     room = db.query(models.Room).filter(models.Room.id == room_id).first()
     if room is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
+        )
 
     if number_of_guests > room.max_guests:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Number of guests exceeds room capacity")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Number of guests exceeds room capacity",
+        )
 
     if check_out_date <= check_in_date:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Check-out date must be after check-in date")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Check-out date must be after check-in date",
+        )
 
     number_of_nights = calculate_nights(check_in_date, check_out_date)
     price_per_night = room.price_per_night
     total_price = calculate_total_price(price_per_night, number_of_nights)
-
 
     try:
         available_inventory = calculate_available_inventory(
@@ -49,7 +51,10 @@ def create_booking_for_user(
         )
 
         if available_inventory <= 0:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No rooms available for these dates")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No rooms available for these dates",
+            )
 
         new_booking = models.Booking(
             room_id=room_id,

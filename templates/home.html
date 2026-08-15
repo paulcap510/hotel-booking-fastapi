@@ -267,7 +267,16 @@
     dateFormat: 'Y-m-d',
     minDate: 'today',
     onChange: function (selectedDates) {
-      checkOutPicker.set('minDate', selectedDates[0]);
+      const nextDay = new Date(selectedDates[0]);
+      nextDay.setDate(nextDay.getDate() + 1);
+      checkOutPicker.set('minDate', nextDay);
+
+      if (
+        checkOutPicker.selectedDates[0] &&
+        checkOutPicker.selectedDates[0] <= selectedDates[0]
+      ) {
+        checkOutPicker.clear();
+      }
     },
   });
 
