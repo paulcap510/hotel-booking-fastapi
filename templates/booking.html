@@ -111,7 +111,7 @@
       <aside class="bg-white rounded-4 shadow-sm p-4 sticky-top" style="top: 20px;">
 
         <img
-          src="{{ url_for('static', path=hotel.image_path) }}"
+          src="{% if hotel.image_path.startswith('http') %}{{ hotel.image_path }}{% else %}{{ url_for('static', path=hotel.image_path) }}{% endif %}"
           alt="{{ hotel.name }}"
           class="img-fluid rounded-4 w-100 mb-3"
           style="height: 180px; object-fit: cover;"
