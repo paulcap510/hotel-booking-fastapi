@@ -258,7 +258,7 @@
             <!-- Hotel image -->
             <div class="col-md-4">
               <img
-                src="{{ url_for('static', path=hotel.image_path) }}"
+                src="{% if hotel.image_path.startswith('http') %}{{ hotel.image_path }}{% else %}{{ url_for('static', path=hotel.image_path) }}{% endif %}"
                 alt="{{ hotel.name }}"
                 class="img-fluid w-100 h-100"
                 style="min-height: 240px; object-fit: cover"
