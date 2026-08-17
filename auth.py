@@ -3,7 +3,6 @@ from datetime import UTC, datetime, timedelta
 from pwdlib import PasswordHash
 from config import settings
 
-
 password_hash = PasswordHash.recommended()
 # creates a password hasher using argon2 with the recommended settings
 
@@ -11,8 +10,10 @@ password_hash = PasswordHash.recommended()
 def hash_password(password: str) -> str:
     return password_hash.hash(password)
 
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
+
 
 # --- Session-based auth (replaces JWT) ---
 # In-memory store for now. Maps session_id -> {"user_id": ..., "expires_at": ...}
@@ -26,7 +27,8 @@ reset_tokens: dict[str, dict] = {}
 
 def create_session(user_id: int) -> str:
     """Create a new session and return the session_id to put in a cookie."""
-    session_id = secrets.token_urlsafe(32)  # random, unguessable string
+    session_id = secrets.token_urlsafe(32)
+    # random, unguessable string of 32 bytes of secure randomness
     expires_at = datetime.now(UTC) + timedelta(
         minutes=settings.access_token_expire_minutes
     )
@@ -50,6 +52,7 @@ def get_user_id_from_session(session_id: str | None) -> int | None:
 
     return session["user_id"]
 
+
 def delete_session(session_id: str | None) -> None:
     """Remove a session — used for logout."""
     if session_id in sessions:
@@ -62,6 +65,7 @@ def create_reset_token(user_id: int) -> str:
     reset_tokens[token] = {"user_id": user_id, "expires_at": expires_at}
     return token
 
+
 def get_user_id_from_reset_token(token: str) -> int | None:
     entry = reset_tokens.get(token)
 
@@ -73,11 +77,6 @@ def get_user_id_from_reset_token(token: str) -> int | None:
         return None
 
     return entry["user_id"]
-
-
-
-
-
 
 
 def delete_reset_token(token: str) -> None:
